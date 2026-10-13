@@ -80,10 +80,17 @@ class AppSlidableAction {
       padding: padding,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          FaIcon(icon),
-          const SizedBox(height: 4),
-          Text(label ?? 'Delete'),
+          FaIcon(icon, size: AppIconSize.md),
+          const SizedBox(height: AppSpacing.xs),
+          Flexible(
+            child: Text(
+              label ?? 'Delete',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );

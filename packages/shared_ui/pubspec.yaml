@@ -15,6 +15,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  app_ui: ^0.1.0
   shared_contracts: ^0.1.0
   font_awesome_flutter: ^11.0.0
 

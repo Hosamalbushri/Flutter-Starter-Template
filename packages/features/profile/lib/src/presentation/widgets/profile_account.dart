@@ -25,10 +25,13 @@ class _ChangePasswordTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
     return ListTile(
       leading: const FaIcon(FontAwesomeIcons.key),
       title: Text(context.l10n.profileChangePassword),
-      trailing: const FaIcon(FontAwesomeIcons.chevronRight),
+      trailing: FaIcon(
+        isRtl ? FontAwesomeIcons.chevronLeft : FontAwesomeIcons.chevronRight,
+      ),
       onTap: () {
         context.push<void>('/profile/change-password');
       },

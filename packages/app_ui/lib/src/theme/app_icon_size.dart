@@ -4,6 +4,9 @@
 /// small inline indicators stay visually consistent and can be tuned in one
 /// place.
 abstract final class AppIconSize {
+  /// 12px - extra-small inline indicators and compact badge glyphs.
+  static const double xs = 12;
+
   /// 16px - small inline glyphs.
   static const double sm = 16;
 

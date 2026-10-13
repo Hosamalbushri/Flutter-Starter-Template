@@ -53,7 +53,7 @@ class _AddToCollectionBody extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: Align(
-                  alignment: Alignment.centerLeft,
+                  alignment: AlignmentDirectional.centerStart,
                   child: Text(
                     context.l10n.addToCollectionTitle,
                     style: context.textTheme.titleLarge?.copyWith(

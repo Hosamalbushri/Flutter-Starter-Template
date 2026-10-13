@@ -35,14 +35,28 @@ class _AppCarouselState extends State<AppCarousel> {
   int _current = 0;
 
   @override
+  void didUpdateWidget(AppCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.items.isEmpty) {
+      _current = 0;
+    } else if (_current >= widget.items.length) {
+      _current = widget.items.length - 1;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (widget.items.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         CarouselSlider(
           items: widget.items,
           options: CarouselOptions(
-            autoPlay: widget.autoPlay,
+            autoPlay: widget.autoPlay && widget.items.length > 1,
             autoPlayInterval: widget.autoPlayInterval,
             enlargeCenterPage: widget.enlargeCenterPage,
             viewportFraction: widget.viewportFraction,
@@ -63,8 +77,8 @@ class _AppCarouselState extends State<AppCarousel> {
               return AnimatedContainer(
                 duration: AppDurations.medium,
                 margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                width: isActive ? 24 : 8,
-                height: 8,
+                width: isActive ? AppSpacing.xxl : AppSpacing.sm,
+                height: AppSpacing.sm,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(AppRadius.xs),
                   color: isActive

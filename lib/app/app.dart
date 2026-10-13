@@ -82,6 +82,10 @@ class _AppState extends State<App> {
     _ownsSession = widget.session == null;
     // fst:auth:end
     final features = widget.features ?? enabledFeatures;
+    validateFeatureModules(features);
+    for (final feature in features) {
+      unawaited(feature.initialize());
+    }
     final result = buildRouterWithDeepLink(
       _session,
       featureRoutes: [
@@ -184,6 +188,8 @@ class _AppState extends State<App> {
             theme: AppTheme.light(scheme: themeState.scheme),
             darkTheme: AppTheme.dark(scheme: themeState.scheme),
             themeMode: themeState.mode,
+            locale: themeState.locale,
+            localeListResolutionCallback: resolveSupportedLocale,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             routerConfig: _router,

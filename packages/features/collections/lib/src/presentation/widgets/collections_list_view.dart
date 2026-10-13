@@ -47,6 +47,7 @@ class _CollectionsListBody extends StatelessWidget {
         if (state.failure != null && state.items.isEmpty) {
           return AppErrorView(
             message: context.l10n.collectionsLoadError,
+            retryLabel: context.l10n.commonRetry,
             onRetry: () => context.read<CollectionsListBloc>().add(
               const CollectionsListLoadRequested(),
             ),
@@ -65,6 +66,10 @@ class _CollectionsListBody extends StatelessWidget {
           );
         }
 
+        final textScale =
+            MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
+        final mainAxisExtent = 116 * (1 + (textScale - 1) * 0.45);
+
         return GridView.builder(
           padding:
               padding ??
@@ -74,9 +79,9 @@ class _CollectionsListBody extends StatelessWidget {
                 AppSpacing.lg,
                 96,
               ),
-          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
             maxCrossAxisExtent: 220,
-            mainAxisExtent: 116,
+            mainAxisExtent: mainAxisExtent,
             crossAxisSpacing: AppSpacing.md,
             mainAxisSpacing: AppSpacing.md,
           ),

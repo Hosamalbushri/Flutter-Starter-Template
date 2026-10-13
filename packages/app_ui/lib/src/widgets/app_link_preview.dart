@@ -25,8 +25,8 @@ class AppLinkPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context._colorScheme;
-    final textTheme = context._textTheme;
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
 
     return LinkPreview(
       text: url,
@@ -37,8 +37,8 @@ class AppLinkPreview extends StatelessWidget {
       maxTitleLines: maxTitleLines,
       maxDescriptionLines: maxDescriptionLines,
       enableAnimation: enableAnimation,
-      borderRadius: 12,
-      gap: 8,
+      borderRadius: AppRadius.md,
+      gap: AppSpacing.sm,
       sideBorderColor: colorScheme.primary,
       backgroundColor: colorScheme.surfaceContainerHighest,
       titleTextStyle: textTheme.titleSmall?.copyWith(
@@ -58,9 +58,4 @@ class AppLinkPreview extends StatelessWidget {
       ),
     );
   }
-}
-
-extension _ThemeExt on BuildContext {
-  ColorScheme get _colorScheme => Theme.of(this).colorScheme;
-  TextTheme get _textTheme => Theme.of(this).textTheme;
 }

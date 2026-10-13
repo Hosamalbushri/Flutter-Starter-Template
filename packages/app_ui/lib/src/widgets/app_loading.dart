@@ -11,21 +11,31 @@ class AppLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: size,
-            height: size,
-            child: const CircularProgressIndicator(strokeWidth: 3),
-          ),
-          if (label != null) ...[
-            const SizedBox(height: AppSpacing.md),
-            Text(label!, style: context.textTheme.bodyMedium),
+    return Semantics(
+      container: true,
+      label: label,
+      liveRegion: true,
+      excludeSemantics: label != null,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: size,
+              height: size,
+              child: const CircularProgressIndicator(strokeWidth: 3),
+            ),
+            if (label != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                label!,
+                style: context.textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
           ],
-        ],
-      ),
-    ).animateFadeIn(duration: AppDurations.fast);
+        ),
+      ).animateFadeIn(duration: AppDurations.fast),
+    );
   }
 }

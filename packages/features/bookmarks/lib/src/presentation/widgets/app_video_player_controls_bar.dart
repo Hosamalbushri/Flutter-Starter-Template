@@ -2,6 +2,7 @@ import 'package:app_platform/app_platform.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:localization/localization.dart';
 
 class AppVideoPlayerControlsBar extends StatelessWidget {
   const AppVideoPlayerControlsBar({
@@ -111,6 +112,7 @@ class _ControlsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Row(
       children: [
         IconButton(
@@ -120,7 +122,9 @@ class _ControlsRow extends StatelessWidget {
                 : FontAwesomeIcons.play,
             color: Colors.white,
           ),
-          tooltip: controller.value.isPlaying ? 'Pause' : 'Play',
+          tooltip: controller.value.isPlaying
+              ? l10n.videoPlayerPause
+              : l10n.videoPlayerPlay,
           onPressed: onTogglePlay,
         ),
         IconButton(
@@ -132,15 +136,19 @@ class _ControlsRow extends StatelessWidget {
                 : FontAwesomeIcons.volumeHigh,
             color: Colors.white,
           ),
-          tooltip: isMuted ? 'Unmute' : 'Mute',
+          tooltip: isMuted ? l10n.videoPlayerUnmute : l10n.videoPlayerMute,
           onPressed: onToggleMute,
         ),
-        Text(
-          '${formatVideoDuration(controller.value.position)} / '
-          '${formatVideoDuration(controller.value.duration)}',
-          style: const TextStyle(color: Colors.white, fontSize: 13),
+        Expanded(
+          child: Text(
+            '${formatVideoDuration(controller.value.position)} / '
+            '${formatVideoDuration(controller.value.duration)}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: Colors.white, fontSize: 13),
+          ),
         ),
-        const Spacer(),
+        const SizedBox(width: AppSpacing.xs),
         _PlaybackSpeedMenu(
           playbackSpeed: playbackSpeed,
           onSelected: onSpeedSelected,
@@ -152,7 +160,9 @@ class _ControlsRow extends StatelessWidget {
             color: Colors.white,
             size: 28,
           ),
-          tooltip: isFullscreen ? 'Exit full screen' : 'Full screen',
+          tooltip: isFullscreen
+              ? l10n.videoPlayerExitFullScreen
+              : l10n.videoPlayerFullScreen,
           onPressed: onFullscreenPressed,
         ),
       ],
@@ -173,7 +183,7 @@ class _PlaybackSpeedMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopupMenuButton<double>(
       initialValue: playbackSpeed,
-      tooltip: 'Playback speed',
+      tooltip: context.l10n.videoPlayerPlaybackSpeed,
       onSelected: onSelected,
       itemBuilder: (context) => [
         for (final speed in [0.5, 0.75, 1.0, 1.25, 1.5, 2.0])

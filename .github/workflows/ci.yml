@@ -331,12 +331,14 @@ jobs:
           - { name: no-firebase, flags: '--no-firebase' }
           - { name: no-auth, flags: '--no-auth' }
           - { name: no-backend, flags: '--no-backend' }
+          - { name: no-backend-jwt-drift, flags: '--no-firebase --no-backend --auth --auth-provider jwt --database drift' }
           - { name: minimal, flags: '--minimal' }
           # Drift diverges from ObjectBox in what it can strip — it drops
           # per-feature tables and the sync engine, ObjectBox keeps both — so
           # the configs where that shows have to be covered on both engines.
           - { name: default-drift, flags: '--database drift' }
           - { name: exclude-bookmarks-drift, flags: '--exclude-feature bookmarks --database drift' }
+          - { name: drift-no-setup-exclusions, flags: '--no-firebase --backend --no-auth --database drift --exclude-feature notifications' }
           - { name: minimal-drift, flags: '--minimal --database drift' }
     steps:
       - name: Checkout
@@ -469,6 +471,19 @@ jobs:
             fi
           }
 
+          assert_no_stale_objectbox_di() {
+            local stale
+            stale=$(find "$out/lib" "$out/packages/features" -type f \
+              \( -name 'injection.config.dart' -o -name 'di.module.dart' \) \
+              -print0 2>/dev/null | xargs -0 -r grep -Il \
+              'ObjectBox' || true)
+            if [ -n "$stale" ]; then
+              echo "::error::ObjectBox DI survived Drift selection ($CONFIG):"
+              echo "$stale"
+              fail=1
+            fi
+          }
+
           # ── Per-config structural assertions ──
           case "$CONFIG" in
             default|default-drift)
@@ -497,9 +512,23 @@ jobs:
                   || { echo "::error::collections table wrongly removed ($CONFIG)"; fail=1; }
               fi
               ;;
+            drift-no-setup-exclusions)
+              [ ! -d "$notifications" ] || { echo "::error::notifications not removed ($CONFIG)"; fail=1; }
+              [ -d "$bookmarks" ] || { echo "::error::bookmarks wrongly removed ($CONFIG)"; fail=1; }
+              assert_no_stale_objectbox_di
+              assert_rev_sync_present
+              ;;
             no-firebase)
               [ -d "$auth" ] || { echo "::error::auth removed in no-firebase"; fail=1; }
               [ ! -f "$out/android/app/google-services.json" ] || { echo "::error::firebase config left in no-firebase"; fail=1; }
+              if grep -q 'firebase_analytics' "$out/packages/analytics/pubspec.yaml"; then
+                echo "::error::firebase_analytics dependency survived no-firebase"; fail=1
+              fi
+              if grep -q 'FirebaseAnalyticsService' "$out/packages/analytics/lib/src/analytics_service.dart"; then
+                echo "::error::Firebase analytics adapter survived no-firebase"; fail=1
+              fi
+              grep -q 'NoOpPerformanceTracker' "$network/lib/src/performance_module.dart" \
+                || { echo "::error::performance binding not swapped to no-op in no-firebase"; fail=1; }
               assert_rev_sync_present
               ;;
             no-auth)
@@ -510,6 +539,25 @@ jobs:
               if grep -rIq 'fst:auth:' "$out/lib" "$out/test" "$out/packages" 2>/dev/null; then
                 echo "::error::fst:auth markers survived the strip (no-auth)"; fail=1
               fi
+              ;;
+            no-backend-jwt-drift)
+              [ -d "$auth" ] || { echo "::error::JWT auth removed ($CONFIG)"; fail=1; }
+              [ -d "$network" ] || { echo "::error::network client removed ($CONFIG)"; fail=1; }
+              [ ! -d "$syncconn" ] || { echo "::error::sync_connectivity_plus not removed ($CONFIG)"; fail=1; }
+              [ ! -d "$bookmarks" ] || { echo "::error::bookmarks not removed ($CONFIG)"; fail=1; }
+              grep -q 'NoOpPerformanceTracker' "$network/lib/src/performance_module.dart" \
+                || { echo "::error::performance binding not swapped to no-op ($CONFIG)"; fail=1; }
+              if grep -q 'FirebasePerformance.instance' "$network/lib/src/performance_module.dart"; then
+                echo "::error::FirebasePerformance binding survived ($CONFIG)"; fail=1
+              fi
+              if grep -q 'firebase_analytics' "$out/packages/analytics/pubspec.yaml"; then
+                echo "::error::firebase_analytics dependency survived ($CONFIG)"; fail=1
+              fi
+              if grep -q 'FirebaseAnalyticsService' "$out/packages/analytics/lib/src/analytics_service.dart"; then
+                echo "::error::Firebase analytics adapter survived ($CONFIG)"; fail=1
+              fi
+              assert_no_media_perms
+              assert_rev_sync_absent
               ;;
             no-backend|minimal|minimal-drift)
               [ ! -d "$auth" ] || { echo "::error::auth not removed ($CONFIG)"; fail=1; }
@@ -556,6 +604,10 @@ jobs:
         include:
           - { name: default, flags: '' }
           - { name: default-drift, flags: '--database drift' }
+          - { name: no-firebase-jwt, flags: '--no-firebase --auth-provider jwt' }
+          - { name: no-firebase-no-backend-jwt-drift, flags: '--no-firebase --no-backend --auth --auth-provider jwt --database drift' }
+          - { name: drift-excluded-regression, flags: '--no-firebase --backend --no-auth --database drift --exclude-feature notifications' }
+          - { name: feature-registration, flags: '--no-firebase --backend --no-auth --database objectbox --exclude-feature bookmarks,collections,notifications' }
           - { name: minimal, flags: '--minimal' }
           - { name: minimal-drift, flags: '--minimal --database drift' }
     steps:
@@ -603,6 +655,62 @@ jobs:
         working-directory: ${{ runner.temp }}/analyze-smoke
         run: ./tool/setup.sh --no-hooks --no-backend
 
+      - name: Verify repeatable Drift code generation
+        if: matrix.name == 'drift-excluded-regression'
+        working-directory: ${{ runner.temp }}/analyze-smoke
+        run: |
+          ./tool/codegen.sh
+          if find lib packages/features -type f \
+              \( -name 'injection.config.dart' -o -name 'di.module.dart' \) \
+              -print0 | xargs -0 -r grep -Il 'ObjectBox'; then
+            echo "::error::ObjectBox DI was regenerated in a Drift scaffold"
+            exit 1
+          fi
+
+      - name: Add and verify generated feature routes
+        if: matrix.name == 'feature-registration'
+        working-directory: ${{ runner.temp }}/analyze-smoke
+        run: |
+          cli=(dart --packages="$GITHUB_WORKSPACE/published/cli/.dart_tool/package_config.json" "$GITHUB_WORKSPACE/published/cli/bin/fst.dart")
+          "${cli[@]}" add-feature activity_feed --source presentation --route-path /activity --no-codegen
+          "${cli[@]}" add-feature inventory --source local --route-path /workspace/inventory --no-codegen
+          "${cli[@]}" add-feature catalog --source api --route-path /commerce/catalog
+
+          "${cli[@]}" list-features
+          "${cli[@]}" validate-features
+
+          # Dry-run is a strict no-write contract, including generated caches.
+          before=$(find . -type f -not -path './.git/*' -exec sha256sum {} + | sort | sha256sum)
+          "${cli[@]}" remove-feature activity_feed --dry-run
+          after=$(find . -type f -not -path './.git/*' -exec sha256sum {} + | sort | sha256sum)
+          test "$before" = "$after"
+
+          # A live sibling dependency must block removal without cascading.
+          sed -i '/^dependencies:$/a\  feature_inventory: ^0.1.0' packages/features/catalog/pubspec.yaml
+          if "${cli[@]}" remove-feature inventory --yes; then
+            echo "::error::reverse dependency did not block feature removal"
+            exit 1
+          fi
+          sed -i '/^  feature_inventory: \^0.1.0$/d' packages/features/catalog/pubspec.yaml
+
+          "${cli[@]}" remove-feature activity_feed --yes
+          ! grep -R "feature_activity_feed\|FeatureActivityFeedPackageModule" \
+            pubspec.yaml lib/app test/architecture/package_layering_test.dart
+          "${cli[@]}" add-feature activity_feed --source presentation --route-path /activity --no-codegen
+          ./tool/codegen.sh
+          "${cli[@]}" validate-features
+
+          # Standalone packages share the generated app's architecture guards.
+          "${cli[@]}" create-package inventory_contracts --type contracts --no-verify
+          "${cli[@]}" create-package inventory_storage --type infrastructure --dependency inventory_contracts --no-verify
+          "${cli[@]}" create-package inventory_ui --type ui --dependency inventory_contracts --dependency inventory_storage --no-verify
+          "${cli[@]}" validate-package inventory_contracts
+          "${cli[@]}" validate-package inventory_storage
+          "${cli[@]}" validate-package inventory_ui
+          dart test packages/inventory_contracts
+          dart test packages/inventory_storage
+          flutter test packages/inventory_ui
+
       - name: Analyze the scaffold
         working-directory: ${{ runner.temp }}/analyze-smoke
         run: flutter analyze
@@ -618,6 +726,11 @@ jobs:
       - name: Test the scaffold
         working-directory: ${{ runner.temp }}/analyze-smoke
         run: flutter test
+
+      - name: Build the selected generated scaffold
+        if: matrix.name == 'no-firebase-no-backend-jwt-drift' || matrix.name == 'feature-registration'
+        working-directory: ${{ runner.temp }}/analyze-smoke
+        run: flutter build apk --debug --flavor dev
   # fst:template-only:end
 
   # Compile smoke-test: `flutter analyze` type-checks Dart but never assembles

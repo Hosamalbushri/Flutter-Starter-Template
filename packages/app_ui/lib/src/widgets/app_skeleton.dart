@@ -70,36 +70,43 @@ class _AppShimmerState extends State<AppShimmer>
       base,
     );
 
-    return AnimatedBuilder(
-      animation: _controller,
-      child: widget.child,
-      builder: (context, child) {
-        return ShaderMask(
-          blendMode: BlendMode.srcATop,
-          shaderCallback: (bounds) => LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [base, highlight, base],
-            stops: const [0.2, 0.5, 0.8],
-            transform: _SlidingGradientTransform(_controller.value),
-          ).createShader(bounds),
-          child: child,
-        );
-      },
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+
+    return ExcludeSemantics(
+      child: AnimatedBuilder(
+        animation: _controller,
+        child: widget.child,
+        builder: (context, child) {
+          return ShaderMask(
+            blendMode: BlendMode.srcATop,
+            shaderCallback: (bounds) => LinearGradient(
+              colors: [base, highlight, base],
+              stops: const [0.2, 0.5, 0.8],
+              transform: _SlidingGradientTransform(
+                _controller.value,
+                isRtl: isRtl,
+              ),
+            ).createShader(bounds),
+            child: child,
+          );
+        },
+      ),
     );
   }
 }
 
 /// Translates a gradient horizontally to drive the shimmer sweep.
 class _SlidingGradientTransform extends GradientTransform {
-  const _SlidingGradientTransform(this.slidePercent);
+  const _SlidingGradientTransform(this.slidePercent, {required this.isRtl});
 
   final double slidePercent;
+  final bool isRtl;
 
   @override
   Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
+    final directionFactor = isRtl ? (1 - slidePercent * 2) : (slidePercent * 2 - 1);
     return Matrix4.translationValues(
-      bounds.width * (slidePercent * 2 - 1),
+      bounds.width * directionFactor,
       0,
       0,
     );
@@ -116,7 +123,7 @@ class AppSkeleton extends StatelessWidget {
     super.key,
     this.width,
     this.height = 16,
-    this.borderRadius = const BorderRadius.all(Radius.circular(8)),
+    this.borderRadius = const BorderRadius.all(Radius.circular(AppRadius.sm)),
   }) : shape = BoxShape.rectangle;
 
   /// A thin rounded bar approximating a line of text.
@@ -138,13 +145,15 @@ class AppSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        shape: shape,
-        borderRadius: shape == BoxShape.circle ? null : borderRadius,
+    return ExcludeSemantics(
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          shape: shape,
+          borderRadius: shape == BoxShape.circle ? null : borderRadius,
+        ),
       ),
     );
   }

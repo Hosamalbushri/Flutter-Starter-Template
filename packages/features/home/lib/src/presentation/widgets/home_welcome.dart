@@ -160,10 +160,13 @@ class _QuickActionTile extends StatelessWidget {
       ),
       child: InkWell(
         onTap: onTap,
-        child: SizedBox(
-          height: 80,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 80),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.sm,
+            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -362,79 +365,16 @@ class _FeaturedCollectionsSection extends StatelessWidget {
               children: [
                 for (final (index, collection) in collections.indexed) ...[
                   if (index > 0) const SizedBox(width: AppSpacing.md),
-                  _CollectionCard(collection: collection),
+                  CollectionCard(
+                    collection: collection,
+                    onTap: () =>
+                        context.push<void>('/collections/${collection.id}'),
+                  ),
                 ],
               ],
             ),
           ),
       ],
-    );
-  }
-}
-
-class _CollectionCard extends StatelessWidget {
-  const _CollectionCard({required this.collection});
-
-  final CollectionSummary collection;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      clipBehavior: Clip.antiAlias,
-      color: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-      ),
-      child: Ink(
-        width: 160,
-        height: 104,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: collectionGradientFor(collection.color),
-          ),
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-        ),
-        child: InkWell(
-          onTap: () => context.push<void>('/collections/${collection.id}'),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    FaIcon(
-                      collectionIconFor(collection.icon),
-                      color: Colors.white,
-                      size: AppIconSize.md,
-                    ),
-                    Text(
-                      '${collection.itemCount}',
-                      style: context.textTheme.labelLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                Text(
-                  collection.name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.labelMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

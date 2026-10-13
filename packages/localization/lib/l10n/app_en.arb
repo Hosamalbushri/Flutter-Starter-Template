@@ -366,5 +366,19 @@
   },
   "addToCollectionTitle": "Add to collection",
   "addToCollectionEmpty": "You haven't created any collections yet.",
-  "homeCreateCollection": "Create collection"
+  "homeCreateCollection": "Create collection",
+  "bookmarkAttachGallery": "Gallery",
+  "bookmarkAttachCamera": "Camera",
+  "bookmarkAttachVideo": "Video",
+  "bookmarkAttachRecord": "Record",
+  "bookmarkRemoveVideoLabel": "Remove video",
+  "videoPlayerPlay": "Play",
+  "videoPlayerPause": "Pause",
+  "videoPlayerMute": "Mute",
+  "videoPlayerUnmute": "Unmute",
+  "videoPlayerFullScreen": "Full screen",
+  "videoPlayerExitFullScreen": "Exit full screen",
+  "videoPlayerPlaybackSpeed": "Playback speed",
+  "videoPlayerLoadFailed": "Failed to load video",
+  "profileAppearanceLanguageLabel": "Language"
 }

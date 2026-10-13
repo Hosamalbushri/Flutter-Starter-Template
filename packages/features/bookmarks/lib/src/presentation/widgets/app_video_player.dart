@@ -4,6 +4,7 @@ import 'package:app_platform/app_platform.dart';
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:localization/localization.dart';
 
 import 'app_video_player_controls.dart';
 import 'app_video_player_fullscreen.dart';
@@ -48,6 +49,19 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
     super.initState();
     widget.controller.valueListenable.addListener(_onControllerValueChanged);
     _startHideTimer();
+  }
+
+  @override
+  void didUpdateWidget(covariant AppVideoPlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.controller, widget.controller)) {
+      oldWidget.controller.valueListenable.removeListener(
+        _onControllerValueChanged,
+      );
+      widget.controller.valueListenable.addListener(_onControllerValueChanged);
+      _playbackSpeed = widget.controller.value.playbackSpeed;
+      _isMuted = widget.controller.value.volume == 0.0;
+    }
   }
 
   @override
@@ -136,7 +150,11 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
           child: const Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              FaIcon(FontAwesomeIcons.video, color: Colors.white70, size: 48),
+              FaIcon(
+                FontAwesomeIcons.video,
+                color: Colors.white70,
+                size: AppIconSize.xxl,
+              ),
               SizedBox(height: AppSpacing.sm),
               Text(
                 'Mock Video Player View',
@@ -155,7 +173,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
           color: Colors.black,
           alignment: Alignment.center,
           child: widget.controller.value.hasError
-              ? _buildErrorView()
+              ? _buildErrorView(context)
               : const CircularProgressIndicator(),
         ),
       );
@@ -206,7 +224,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
     );
   }
 
-  Widget _buildErrorView() {
+  Widget _buildErrorView(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -217,7 +235,8 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
         ),
         const SizedBox(height: AppSpacing.md),
         Text(
-          widget.controller.value.errorDescription ?? 'Failed to load video',
+          widget.controller.value.errorDescription ??
+              context.l10n.videoPlayerLoadFailed,
           style: const TextStyle(color: Colors.white70, fontSize: 14),
           textAlign: TextAlign.center,
         ),

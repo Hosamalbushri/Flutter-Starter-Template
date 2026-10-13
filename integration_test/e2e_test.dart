@@ -16,11 +16,8 @@
 
 import 'dart:async';
 
-import 'package:feature_auth/src/presentation/bloc/auth_bloc.dart';
-import 'package:feature_auth/src/presentation/bloc/auth_state.dart';
+import 'package:feature_auth/feature_auth.dart';
 import 'package:feature_bookmarks/feature_bookmarks.dart';
-import 'package:feature_bookmarks/src/presentation/bloc/bookmark_form/bookmark_form_bloc.dart';
-import 'package:feature_bookmarks/src/presentation/bloc/bookmarks_list/bookmarks_list_bloc.dart';
 import 'package:feature_collections/feature_collections.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

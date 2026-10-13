@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_ar.dart';
 import 'app_localizations_en.dart';
 import 'app_localizations_vi.dart';
 
@@ -94,6 +95,7 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('ar'),
     Locale('en'),
     Locale('vi'),
   ];
@@ -1327,6 +1329,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create collection'**
   String get homeCreateCollection;
+
+  /// No description provided for @bookmarkAttachGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get bookmarkAttachGallery;
+
+  /// No description provided for @bookmarkAttachCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get bookmarkAttachCamera;
+
+  /// No description provided for @bookmarkAttachVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Video'**
+  String get bookmarkAttachVideo;
+
+  /// No description provided for @bookmarkAttachRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Record'**
+  String get bookmarkAttachRecord;
+
+  /// No description provided for @bookmarkRemoveVideoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove video'**
+  String get bookmarkRemoveVideoLabel;
+
+  /// No description provided for @videoPlayerPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get videoPlayerPlay;
+
+  /// No description provided for @videoPlayerPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get videoPlayerPause;
+
+  /// No description provided for @videoPlayerMute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get videoPlayerMute;
+
+  /// No description provided for @videoPlayerUnmute.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute'**
+  String get videoPlayerUnmute;
+
+  /// No description provided for @videoPlayerFullScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Full screen'**
+  String get videoPlayerFullScreen;
+
+  /// No description provided for @videoPlayerExitFullScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit full screen'**
+  String get videoPlayerExitFullScreen;
+
+  /// No description provided for @videoPlayerPlaybackSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback speed'**
+  String get videoPlayerPlaybackSpeed;
+
+  /// No description provided for @videoPlayerLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load video'**
+  String get videoPlayerLoadFailed;
+
+  /// No description provided for @profileAppearanceLanguageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get profileAppearanceLanguageLabel;
 }
 
 class _AppLocalizationsDelegate
@@ -1340,7 +1426,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en', 'vi'].contains(locale.languageCode);
+      <String>['ar', 'en', 'vi'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -1349,6 +1435,8 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'ar':
+      return AppLocalizationsAr();
     case 'en':
       return AppLocalizationsEn();
     case 'vi':

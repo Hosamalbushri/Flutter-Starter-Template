@@ -1,3 +1,4 @@
+import 'package:app_ui/app_ui.dart';
 // fst:auth:start
 import 'package:feature_auth/feature_auth.dart';
 // fst:auth:end
@@ -10,6 +11,7 @@ import 'package:feature_notifications/feature_notifications.dart';
 // fst:feature:notifications:end
 import 'package:feature_profile/feature_profile.dart';
 import 'package:feature_splash/feature_splash.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_contracts/shared_contracts.dart';
@@ -179,18 +181,27 @@ class DeepLinkScope extends InheritedWidget {
       deepLink != oldWidget.deepLink;
 }
 
+/// Development-only path for the interactive UI component showcase.
+const String debugUiShowcasePath = '/dev/ui-showcase';
+
 /// Builds the app router and wires auth redirects to [session] status changes.
 ///
 /// [featureRoutes] are the non-shell routes contributed by the feature
 /// packages (and auth's login/register). They are mounted alongside the
 /// generated shell routes ([$appRoutes]) so adding a feature's screens never
 /// edits this file — the feature ships its own route table.
+///
+/// When [includeDebugRoutes] is true (defaults to [kDebugMode]), mounts
+/// [debugUiShowcasePath] for inspecting design tokens and shared UI components.
+/// In release/production builds, [kDebugMode] is false so debug routes are
+/// never registered.
 ({GoRouter router, DeepLinkState deepLink}) buildRouterWithDeepLink(
   Session? session, {
   required List<RouteBase> featureRoutes,
   String? loginLocation,
   String? registerLocation,
   List<NavigatorObserver>? observers,
+  bool includeDebugRoutes = kDebugMode,
 }) {
   final deepLink = DeepLinkState();
   final homeLocation = const HomeRoute().location;
@@ -200,7 +211,16 @@ class DeepLinkScope extends InheritedWidget {
     // No initialLocation — GoRouter resolves the platform deep-link URI on
     // cold start and the redirect below captures it before sending the user
     // through splash / auth.
-    routes: [...$appRoutes, ...featureRoutes],
+    routes: [
+      ...$appRoutes,
+      ...featureRoutes,
+      if (includeDebugRoutes)
+        GoRoute(
+          path: debugUiShowcasePath,
+          name: 'dev-ui-showcase',
+          builder: (context, state) => const AppUiShowcaseScreen(),
+        ),
+    ],
     observers: observers,
     refreshListenable: session,
     redirect: (context, state) => resolveSplashRedirect(

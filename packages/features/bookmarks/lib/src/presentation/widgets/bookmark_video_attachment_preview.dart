@@ -5,6 +5,7 @@ import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:localization/localization.dart';
 
 import '../bloc/bookmark_form/bookmark_form_bloc.dart';
 import 'app_video_player.dart';
@@ -70,7 +71,7 @@ class _BookmarkVideoAttachmentPreviewState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Attached Video',
+          context.l10n.bookmarkAttachedVideo,
           style: context.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -88,23 +89,27 @@ class _BookmarkVideoAttachmentPreviewState
                     : const Center(child: CircularProgressIndicator()),
               ),
             ),
-            Positioned(
+            PositionedDirectional(
               top: AppSpacing.sm,
-              right: AppSpacing.sm,
-              child: GestureDetector(
-                onTap: () => context.read<BookmarkFormBloc>().add(
-                  const BookmarkFormVideoRemoved(),
-                ),
-                child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.xs),
-                  decoration: const BoxDecoration(
-                    color: Colors.black54,
-                    shape: BoxShape.circle,
+              end: AppSpacing.sm,
+              child: Semantics(
+                button: true,
+                label: context.l10n.bookmarkRemoveVideoLabel,
+                child: GestureDetector(
+                  onTap: () => context.read<BookmarkFormBloc>().add(
+                    const BookmarkFormVideoRemoved(),
                   ),
-                  child: const FaIcon(
-                    FontAwesomeIcons.xmark,
-                    size: AppIconSize.md,
-                    color: Colors.white,
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.xs),
+                    decoration: const BoxDecoration(
+                      color: Colors.black54,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const FaIcon(
+                      FontAwesomeIcons.xmark,
+                      size: AppIconSize.md,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),

@@ -17,9 +17,54 @@ class _AppearanceCard extends StatelessWidget {
           _SubLabel(context.l10n.profileAppearanceColorLabel),
           const SizedBox(height: AppSpacing.xs),
           const _ColorSchemeSelector(),
+          const SizedBox(height: AppSpacing.md),
+          const _SettingsDivider(),
+          _SubLabel(context.l10n.profileAppearanceLanguageLabel),
+          const SizedBox(height: AppSpacing.xs),
+          const _LanguageSelector(),
           const SizedBox(height: AppSpacing.lg),
         ],
       ),
+    );
+  }
+}
+
+class _LanguageSelector extends StatelessWidget {
+  const _LanguageSelector();
+
+  static const List<(Locale?, String)> _options = [
+    (null, ''),
+    (Locale('en'), 'English'),
+    (Locale('ar'), 'العربية'),
+    (Locale('vi'), 'Tiếng Việt'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ThemeBloc, ThemeState>(
+      builder: (context, state) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              for (final (locale, nativeName) in _options)
+                ChoiceChip(
+                  label: Text(
+                    locale == null
+                        ? context.l10n.profileThemeSystemDefault
+                        : nativeName,
+                  ),
+                  selected: state.locale?.languageCode == locale?.languageCode,
+                  onSelected: (_) => context.read<ThemeBloc>().add(
+                    ThemeLocaleChanged(locale),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

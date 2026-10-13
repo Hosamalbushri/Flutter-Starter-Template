@@ -146,6 +146,7 @@ class _RegisterTopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colorScheme.surface,
@@ -172,11 +173,16 @@ class _RegisterTopBar extends StatelessWidget {
             alignment: Alignment.center,
             children: [
               Align(
-                alignment: Alignment.centerLeft,
+                alignment: AlignmentDirectional.centerStart,
                 child: IconButton(
                   tooltip: MaterialLocalizations.of(context).backButtonTooltip,
                   onPressed: onBackPressed,
-                  icon: const FaIcon(FontAwesomeIcons.arrowLeft, size: 24),
+                  icon: FaIcon(
+                    isRtl
+                        ? FontAwesomeIcons.arrowRight
+                        : FontAwesomeIcons.arrowLeft,
+                    size: 24,
+                  ),
                 ),
               ),
               Padding(
@@ -369,8 +375,8 @@ class _RegisterFormCard extends StatelessWidget {
                 ).animateShake(),
               ],
               const SizedBox(height: AppSpacing.xxxl),
-              SizedBox(
-                height: 48,
+              ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 48),
                 child: FilledButton(
                   onPressed: isSubmitting ? null : onSubmit,
                   style: FilledButton.styleFrom(
@@ -380,6 +386,10 @@ class _RegisterFormCard extends StatelessWidget {
                         .withValues(alpha: 0.62),
                     disabledForegroundColor: colorScheme.onPrimary.withValues(
                       alpha: 0.82,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.sm,
                     ),
                     shape: const StadiumBorder(),
                     textStyle: const TextStyle(

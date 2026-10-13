@@ -207,7 +207,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                   const SizedBox(height: AppSpacing.xxxl),
                                   AppButton(
                                     label: context.l10n.loginSubmit,
-                                    icon: FontAwesomeIcons.arrowRight,
+                                    icon:
+                                        Directionality.of(context) ==
+                                            TextDirection.rtl
+                                        ? FontAwesomeIcons.arrowLeft
+                                        : FontAwesomeIcons.arrowRight,
                                     onPressed: _submit,
                                     isLoading: isSubmitting,
                                     expand: true,
@@ -491,13 +495,17 @@ class _SocialButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    return SizedBox(
-      height: 48,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 48),
       child: OutlinedButton.icon(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
           foregroundColor: colorScheme.onSurface,
           side: BorderSide(color: colorScheme.outlineVariant),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.sm,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.lg),
           ),
@@ -534,7 +542,7 @@ class _RegisterPrompt extends StatelessWidget {
         TextButton(
           onPressed: isSubmitting
               ? null
-              : () => context.go(AuthRoutes.register),
+              : () => context.push(AuthRoutes.register),
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
             minimumSize: Size.zero,

@@ -27,6 +27,7 @@ class NotificationsView extends StatelessWidget {
             title: context.l10n.notificationsAppBarTitle,
             body: AppErrorView(
               message: context.l10n.notificationsLoadError,
+              retryLabel: context.l10n.commonRetry,
               onRetry: () => context.read<NotificationsBloc>().add(
                 const NotificationsLoadRequested(),
               ),

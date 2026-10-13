@@ -44,9 +44,13 @@ class AppListDetailPane extends StatelessWidget {
         if (constraints.maxWidth < twoPaneMinWidth) {
           return master;
         }
+        final effectiveMasterWidth = masterWidth.clamp(
+          0.0,
+          constraints.maxWidth * 0.55,
+        );
         return Row(
           children: [
-            SizedBox(width: masterWidth, child: master),
+            SizedBox(width: effectiveMasterWidth, child: master),
             const VerticalDivider(width: 1, thickness: 1),
             Expanded(child: detail ?? placeholder),
           ],

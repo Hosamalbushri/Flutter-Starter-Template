@@ -1,8 +1,11 @@
+// fst:auth:start
+import 'dart:async';
+// fst:auth:end
+
 import 'package:architecture/architecture.dart';
 // fst:auth:start
 import 'package:checks/checks.dart';
-import 'package:feature_auth/src/presentation/bloc/auth_bloc.dart';
-import 'package:feature_auth/src/presentation/bloc/auth_state.dart';
+import 'package:feature_auth/feature_auth.dart';
 // fst:auth:end
 import 'package:feature_home/feature_home.dart';
 // fst:feature:notifications:start
@@ -10,6 +13,8 @@ import 'package:feature_notifications/feature_notifications.dart';
 // fst:feature:notifications:end
 // fst:auth:start
 import 'package:flutter/material.dart';
+// fst:auth:end
+// fst:auth:start
 import 'package:flutter_starter_template/app/app.dart';
 // fst:auth:end
 import 'package:flutter_starter_template/app/di/injection.dart';
@@ -25,6 +30,11 @@ import 'test_utils.dart';
 
 // fst:auth:start
 final class _NoOpSyncModule extends FeatureModule {
+  const _NoOpSyncModule(this.id);
+
+  @override
+  final String id;
+
   @override
   FeatureSyncController get syncController => _NoOpSync();
 }
@@ -40,10 +50,19 @@ final class _NoOpSync implements FeatureSyncController {
 void main() {
   late MockAnalyticsService analytics;
   // fst:auth:start
-  late AuthBloc authBloc;
+  late MockAuthBloc authBloc;
+  late StreamController<AuthState> authStateController;
   // fst:auth:end
   late ThemeBloc themeBloc;
   HomeBloc? homeBloc;
+
+  // fst:auth:start
+  setUpAll(() {
+    registerFallbackValue(
+      const AuthSignInRequested(username: '', password: ''),
+    );
+  });
+  // fst:auth:end
 
   setUp(() async {
     await getIt.reset();
@@ -52,20 +71,29 @@ void main() {
     stubAnalyticsService(analytics);
 
     // fst:auth:start
-    final signIn = MockSignIn();
-    when(() => signIn((username: 'alice', password: 'hunter2'))).thenAnswer((
-      _,
-    ) async {
-      return const Ok(testUser);
-    });
-
-    final restoreSession = MockRestoreSession();
+    authStateController = StreamController<AuthState>.broadcast();
+    var currentAuthState = const AuthState.initial();
+    authBloc = MockAuthBloc();
+    when(() => authBloc.state).thenAnswer((_) => currentAuthState);
+    when(() => authBloc.stream).thenAnswer((_) => authStateController.stream);
+    when(() => authBloc.close()).thenAnswer((_) async {});
     when(
-      restoreSession.call,
-    ).thenAnswer((_) async => const Err(testFailure));
-
-    final signOut = MockSignOut();
-    when(signOut.call).thenAnswer((_) async => const Ok(null));
+      () => authBloc.add(const AuthSessionRestoreRequested()),
+    ).thenAnswer((_) {
+      authStateController.add(currentAuthState);
+    });
+    when(
+      () => authBloc.add(
+        any<AuthSignInRequested>(
+          that: isA<AuthSignInRequested>()
+              .having((e) => e.username, 'username', 'alice')
+              .having((e) => e.password, 'password', 'hunter2'),
+        ),
+      ),
+    ).thenAnswer((_) {
+      currentAuthState = const AuthState.authenticated(testUser);
+      authStateController.add(currentAuthState);
+    });
     // fst:auth:end
 
     final bookmarkStats = MockBookmarkStatsReader();
@@ -78,15 +106,6 @@ void main() {
       collectionsReader.call,
     ).thenAnswer((_) async => const Ok<List<CollectionSummary>>([]));
 
-    // fst:auth:start
-    authBloc = AuthBloc(
-      signIn: signIn,
-      register: MockRegister(),
-      signOut: signOut,
-      restoreSession: restoreSession,
-      analytics: analytics,
-    );
-    // fst:auth:end
     themeBloc = ThemeBloc(await SharedPreferences.getInstance(), analytics);
 
     getIt.registerFactory<HomeBloc>(() {
@@ -110,6 +129,7 @@ void main() {
     }
     await themeBloc.close();
     // fst:auth:start
+    await authStateController.close();
     await authBloc.close();
     // fst:auth:end
   });
@@ -120,7 +140,11 @@ void main() {
       App(
         authBloc: authBloc,
         themeBloc: themeBloc,
-        features: [_NoOpSyncModule(), _NoOpSyncModule(), _NoOpSyncModule()],
+        features: const [
+          _NoOpSyncModule('bookmarks'),
+          _NoOpSyncModule('collections'),
+          _NoOpSyncModule('notifications'),
+        ],
         navigatorObservers: const [],
         videoPlayerService: MockVideoPlayerService(),
       ),

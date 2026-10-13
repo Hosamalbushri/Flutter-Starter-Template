@@ -51,7 +51,7 @@ class _BookmarkFormViewState extends State<BookmarkFormView> {
     return AppScaffold(
       padding: EdgeInsets.zero,
       safeArea: false,
-      backgroundColor: _BookmarkFormColors.background,
+      backgroundColor: _BookmarkFormColors.background(context),
       resizeToAvoidBottomInset: true,
       body: BlocConsumer<BookmarkFormBloc, BookmarkFormState>(
         listenWhen: (prev, curr) => prev.status != curr.status,
@@ -173,12 +173,12 @@ class _BookmarkTaskHeader extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             Align(
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               child: Padding(
-                padding: const EdgeInsets.only(left: AppSpacing.sm),
+                padding: const EdgeInsetsDirectional.only(start: AppSpacing.sm),
                 child: IconButton(
                   icon: const FaIcon(FontAwesomeIcons.xmark),
-                  color: _BookmarkFormColors.mutedText,
+                  color: _BookmarkFormColors.mutedText(context),
                   tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                   onPressed: () => Navigator.of(context).maybePop(),
                 ),
@@ -191,7 +191,7 @@ class _BookmarkTaskHeader extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: context.textTheme.headlineSmall?.copyWith(
-                  color: _BookmarkFormColors.text,
+                  color: _BookmarkFormColors.text(context),
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0,
                 ),
@@ -219,7 +219,7 @@ class _StickySubmitBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: _BookmarkFormColors.background.withValues(alpha: 0.94),
+        color: _BookmarkFormColors.background(context).withValues(alpha: 0.94),
         boxShadow: const [
           BoxShadow(
             color: Color(0x080A192F),
@@ -254,7 +254,9 @@ class _StickySubmitBar extends StatelessWidget {
 }
 
 abstract final class _BookmarkFormColors {
-  static const background = Color(0xFFF7F9FB);
-  static const text = Color(0xFF191C1E);
-  static const mutedText = Color(0xFF434656);
+  static Color background(BuildContext context) =>
+      context.isDark ? context.colorScheme.surface : const Color(0xFFF7F9FB);
+  static Color text(BuildContext context) => context.colorScheme.onSurface;
+  static Color mutedText(BuildContext context) =>
+      context.colorScheme.onSurfaceVariant;
 }

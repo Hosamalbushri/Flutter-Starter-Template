@@ -20,14 +20,15 @@ abstract final class AppBreakpoints {
 /// specific subtree; use these context getters for whole-screen decisions.
 extension BuildContextBreakpoints on BuildContext {
   /// Whether the screen width is below [AppBreakpoints.medium].
-  bool get isCompact => MediaQuery.of(this).size.width < AppBreakpoints.medium;
+  bool get isCompact => MediaQuery.sizeOf(this).width < AppBreakpoints.medium;
 
   /// Whether the screen width is within the medium window size class.
-  bool get isMedium =>
-      MediaQuery.of(this).size.width >= AppBreakpoints.medium &&
-      MediaQuery.of(this).size.width < AppBreakpoints.expanded;
+  bool get isMedium {
+    final width = MediaQuery.sizeOf(this).width;
+    return width >= AppBreakpoints.medium && width < AppBreakpoints.expanded;
+  }
 
   /// Whether the screen width is at or above [AppBreakpoints.expanded].
   bool get isExpanded =>
-      MediaQuery.of(this).size.width >= AppBreakpoints.expanded;
+      MediaQuery.sizeOf(this).width >= AppBreakpoints.expanded;
 }

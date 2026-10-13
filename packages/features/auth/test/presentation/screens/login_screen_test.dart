@@ -1,6 +1,7 @@
 import 'package:feature_auth/src/presentation/bloc/auth_bloc.dart';
 import 'package:feature_auth/src/presentation/bloc/auth_state.dart';
 import 'package:feature_auth/src/presentation/screens/login_screen.dart';
+import 'package:feature_auth/src/presentation/screens/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,6 +23,13 @@ Widget wrapWithDependencies(AuthBloc bloc) {
           builder: (context, state) => BlocProvider<AuthBloc>.value(
             value: bloc,
             child: const LoginScreen(),
+          ),
+        ),
+        GoRoute(
+          path: '/register',
+          builder: (context, state) => BlocProvider<AuthBloc>.value(
+            value: bloc,
+            child: const RegisterScreen(),
           ),
         ),
       ],
@@ -60,6 +68,29 @@ void main() {
       expect(find.text('Google'), findsOneWidget);
       expect(find.text('Apple'), findsOneWidget);
       expect(find.text('Create an account'), findsOneWidget);
+    });
+
+    testWidgets('system back returns from registration to login', (
+      tester,
+    ) async {
+      await tester.pumpWidget(wrapWithDependencies(mockBloc));
+      await tester.pump(const Duration(seconds: 1));
+
+      final createAccount = find.widgetWithText(
+        TextButton,
+        'Create an account',
+      );
+      await tester.ensureVisible(createAccount);
+      await tester.pumpAndSettle();
+      await tester.tap(createAccount);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Join Flutter Starter'), findsAtLeast(1));
+
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Welcome Back'), findsOneWidget);
     });
 
     testWidgets('shows validation errors on empty submit', (tester) async {

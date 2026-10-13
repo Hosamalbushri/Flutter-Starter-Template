@@ -80,8 +80,8 @@ class _NotificationSectionLabel extends StatelessWidget {
     return Semantics(
       header: true,
       child: Padding(
-        padding: const EdgeInsets.only(
-          left: AppSpacing.xs,
+        padding: const EdgeInsetsDirectional.only(
+          start: AppSpacing.xs,
           bottom: AppSpacing.sm,
         ),
         child: Text(

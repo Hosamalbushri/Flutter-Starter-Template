@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:photo_view/photo_view.dart';
@@ -34,6 +36,7 @@ class _AppPhotoViewFullScreenPageState
   double _dragOffset = 0;
   bool _isDragging = false;
   late PhotoViewController _photoViewController;
+  StreamSubscription<PhotoViewControllerValue>? _stateSubscription;
   double? _initialScale;
 
   @override
@@ -42,7 +45,7 @@ class _AppPhotoViewFullScreenPageState
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
     _photoViewController = PhotoViewController();
-    _photoViewController.outputStateStream.listen((value) {
+    _stateSubscription = _photoViewController.outputStateStream.listen((value) {
       if (mounted && _initialScale == null && value.scale != null) {
         setState(() => _initialScale = value.scale);
       }
@@ -51,6 +54,7 @@ class _AppPhotoViewFullScreenPageState
 
   @override
   void dispose() {
+    _stateSubscription?.cancel();
     _pageController.dispose();
     _photoViewController.dispose();
     super.dispose();
@@ -241,10 +245,10 @@ class _FullscreenTopBar extends StatelessWidget {
           ignoring: !visible,
           child: Container(
             padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top + 8,
-              bottom: 16,
-              left: 8,
-              right: 8,
+              top: MediaQuery.paddingOf(context).top + AppSpacing.sm,
+              bottom: AppSpacing.lg,
+              left: AppSpacing.sm,
+              right: AppSpacing.sm,
             ),
             decoration: BoxDecoration(
               gradient: LinearGradient(

@@ -61,4 +61,81 @@ void main() {
           '${offenders.map((p) => '  $p').join('\n')}',
     );
   });
+
+  test(
+    'authenticated Dio provider depends on PerformanceTracker, not '
+    'FirebasePerformance directly',
+    () {
+      final source = File(
+        'packages/network/lib/src/network_module.dart',
+      ).readAsStringSync();
+      expect(
+        source,
+        contains('PerformanceTracker performance'),
+        reason:
+            'provideDio must depend on PerformanceTracker so '
+            '`fst create --no-firebase` can substitute NoOpPerformanceTracker '
+            'without initializing Firebase.',
+      );
+      expect(
+        source,
+        isNot(contains('FirebasePerformance')),
+        reason:
+            'network_module.dart must not reference FirebasePerformance '
+            'directly; use PerformanceTracker instead.',
+      );
+    },
+  );
+
+  test(
+    'PerformanceModule provides PerformanceTracker with // fst:performance-impl '
+    'marker',
+    () {
+      final source = File(
+        'packages/network/lib/src/performance_module.dart',
+      ).readAsStringSync();
+      expect(
+        RegExp(
+          r'\bPerformanceTracker\s+providePerformance\s*\(',
+        ).hasMatch(source),
+        isTrue,
+        reason:
+            'PerformanceModule must provide PerformanceTracker so '
+            'NetworkPackageModule registers the port, not FirebasePerformance.',
+      );
+      expect(
+        source,
+        contains('// fst:performance-impl'),
+        reason:
+            'PerformanceModule must carry the `// fst:performance-impl` marker '
+            'so `fst create --no-firebase` can swap the binding to '
+            'NoOpPerformanceTracker.',
+      );
+    },
+  );
+
+  test('generated network DI registers and injects PerformanceTracker', () {
+    final generated = File(
+      'packages/network/lib/src/di.module.dart',
+    ).readAsStringSync();
+    expect(
+      RegExp('lazySingleton<[^>]*PerformanceTracker>').hasMatch(generated),
+      isTrue,
+      reason:
+          'The generated micro-package module must register the '
+          'PerformanceTracker abstraction.',
+    );
+    expect(
+      RegExp(r'gh<[^>]*PerformanceTracker>\(\)').hasMatch(generated),
+      isTrue,
+      reason: 'The generated Dio registration must resolve PerformanceTracker.',
+    );
+    expect(
+      generated,
+      isNot(contains('FirebasePerformance')),
+      reason:
+          'FirebasePerformance must remain behind the source adapter and must '
+          'not leak into generated DI.',
+    );
+  });
 }

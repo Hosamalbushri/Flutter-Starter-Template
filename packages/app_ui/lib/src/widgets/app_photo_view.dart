@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -180,15 +181,32 @@ class AppPhotoView extends StatefulWidget {
 
 class _AppPhotoViewState extends State<AppPhotoView> {
   late PhotoViewController _photoViewController;
+  StreamSubscription<PhotoViewControllerValue>? _stateSubscription;
   double? _initialScale;
 
   @override
   void initState() {
     super.initState();
     _photoViewController = widget.controller ?? PhotoViewController();
+    _subscribeController();
+  }
 
-    // Listen to scale changes to capture the initial resolved scale factor
-    _photoViewController.outputStateStream.listen((value) {
+  @override
+  void didUpdateWidget(AppPhotoView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      _stateSubscription?.cancel();
+      if (oldWidget.controller == null) {
+        _photoViewController.dispose();
+      }
+      _photoViewController = widget.controller ?? PhotoViewController();
+      _initialScale = null;
+      _subscribeController();
+    }
+  }
+
+  void _subscribeController() {
+    _stateSubscription = _photoViewController.outputStateStream.listen((value) {
       if (mounted && _initialScale == null && value.scale != null) {
         _initialScale = value.scale;
       }
@@ -197,6 +215,7 @@ class _AppPhotoViewState extends State<AppPhotoView> {
 
   @override
   void dispose() {
+    _stateSubscription?.cancel();
     // Only dispose if we created it locally
     if (widget.controller == null) {
       _photoViewController.dispose();

@@ -89,7 +89,7 @@ class BookmarkDetailView extends StatelessWidget {
       child: AppScaffold(
         title: context.l10n.bookmarkAppBarTitle,
         padding: EdgeInsets.zero,
-        backgroundColor: _BookmarkDetailColors.background,
+        backgroundColor: _BookmarkDetailColors.background(context),
         actions: [
           BlocBuilder<BookmarkDetailBloc, BookmarkDetailState>(
             builder: (context, state) {
@@ -155,6 +155,7 @@ class BookmarkDetailView extends StatelessWidget {
               BookmarkDetailLoading() => const AppLoading(),
               BookmarkDetailFailure(:final failure) => AppErrorView(
                 message: bookmarkFailureMessage(context, failure),
+                retryLabel: context.l10n.commonRetry,
                 onRetry: () => context.read<BookmarkDetailBloc>().add(
                   BookmarkDetailLoadRequested(id),
                 ),
@@ -226,7 +227,7 @@ class _DetailBody extends StatelessWidget {
               Text(
                 bookmark.title,
                 style: context.textTheme.headlineSmall?.copyWith(
-                  color: _BookmarkDetailColors.text,
+                  color: _BookmarkDetailColors.text(context),
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0,
                 ),
@@ -236,7 +237,7 @@ class _DetailBody extends StatelessWidget {
                 Text(
                   bookmark.description,
                   style: context.textTheme.bodyLarge?.copyWith(
-                    color: _BookmarkDetailColors.mutedText,
+                    color: _BookmarkDetailColors.mutedText(context),
                     letterSpacing: 0,
                   ),
                 ).animateFadeIn(delay: 100.ms),
@@ -301,7 +302,7 @@ class _SourceSection extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: context.textTheme.bodySmall?.copyWith(
-              color: _BookmarkDetailColors.mutedText,
+              color: _BookmarkDetailColors.mutedText(context),
               letterSpacing: 0,
             ),
           ),
@@ -341,10 +342,10 @@ class _TagsSection extends StatelessWidget {
               for (final tag in tags)
                 DecoratedBox(
                   decoration: BoxDecoration(
-                    color: _BookmarkDetailColors.surfaceLow,
+                    color: _BookmarkDetailColors.surfaceLow(context),
                     borderRadius: BorderRadius.circular(AppRadius.xl),
                     border: Border.all(
-                      color: _BookmarkDetailColors.surfaceHigh,
+                      color: _BookmarkDetailColors.surfaceHigh(context),
                     ),
                   ),
                   child: Padding(
@@ -355,7 +356,7 @@ class _TagsSection extends StatelessWidget {
                     child: Text(
                       tag,
                       style: context.textTheme.labelMedium?.copyWith(
-                        color: _BookmarkDetailColors.secondary,
+                        color: _BookmarkDetailColors.secondary(context),
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0,
                       ),
@@ -410,9 +411,9 @@ class _DetailsSection extends StatelessWidget {
               decoration: BoxDecoration(
                 border: i == rows.length - 1
                     ? null
-                    : const Border(
+                    : Border(
                         bottom: BorderSide(
-                          color: _BookmarkDetailColors.surfaceHigh,
+                          color: _BookmarkDetailColors.surfaceHigh(context),
                         ),
                       ),
               ),
@@ -423,27 +424,33 @@ class _DetailsSection extends StatelessWidget {
                     child: Text(
                       rows[i].label,
                       style: context.textTheme.bodySmall?.copyWith(
-                        color: _BookmarkDetailColors.mutedText,
+                        color: _BookmarkDetailColors.mutedText(context),
                         letterSpacing: 0,
                       ),
                     ),
                   ),
                   if (rows[i].valueIcon != null)
                     Padding(
-                      padding: const EdgeInsets.only(right: AppSpacing.xs),
+                      padding: const EdgeInsetsDirectional.only(
+                        end: AppSpacing.xs,
+                      ),
                       child: FaIcon(
                         rows[i].valueIcon,
-                        size: 12,
-                        color: _BookmarkDetailColors.mutedText,
+                        size: AppIconSize.xs,
+                        color: _BookmarkDetailColors.mutedText(context),
                       ),
                     ),
                   if (rows[i].value.isNotEmpty)
-                    Text(
-                      rows[i].value,
-                      style: context.textTheme.labelMedium?.copyWith(
-                        color: _BookmarkDetailColors.text,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0,
+                    Flexible(
+                      child: Text(
+                        rows[i].value,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textTheme.labelMedium?.copyWith(
+                          color: _BookmarkDetailColors.text(context),
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0,
+                        ),
                       ),
                     ),
                 ],
@@ -521,7 +528,7 @@ class _OpenInBrowserBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: _BookmarkDetailColors.background.withValues(alpha: 0.94),
+        color: _BookmarkDetailColors.background(context).withValues(alpha: 0.94),
         boxShadow: const [
           BoxShadow(
             color: Color(0x080A192F),
@@ -552,7 +559,7 @@ class _OpenInBrowserBar extends StatelessWidget {
   }
 }
 
-/// White surface card with the soft ambient shadow used across the detail view.
+/// Surface card with the soft ambient shadow used across the detail view.
 class _DetailCard extends StatelessWidget {
   const _DetailCard({required this.child});
 
@@ -562,7 +569,7 @@ class _DetailCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: _BookmarkDetailColors.surface,
+        color: _BookmarkDetailColors.surface(context),
         borderRadius: BorderRadius.circular(AppRadius.lg),
         boxShadow: const [
           BoxShadow(
@@ -596,11 +603,13 @@ class _MenuItem extends StatelessWidget {
     final color = this.color ?? context.colorScheme.onSurface;
     return Row(
       children: [
-        FaIcon(icon, size: 16, color: color),
+        FaIcon(icon, size: AppIconSize.sm, color: color),
         const SizedBox(width: AppSpacing.md),
-        Text(
-          label,
-          style: context.textTheme.bodyMedium?.copyWith(color: color),
+        Flexible(
+          child: Text(
+            label,
+            style: context.textTheme.bodyMedium?.copyWith(color: color),
+          ),
         ),
       ],
     );
@@ -618,14 +627,22 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        FaIcon(icon, size: 16, color: _BookmarkDetailColors.primary),
+        FaIcon(
+          icon,
+          size: AppIconSize.sm,
+          color: _BookmarkDetailColors.primary(context),
+        ),
         const SizedBox(width: AppSpacing.sm),
-        Text(
-          label,
-          style: context.textTheme.labelLarge?.copyWith(
-            color: _BookmarkDetailColors.text,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0,
+        Expanded(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textTheme.labelLarge?.copyWith(
+              color: _BookmarkDetailColors.text(context),
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0,
+            ),
           ),
         ),
       ],
@@ -647,27 +664,35 @@ class _SubtleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = _BookmarkDetailColors.primary(context);
     return Material(
-      color: _BookmarkDetailColors.surfaceLow,
+      color: _BookmarkDetailColors.surfaceLow(context),
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppRadius.lg),
         onTap: onPressed,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.md,
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                label,
-                style: context.textTheme.labelLarge?.copyWith(
-                  color: _BookmarkDetailColors.primary,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0,
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.labelLarge?.copyWith(
+                    color: primary,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0,
+                  ),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              FaIcon(icon, size: 14, color: _BookmarkDetailColors.primary),
+              FaIcon(icon, size: 14, color: primary),
             ],
           ),
         ),
@@ -758,12 +783,21 @@ class _VideoSectionState extends State<_VideoSection> {
 }
 
 abstract final class _BookmarkDetailColors {
-  static const background = Color(0xFFF7F9FB);
-  static const surface = Color(0xFFFFFFFF);
-  static const surfaceLow = Color(0xFFF2F4F6);
-  static const surfaceHigh = Color(0xFFE0E3E5);
-  static const primary = Color(0xFF0052FF);
-  static const secondary = Color(0xFF515F78);
-  static const text = Color(0xFF191C1E);
-  static const mutedText = Color(0xFF434656);
+  static Color background(BuildContext context) =>
+      context.isDark ? context.colorScheme.surface : const Color(0xFFF7F9FB);
+  static Color surface(BuildContext context) => context.isDark
+      ? context.colorScheme.surfaceContainerLow
+      : const Color(0xFFFFFFFF);
+  static Color surfaceLow(BuildContext context) => context.isDark
+      ? context.colorScheme.surfaceContainerHigh
+      : const Color(0xFFF2F4F6);
+  static Color surfaceHigh(BuildContext context) => context.isDark
+      ? context.colorScheme.outlineVariant
+      : const Color(0xFFE0E3E5);
+  static Color primary(BuildContext context) => context.colorScheme.primary;
+  static Color secondary(BuildContext context) =>
+      context.colorScheme.onSurfaceVariant;
+  static Color text(BuildContext context) => context.colorScheme.onSurface;
+  static Color mutedText(BuildContext context) =>
+      context.colorScheme.onSurfaceVariant;
 }

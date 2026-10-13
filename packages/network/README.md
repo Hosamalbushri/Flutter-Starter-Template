@@ -12,8 +12,12 @@ on those packages directly.
 - `NetworkModule` — provides the configured `Dio` instance (base URL and
   timeouts sourced from `EnvConfig`) with the interceptors attached.
 - `RetryInterceptor` — retries transient failures with backoff.
-- `PerformanceInterceptor` — records request timing via Firebase Performance.
-- `CoreNetworkPackageModule` — the injectable micro-package module the app
+- `PerformanceTracker` — port for network performance metrics with
+  `FirebasePerformanceTracker` and `NoOpPerformanceTracker` implementations.
+  `PerformanceModule` binds it at the `// fst:performance-impl` marker;
+  `fst create --no-firebase` swaps it to the no-op automatically.
+- `PerformanceInterceptor` — records request timing via `PerformanceTracker`.
+- `NetworkPackageModule` — the injectable micro-package module the app
   registers via `externalPackageModulesBefore`.
 - Re-exports: `package:dio/dio.dart`, `package:retrofit/retrofit.dart`
   (hiding `Headers`/`HttpMethod`), `package:firebase_performance/...`.

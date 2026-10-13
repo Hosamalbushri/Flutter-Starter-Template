@@ -30,11 +30,11 @@ const _componentThemes = FlexSubThemesData(
 
   // Buttons / FAB / chips: radius scale consistent with `AppButton._style()`
   // (10/14/16 across small/medium/large) and elevation 2 for primary actions.
-  filledButtonRadius: 14,
-  elevatedButtonRadius: 14,
+  filledButtonRadius: AppRadius.button,
+  elevatedButtonRadius: AppRadius.button,
   elevatedButtonElevation: AppElevation.md - 1,
-  outlinedButtonRadius: 14,
-  textButtonRadius: 14,
+  outlinedButtonRadius: AppRadius.button,
+  textButtonRadius: AppRadius.button,
   fabRadius: AppRadius.lg,
   chipRadius: AppRadius.sm,
 

@@ -2,12 +2,12 @@ import 'dart:developer' as developer;
 
 import 'package:config/config.dart';
 import 'package:dio/dio.dart';
-import 'package:firebase_performance/firebase_performance.dart';
 import 'package:injectable/injectable.dart';
 import 'package:storage/storage.dart';
 
 import 'auth_interceptor.dart';
 import 'performance_interceptor.dart';
+import 'performance_tracker.dart';
 import 'retry_interceptor.dart';
 import 'token_refresher.dart';
 
@@ -53,7 +53,7 @@ abstract class NetworkModule {
     AuthTokenStore tokens,
     TokenRefresher refresher,
     EnvConfig env,
-    FirebasePerformance performance,
+    PerformanceTracker performance,
   ) {
     final dio = Dio(apiBaseOptions(env.apiBaseUrl, timeout: env.apiTimeout));
     if (!env.isDev) {

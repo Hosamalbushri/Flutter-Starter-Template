@@ -22,6 +22,7 @@ void main() {
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.text('Loading...'), findsNothing);
+      expect(find.bySemanticsLabel('Loading'), findsNothing);
     });
 
     testWidgets('shows label when provided', (tester) async {
@@ -31,6 +32,7 @@ void main() {
       await tester.pump(AppDurations.fast);
 
       expect(find.text('Loading...'), findsOneWidget);
+      expect(find.bySemanticsLabel('Loading...'), findsOneWidget);
     });
 
     testWidgets('uses custom size', (tester) async {

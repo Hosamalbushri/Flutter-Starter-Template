@@ -18,6 +18,7 @@ class AppCard extends StatelessWidget {
     this.onTap,
     this.margin,
     this.color,
+    this.semanticLabel,
   });
 
   /// Content laid out inside the card's padding.
@@ -37,11 +38,14 @@ class AppCard extends StatelessWidget {
   /// `cardTheme` color.
   final Color? color;
 
+  /// Optional accessible label announced by screen readers.
+  final String? semanticLabel;
+
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(AppRadius.lg);
 
-    return Card(
+    final card = Card(
       margin: margin,
       color: color,
       shape: RoundedRectangleBorder(borderRadius: radius),
@@ -56,6 +60,16 @@ class AppCard extends StatelessWidget {
             : null,
         child: Padding(padding: padding, child: child),
       ),
+    );
+
+    if (onTap == null && semanticLabel == null) {
+      return card;
+    }
+
+    return Semantics(
+      button: onTap != null,
+      label: semanticLabel,
+      child: card,
     );
   }
 }

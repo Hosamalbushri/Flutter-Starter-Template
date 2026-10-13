@@ -1,38 +1,14 @@
-// Architecture guardrail: enforces the cross-feature import boundary
-// documented in CLAUDE.md ("a feature must not import another feature").
+// Architecture guardrail: enforces feature-to-feature boundaries, cross-package
+// private `lib/src/` import restrictions, and relative-import containment.
 //
-// Features now live as workspace packages under `packages/features/<name>`
-// (Dart package `feature_<name>`). A feature package may not import another
-// feature package — shared *state* is read through a `shared_contracts`
-// contract and shared visuals come from `shared_ui`, so a direct
-// `package:feature_<other>` import is a boundary crossing.
-//
-// The one documented escape hatch is the "capability" exception: a
-// presentation object that one feature deliberately surfaces inside another
-// while it has a single consumer. Those exact edges are whitelisted in
-// [_allowedCrossFeatureImports]. When you intentionally add such a capability,
-// add its edge here with a comment; when a second consumer appears, promote
-// the contract to `shared_*` and remove the entry (the staleness test below
-// will remind you if a whitelisted edge disappears).
-//
-// This complements `package_layering_test`: that test ranks the feature
-// packages and enforces their dependency *direction* (a feature may only
-// depend on strictly lower layers), while this scan enforces the *capability
-// allowlist* — which specific feature-to-feature edges are permitted at all.
-//
-// A pure file-scan test on purpose: no third-party dependency, runs inside the
-// normal `fvm flutter test` / CI flow, and can't break when the analyzer or
-// pinned SDK is upgraded.
+// Preserve all `// fst:` sentinel comments so `fst create` strips optional
+// capability exceptions cleanly.
 
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
 /// Documented capability exceptions, keyed by the importing feature package.
-///
-/// Each value is the set of feature packages it is allowed to import. Keep this
-/// list minimal and commented — every entry is a deliberate exception to the
-/// boundary rule.
 const _allowedCrossFeatureImports = <String, Set<String>>{
   // fst:feature:bookmarks:start
   // bookmarks surfaces collections' "add to collection" sheet and embedded
@@ -60,7 +36,6 @@ void main() {
     );
   });
 
-  // Maps each feature package directory to its Dart package name.
   final featurePackages = <String, String>{};
   for (final entity in featuresDir.listSync().whereType<Directory>()) {
     final pubspec = File('${entity.path}/pubspec.yaml');
@@ -78,15 +53,10 @@ void main() {
   test(
     'no feature imports another feature outside the documented allowlist',
     () {
-      final violations = crossFeatureImports
-          .where(
-            (i) =>
-                !(_allowedCrossFeatureImports[i.sourceFeature]?.contains(
-                      i.targetFeature,
-                    ) ??
-                    false),
-          )
-          .toList();
+      final violations = findDisallowedCrossFeatureImports(
+        crossFeatureImports,
+        _allowedCrossFeatureImports,
+      );
 
       expect(
         violations,
@@ -96,6 +66,32 @@ void main() {
             'CLAUDE.md. Read shared state through a shared_contracts contract, '
             'or — if this is a deliberate single-consumer capability — add it '
             'to _allowedCrossFeatureImports in this test.\n\n'
+            '${violations.map((v) => '  $v').join('\n')}',
+      );
+    },
+  );
+
+  test(
+    'no feature declares another feature in pubspec.yaml outside the allowlist',
+    () {
+      final violations = <String>[];
+      featurePackages.forEach((dirPath, ownName) {
+        final lines = File('$dirPath/pubspec.yaml').readAsLinesSync();
+        for (final dep in _runtimeDependencies(lines)) {
+          if (!featurePackageNames.contains(dep) || dep == ownName) continue;
+          final allowed =
+              _allowedCrossFeatureImports[ownName]?.contains(dep) ?? false;
+          if (!allowed) {
+            violations.add('$dirPath/pubspec.yaml declares $ownName -> $dep');
+          }
+        }
+      });
+      expect(
+        violations,
+        isEmpty,
+        reason:
+            'Feature pubspec.yaml runtime dependencies must match '
+            '_allowedCrossFeatureImports:\n\n'
             '${violations.map((v) => '  $v').join('\n')}',
       );
     },
@@ -124,11 +120,98 @@ void main() {
           'real boundary violations:\n\n${stale.map((s) => '  $s').join('\n')}',
     );
   });
+
+  test(
+    'no package or test imports another package private lib/src/ implementation',
+    () {
+      final violations = _collectPrivateSrcAndRelativeEscapeViolations();
+      expect(
+        violations,
+        isEmpty,
+        reason:
+            'Cross-package imports into `package:<other>/src/...` or relative '
+            'imports escaping a package root bypass public API boundaries:\n\n'
+            '${violations.map((v) => '  $v').join('\n')}',
+      );
+    },
+  );
+
+  group('boundary & private import regression tests', () {
+    test('accepts same-package src/ imports and public barrel imports', () {
+      final violations = scanDirectivesForBoundaryViolations(
+        owningPackage: 'feature_bookmarks',
+        filePath:
+            'packages/features/bookmarks/lib/src/presentation/bookmarks_screen.dart',
+        packageLibRoot: 'packages/features/bookmarks/lib',
+        lines: const [
+          "import 'package:app_ui/app_ui.dart';",
+          "import 'package:feature_bookmarks/src/domain/entities/bookmark.dart';",
+          "import 'package:feature_collections/feature_collections.dart';",
+          "import '../widgets/bookmark_card.dart';",
+        ],
+      );
+      expect(violations, isEmpty);
+    });
+
+    test('rejects cross-package private lib/src/ imports and exports', () {
+      final violations = scanDirectivesForBoundaryViolations(
+        owningPackage: 'feature_bookmarks',
+        filePath:
+            'packages/features/bookmarks/lib/src/presentation/bookmarks_screen.dart',
+        packageLibRoot: 'packages/features/bookmarks/lib',
+        lines: const [
+          "import 'package:feature_collections/src/presentation/bloc/collections_list_bloc.dart';",
+          "export 'package:network/src/dio_module.dart';",
+        ],
+      );
+      expect(
+        violations,
+        containsAll([
+          contains('package:feature_collections/src/'),
+          contains('package:network/src/dio_module.dart'),
+        ]),
+      );
+    });
+
+    test('rejects relative imports that escape the package lib/ directory', () {
+      final violations = scanDirectivesForBoundaryViolations(
+        owningPackage: 'feature_bookmarks',
+        filePath:
+            'packages/features/bookmarks/lib/src/presentation/bookmarks_screen.dart',
+        packageLibRoot: 'packages/features/bookmarks/lib',
+        lines: const [
+          "import '../../../../collections/lib/src/di.dart';",
+        ],
+      );
+      expect(violations, contains(contains('relative directive escapes')));
+    });
+
+    test('rejects unapproved cross-feature imports', () {
+      final imports = [
+        CrossFeatureImport(
+          file: 'packages/features/home/lib/src/home_screen.dart',
+          line: 1,
+          sourceFeature: 'feature_home',
+          targetFeature: 'feature_bookmarks',
+          uri: 'package:feature_bookmarks/feature_bookmarks.dart',
+        ),
+      ];
+      final disallowed = findDisallowedCrossFeatureImports(
+        imports,
+        _allowedCrossFeatureImports,
+      );
+      expect(disallowed, hasLength(1));
+      expect(
+        disallowed.single.toString(),
+        contains('feature_home -> feature_bookmarks'),
+      );
+    });
+  });
 }
 
 /// A single import that crosses from one feature package into another.
-class _CrossFeatureImport {
-  _CrossFeatureImport({
+class CrossFeatureImport {
+  CrossFeatureImport({
     required this.file,
     required this.line,
     required this.sourceFeature,
@@ -136,38 +219,37 @@ class _CrossFeatureImport {
     required this.uri,
   });
 
-  /// Path of the importing file, relative to the package root.
   final String file;
-
-  /// 1-based line number of the import directive.
   final int line;
-
-  /// Feature package that owns [file] (e.g. `feature_bookmarks`).
   final String sourceFeature;
-
-  /// Feature package being imported (e.g. `feature_collections`).
   final String targetFeature;
-
-  /// The raw import URI as written in source.
   final String uri;
 
   @override
   String toString() => '$file:$line imports $sourceFeature -> $targetFeature';
 }
 
-/// Matches `import '...'` / `export '...'` and captures the URI.
+List<CrossFeatureImport> findDisallowedCrossFeatureImports(
+  List<CrossFeatureImport> imports,
+  Map<String, Set<String>> allowlist,
+) =>
+    imports
+        .where(
+          (i) => !(allowlist[i.sourceFeature]?.contains(i.targetFeature) ?? false),
+        )
+        .toList();
+
 final _importDirective = RegExp(
   r'''^\s*(?:import|export)\s+['"]([^'"]+)['"]''',
 );
 
-/// Matches the package segment of a `package:feature_<name>/...` URI.
 final _featurePackageUri = RegExp('^package:(feature_[a-z0-9_]+)/');
 
-List<_CrossFeatureImport> _collectCrossFeatureImports(
+List<CrossFeatureImport> _collectCrossFeatureImports(
   Map<String, String> featurePackages,
   Set<String> featurePackageNames,
 ) {
-  final results = <_CrossFeatureImport>[];
+  final results = <CrossFeatureImport>[];
 
   featurePackages.forEach((dirPath, ownName) {
     final libDir = Directory('$dirPath/lib');
@@ -194,7 +276,7 @@ List<_CrossFeatureImport> _collectCrossFeatureImports(
         if (!featurePackageNames.contains(targetFeature)) continue;
 
         results.add(
-          _CrossFeatureImport(
+          CrossFeatureImport(
             file: relPath,
             line: i + 1,
             sourceFeature: ownName,
@@ -209,7 +291,122 @@ List<_CrossFeatureImport> _collectCrossFeatureImports(
   return results;
 }
 
-/// Reads the `name:` field from a pubspec's lines.
+List<String> _collectPrivateSrcAndRelativeEscapeViolations() {
+  final violations = <String>[];
+  final rootPubspecLines = File('pubspec.yaml').readAsLinesSync();
+  final rootPkgName = _packageName(rootPubspecLines) ?? 'app';
+
+  final packageRoots = <(String, String)>[('.', rootPkgName)];
+  final packagesDir = Directory('packages');
+  if (packagesDir.existsSync()) {
+    for (final entity in packagesDir.listSync().whereType<Directory>()) {
+      final pubspec = File('${entity.path}/pubspec.yaml');
+      if (pubspec.existsSync()) {
+        final name = _packageName(pubspec.readAsLinesSync());
+        if (name != null) packageRoots.add((_posix(entity.path), name));
+      } else {
+        for (final child in entity.listSync().whereType<Directory>()) {
+          final childPubspec = File('${child.path}/pubspec.yaml');
+          if (!childPubspec.existsSync()) continue;
+          final name = _packageName(childPubspec.readAsLinesSync());
+          if (name != null) packageRoots.add((_posix(child.path), name));
+        }
+      }
+    }
+  }
+  final revSyncPubspec = File('published/rev_sync/pubspec.yaml');
+  if (revSyncPubspec.existsSync()) {
+    final name = _packageName(revSyncPubspec.readAsLinesSync());
+    if (name != null) packageRoots.add(('published/rev_sync', name));
+  }
+
+  for (final (pkgRoot, pkgName) in packageRoots) {
+    final scanDirs = <String>[
+      '$pkgRoot/lib',
+      '$pkgRoot/test',
+      if (pkgRoot == '.') '$pkgRoot/integration_test',
+    ];
+    for (final scanDir in scanDirs) {
+      final dir = Directory(scanDir);
+      if (!dir.existsSync()) continue;
+      final isLibScan = scanDir.endsWith('/lib');
+      for (final file
+          in dir
+              .listSync(recursive: true)
+              .whereType<File>()
+              .where((f) => f.path.endsWith('.dart'))) {
+        final relPath = _posix(file.path);
+        violations.addAll(
+          scanDirectivesForBoundaryViolations(
+            owningPackage: pkgName,
+            filePath: relPath,
+            packageLibRoot: isLibScan ? _posix(dir.path) : null,
+            lines: file.readAsLinesSync(),
+          ),
+        );
+      }
+    }
+  }
+  return violations;
+}
+
+List<String> scanDirectivesForBoundaryViolations({
+  required String owningPackage,
+  required String filePath,
+  required String? packageLibRoot,
+  required List<String> lines,
+}) {
+  final violations = <String>[];
+  for (var i = 0; i < lines.length; i++) {
+    final match = _importDirective.firstMatch(lines[i]);
+    if (match == null) continue;
+    final uri = match.group(1)!;
+    if (uri.startsWith('package:')) {
+      final slash = uri.indexOf('/');
+      if (slash == -1) continue;
+      final targetPkg = uri.substring('package:'.length, slash);
+      final targetSubpath = uri.substring(slash + 1);
+      if (targetPkg != owningPackage && targetSubpath.startsWith('src/')) {
+        violations.add(
+          '$filePath:${i + 1} ($owningPackage) has cross-package private import: $uri',
+        );
+      }
+    } else if (!uri.startsWith('dart:') && packageLibRoot != null) {
+      final normalizedLibRoot = _normalizePosix(packageLibRoot);
+      final resolved = _normalizePosix('${_dirnamePosix(filePath)}/$uri');
+      if (!resolved.startsWith('$normalizedLibRoot/') &&
+          resolved != normalizedLibRoot) {
+        violations.add(
+          '$filePath:${i + 1} ($owningPackage) relative directive escapes $normalizedLibRoot: $uri',
+        );
+      }
+    }
+  }
+  return violations;
+}
+
+String _dirnamePosix(String path) {
+  final idx = path.lastIndexOf('/');
+  return idx == -1 ? '.' : path.substring(0, idx);
+}
+
+String _normalizePosix(String path) {
+  final parts = <String>[];
+  for (final segment in path.split('/')) {
+    if (segment.isEmpty || segment == '.') continue;
+    if (segment == '..') {
+      if (parts.isNotEmpty && parts.last != '..') {
+        parts.removeLast();
+      } else {
+        parts.add('..');
+      }
+    } else {
+      parts.add(segment);
+    }
+  }
+  return parts.join('/');
+}
+
 String? _packageName(List<String> lines) {
   for (final line in lines) {
     final match = RegExp(r'^name:\s*(\S+)').firstMatch(line);
@@ -218,6 +415,25 @@ String? _packageName(List<String> lines) {
   return null;
 }
 
-/// Converts a filesystem path to POSIX separators so the test behaves the same
-/// on Windows CI runners.
+Set<String> _runtimeDependencies(List<String> lines) {
+  final deps = <String>{};
+  final entry = RegExp('^  ([a-zA-Z0-9_]+):');
+  var inDependencies = false;
+
+  for (final line in lines) {
+    if (line.trimRight() == 'dependencies:') {
+      inDependencies = true;
+      continue;
+    }
+    if (inDependencies && line.isNotEmpty && !line.startsWith(' ')) {
+      inDependencies = false;
+    }
+    if (!inDependencies) continue;
+
+    final match = entry.firstMatch(line);
+    if (match != null) deps.add(match.group(1)!);
+  }
+  return deps;
+}
+
 String _posix(String path) => path.replaceAll(r'\', '/');

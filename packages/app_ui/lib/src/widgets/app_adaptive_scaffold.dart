@@ -3,7 +3,9 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../animation/app_durations.dart';
 import '../layout/app_breakpoints.dart';
+import '../theme/app_icon_size.dart';
 import '../theme/app_spacing.dart';
 
 /// A single destination in the [AppAdaptiveScaffold] navigation.
@@ -102,7 +104,19 @@ class AppAdaptiveScaffold extends StatelessWidget {
                         isLabelVisible: d.hasBadge,
                         child: FaIcon(d.selectedIcon),
                       ),
-                      label: Text(d.label),
+                      label: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: extended ? 160 : 76,
+                        ),
+                        child: Text(
+                          d.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: extended
+                              ? TextAlign.start
+                              : TextAlign.center,
+                        ),
+                      ),
                     ),
                 ],
               ),
@@ -217,7 +231,6 @@ class _BottomBarItem extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  static const Duration _duration = Duration(milliseconds: 250);
   static const Curve _curve = Curves.easeOutCubic;
 
   @override
@@ -238,27 +251,36 @@ class _BottomBarItem extends StatelessWidget {
           child: SizedBox(
             height: 64,
             child: Center(
-              child: AnimatedContainer(
-                duration: _duration,
-                curve: _curve,
-                width: 52,
-                height: 52,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: selected
-                      ? selectedColor.withValues(alpha: 0.1)
-                      : Colors.transparent,
-                  shape: BoxShape.circle,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: 52,
+                  maxHeight: 52,
                 ),
-                child: AnimatedSwitcher(
-                  duration: _duration,
-                  child: Badge(
-                    isLabelVisible: destination.hasBadge,
-                    child: FaIcon(
-                      selected ? destination.selectedIcon : destination.icon,
-                      key: ValueKey<bool>(selected),
-                      color: foreground,
-                      size: 20,
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: AnimatedContainer(
+                    duration: AppDurations.fast,
+                    curve: _curve,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? selectedColor.withValues(alpha: 0.1)
+                          : Colors.transparent,
+                      shape: BoxShape.circle,
+                    ),
+                    child: AnimatedSwitcher(
+                      duration: AppDurations.fast,
+                      child: Badge(
+                        isLabelVisible: destination.hasBadge,
+                        child: FaIcon(
+                          selected
+                              ? destination.selectedIcon
+                              : destination.icon,
+                          key: ValueKey<bool>(selected),
+                          color: foreground,
+                          size: AppIconSize.md,
+                        ),
+                      ),
                     ),
                   ),
                 ),

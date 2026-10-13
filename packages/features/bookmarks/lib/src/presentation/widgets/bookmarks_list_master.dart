@@ -69,6 +69,7 @@ class BookmarksListMaster extends StatelessWidget {
               if (state.failure != null && state.items.isEmpty) {
                 return AppErrorView(
                   message: bookmarkFailureMessage(context, state.failure!),
+                  retryLabel: context.l10n.commonRetry,
                   onRetry: () => context.read<BookmarksListBloc>().add(
                     const BookmarksListLoadRequested(),
                   ),
@@ -177,8 +178,9 @@ class _BookmarkFilterTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textScale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
     return SizedBox(
-      height: 40,
+      height: 40 * (1 + (textScale - 1) * 0.45),
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),

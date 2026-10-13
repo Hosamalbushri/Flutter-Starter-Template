@@ -49,7 +49,9 @@ class _AppShellState extends State<AppShell> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     // fst:feature:notifications:start
-    final unreadCount = context.watch<NotificationsBloc>().state.unreadCount;
+    final hasUnreadNotifications = context.select<NotificationsBloc, bool>(
+      (bloc) => bloc.state.unreadCount > 0,
+    );
     // fst:feature:notifications:end
 
     final destinations = [
@@ -70,7 +72,7 @@ class _AppShellState extends State<AppShell> {
         icon: FontAwesomeIcons.bell,
         selectedIcon: FontAwesomeIcons.solidBell,
         label: l10n.navNotifications,
-        hasBadge: unreadCount > 0,
+        hasBadge: hasUnreadNotifications,
       ),
       // fst:feature:notifications:end
       AppDestination(

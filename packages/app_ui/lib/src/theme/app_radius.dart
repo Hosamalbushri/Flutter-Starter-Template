@@ -10,6 +10,15 @@ abstract final class AppRadius {
   /// 8px - chips, thumbnails, small previews.
   static const double sm = 8;
 
+  /// 10px - compact buttons and dense badges.
+  static const double smd = 10;
+
+  /// 12px - medium cards, link previews, and list tiles.
+  static const double md = 12;
+
+  /// 14px - standard interactive buttons.
+  static const double button = 14;
+
   /// 16px - cards and text fields.
   static const double lg = 16;
 

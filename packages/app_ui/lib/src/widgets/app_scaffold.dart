@@ -65,8 +65,10 @@ class AppScaffold extends StatelessWidget {
                       leading ??
                       (Navigator.of(context).canPop()
                           ? IconButton(
-                              icon: const FaIcon(
-                                FontAwesomeIcons.chevronLeft,
+                              icon: FaIcon(
+                                Directionality.of(context) == TextDirection.rtl
+                                    ? FontAwesomeIcons.chevronRight
+                                    : FontAwesomeIcons.chevronLeft,
                               ),
                               iconSize: AppIconSize.md,
                               onPressed: () => Navigator.of(context).maybePop(),

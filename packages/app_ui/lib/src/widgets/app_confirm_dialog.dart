@@ -66,6 +66,8 @@ class AppConfirmDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isNarrowScreen = screenWidth < 380;
     final accent = isDestructive ? colorScheme.error : colorScheme.primary;
     final accentContainer = isDestructive
         ? colorScheme.errorContainer
@@ -74,16 +76,29 @@ class AppConfirmDialog extends StatelessWidget {
         ? colorScheme.onError
         : colorScheme.onPrimary;
 
+    final horizontalInset = isNarrowScreen ? AppSpacing.lg : AppSpacing.xxxl;
+    final contentPadding = isNarrowScreen
+        ? const EdgeInsets.all(AppSpacing.xxl)
+        : const EdgeInsets.fromLTRB(
+            AppSpacing.xxxxl,
+            AppSpacing.xxxxl,
+            AppSpacing.xxxxl,
+            AppSpacing.xxxl,
+          );
+
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl),
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: horizontalInset,
+        vertical: AppSpacing.lg,
+      ),
       backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.xl),
       ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 420),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(40, 40, 40, 32),
+        child: SingleChildScrollView(
+          padding: contentPadding,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -95,7 +110,7 @@ class AppConfirmDialog extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
-                child: FaIcon(icon, color: accent, size: 28),
+                child: FaIcon(icon, color: accent, size: AppIconSize.xl),
               ),
               const SizedBox(height: AppSpacing.xxxl),
               Text(
@@ -122,43 +137,71 @@ class AppConfirmDialog extends StatelessWidget {
                 const SizedBox(height: AppSpacing.xxl),
                 content!,
               ],
-              const SizedBox(height: 44),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: onCancel,
-                      style: TextButton.styleFrom(
-                        minimumSize: const Size.fromHeight(52),
-                        foregroundColor: colorScheme.onSurfaceVariant,
-                        textStyle: context.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0,
-                        ),
+              const SizedBox(height: AppSpacing.xxxl),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final textScale = MediaQuery.textScalerOf(context).scale(1);
+                  final stackActions =
+                      constraints.maxWidth < 260 || textScale >= 1.5;
+
+                  final cancelBtn = TextButton(
+                    onPressed: onCancel,
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(0, 52),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.md,
                       ),
-                      child: Text(cancelLabel),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.xxl),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: confirmEnabled ? onConfirm : null,
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(52),
-                        backgroundColor: accent,
-                        foregroundColor: onAccent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.lg),
-                        ),
-                        textStyle: context.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0,
-                        ),
+                      foregroundColor: colorScheme.onSurfaceVariant,
+                      textStyle: context.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0,
                       ),
-                      child: Text(confirmLabel),
                     ),
-                  ),
-                ],
+                    child: Text(cancelLabel, textAlign: TextAlign.center),
+                  );
+
+                  final confirmBtn = FilledButton(
+                    onPressed: confirmEnabled ? onConfirm : null,
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(0, 52),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.md,
+                      ),
+                      backgroundColor: accent,
+                      foregroundColor: onAccent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                      ),
+                      textStyle: context.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0,
+                      ),
+                    ),
+                    child: Text(confirmLabel, textAlign: TextAlign.center),
+                  );
+
+                  if (stackActions) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        confirmBtn,
+                        const SizedBox(height: AppSpacing.sm),
+                        cancelBtn,
+                      ],
+                    );
+                  }
+
+                  return Row(
+                    children: [
+                      Expanded(child: cancelBtn),
+                      const SizedBox(width: AppSpacing.xxl),
+                      Expanded(child: confirmBtn),
+                    ],
+                  );
+                },
               ),
             ],
           ),

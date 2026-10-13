@@ -5,8 +5,9 @@ import 'screens/register_screen.dart';
 
 /// Canonical navigation paths owned by the auth feature.
 ///
-/// The feature navigates by pushing these via `go_router`'s `context.go`, so it
-/// doesn't depend on the app shell.
+/// The feature owns these paths and does not depend on the app shell. Login
+/// pushes registration so Android/system back returns to login; direct links
+/// and the registration screen's explicit actions fall back to `go`.
 abstract final class AuthRoutes {
   /// The login screen.
   static const login = '/login';

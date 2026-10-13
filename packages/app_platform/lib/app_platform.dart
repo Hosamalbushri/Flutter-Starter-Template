@@ -1,5 +1,4 @@
 export 'package:camera/camera.dart';
-export 'package:firebase_crashlytics/firebase_crashlytics.dart';
 export 'package:firebase_messaging/firebase_messaging.dart';
 export 'package:flutter_local_notifications/flutter_local_notifications.dart';
 export 'package:image_picker/image_picker.dart';

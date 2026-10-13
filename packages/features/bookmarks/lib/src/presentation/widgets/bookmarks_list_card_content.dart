@@ -150,7 +150,7 @@ class _CardMenuButton extends StatelessWidget {
       onTap: () => _showCardMenu(context, bookmark),
       radius: 18,
       child: Padding(
-        padding: const EdgeInsets.only(left: AppSpacing.xs),
+        padding: const EdgeInsetsDirectional.only(start: AppSpacing.xs),
         child: FaIcon(
           FontAwesomeIcons.ellipsisVertical,
           size: 14,
@@ -271,16 +271,17 @@ String _displayDomain(String url) {
   return host.startsWith('www.') ? host.substring(4) : host;
 }
 
-/// A compact, scan-friendly relative time such as `now`, `5m`, `2h`, or `3d`.
+/// A compact, scan-friendly relative time drawn from localized strings.
 ///
 /// Older timestamps fall back to a locale-aware short date drawn from the
 /// active [MaterialLocalizations], which is always initialized for the app's
 /// supported locales.
 String _relativeLabel(BuildContext context, DateTime time) {
+  final l10n = context.l10n;
   final diff = DateTime.now().difference(time);
-  if (diff.inMinutes < 1) return 'now';
-  if (diff.inMinutes < 60) return '${diff.inMinutes}m';
-  if (diff.inHours < 24) return '${diff.inHours}h';
-  if (diff.inDays < 7) return '${diff.inDays}d';
+  if (diff.inMinutes < 1) return l10n.timeJustNow;
+  if (diff.inMinutes < 60) return l10n.timeMinutesAgo(diff.inMinutes);
+  if (diff.inHours < 24) return l10n.timeHoursAgo(diff.inHours);
+  if (diff.inDays < 7) return l10n.timeDaysAgo(diff.inDays);
   return MaterialLocalizations.of(context).formatShortMonthDay(time);
 }

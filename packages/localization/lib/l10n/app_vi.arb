@@ -276,5 +276,19 @@
   },
   "addToCollectionTitle": "Thêm vào bộ sưu tập",
   "addToCollectionEmpty": "Bạn chưa tạo bộ sưu tập nào.",
-  "homeCreateCollection": "Tạo bộ sưu tập"
+  "homeCreateCollection": "Tạo bộ sưu tập",
+  "bookmarkAttachGallery": "Thư viện",
+  "bookmarkAttachCamera": "Máy ảnh",
+  "bookmarkAttachVideo": "Video",
+  "bookmarkAttachRecord": "Quay video",
+  "bookmarkRemoveVideoLabel": "Xóa video",
+  "videoPlayerPlay": "Phát",
+  "videoPlayerPause": "Tạm dừng",
+  "videoPlayerMute": "Tắt tiếng",
+  "videoPlayerUnmute": "Bật tiếng",
+  "videoPlayerFullScreen": "Toàn màn hình",
+  "videoPlayerExitFullScreen": "Thoát toàn màn hình",
+  "videoPlayerPlaybackSpeed": "Tốc độ phát",
+  "videoPlayerLoadFailed": "Không tải được video",
+  "profileAppearanceLanguageLabel": "Ngôn ngữ"
 }

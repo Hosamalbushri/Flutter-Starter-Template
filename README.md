@@ -350,17 +350,22 @@ wires a presentation-only feature in one command. Run it from the **repo root**:
 ```bash
 dart pub global activate flutter_starter_template_cli   # one-time — provides `fst`
 fst add-feature settings                                # or run bare to be prompted
+fst add-feature audit_log --route-path /admin/audit-log
 ```
 
 This generates `packages/features/settings/` — a presentation-only slice with a
-screen routed at `/settings` — and wires it into every place the app needs to
-know about it:
+screen routed at `/settings`, a nested `/settings/details` page, and stable
+GoRouter names — and wires it into every place the app needs to know about it.
+Use `--route-path` for a different absolute static path; generated routes remain
+protected by the app's centralized redirect and are not added to the bottom
+navigation bar:
 
 | Wired into | File |
 |---|---|
 | Workspace member + dependency | `pubspec.yaml` |
 | Injectable DI graph | `lib/app/di/injection.dart` |
 | `enabledFeatures` registry | `lib/app/features.dart` |
+| Architecture layer guard | `test/architecture/package_layering_test.dart` |
 
 It then runs `pub get` + code generation so the tree compiles immediately. Pass
 `--no-codegen` to skip that step and regenerate yourself later.
@@ -374,6 +379,39 @@ The wiring edits land at the `# fst:` / `// fst:` markers in those files (so the
 generator never has to parse Dart) — leave the markers in place. The `fst` CLI
 source lives in [`published/cli/`](published/cli); it's the same tool as the `fst create`
 project scaffolder.
+
+Generated features also participate in a guarded lifecycle:
+
+```bash
+fst list-features
+fst validate-features
+fst remove-feature settings --dry-run
+fst remove-feature settings --yes
+```
+
+The CLI records ownership in `.fst-feature.json`, but discovers live routes,
+dependencies, and registration state from the project. Removal is blocked for
+manual packages, reverse dependencies, or user-modified files (unless
+`--force-modified` explicitly authorizes the latter). It never cascade-deletes.
+Successful removal regenerates DI and runs analysis and tests; a failure rolls
+all source and generated-file changes back byte-for-byte. The transaction
+snapshot is process-local and cannot recover from a hard kill or power loss.
+
+Reusable non-feature packages use the same guarded workspace contracts:
+
+```bash
+fst create-package inventory_contracts --type contracts
+fst create-package inventory_storage --type infrastructure \
+  --dependency inventory_contracts
+fst create-package inventory_ui --type ui --dependency inventory_contracts
+fst validate-package inventory_ui
+```
+
+Supported types are `contracts`, `infrastructure`, `platform`, `ui`, and
+`dev`. Use `--dry-run` for a no-write plan or `--no-verify` when batching
+packages before a single verification pass. See
+[`docs/package-generator.md`](docs/package-generator.md) for ownership,
+dependency, public API, rollback, and local-template compatibility contracts.
 
 <br>
 
@@ -679,15 +717,17 @@ with crash reporting installed through the `CrashReporter` port.
 
 Firebase is opt-out. `fst create --no-firebase` scaffolds a project that builds
 and runs with **no Firebase project at all**: it flips `kFirebaseEnabled` to
-`false`, swaps the analytics and crash bindings to no-ops, removes the Firebase
-Android Gradle plugins, and deletes the native credential files. Re-enable later
-by flipping the flag, restoring the bindings, and running `flutterfire configure`.
+`false`, swaps the analytics, crash, and performance bindings to no-ops, removes
+the Firebase Android Gradle plugins, and deletes the native credential files.
+Re-enable later by flipping the flag, restoring the bindings, and running
+`flutterfire configure`.
 
-Analytics and crash reporting are independent **ports** (`AnalyticsService`,
-`CrashReporter`), wired in the `analytics` and `app_platform` packages. Each has
-a Firebase adapter and a no-op, selected at a single `// fst:analytics-impl` /
-`// fst:crash-impl` binding — so you can keep one on Firebase and the other off,
-or plug in your own backend, by editing just that line.
+Analytics, crash reporting, and performance monitoring are independent **ports**
+(`AnalyticsService`, `CrashReporter`, `PerformanceTracker`), wired in the
+`analytics`, `app_platform`, and `network` packages. Each has a Firebase adapter
+and a no-op, selected at a single `// fst:analytics-impl` / `// fst:crash-impl`
+/ `// fst:performance-impl` binding — so you can keep one on Firebase and the
+others off, or plug in your own backend, by editing just that line.
 
 <br>
 

@@ -683,4 +683,46 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get homeCreateCollection => 'Tạo bộ sưu tập';
+
+  @override
+  String get bookmarkAttachGallery => 'Thư viện';
+
+  @override
+  String get bookmarkAttachCamera => 'Máy ảnh';
+
+  @override
+  String get bookmarkAttachVideo => 'Video';
+
+  @override
+  String get bookmarkAttachRecord => 'Quay video';
+
+  @override
+  String get bookmarkRemoveVideoLabel => 'Xóa video';
+
+  @override
+  String get videoPlayerPlay => 'Phát';
+
+  @override
+  String get videoPlayerPause => 'Tạm dừng';
+
+  @override
+  String get videoPlayerMute => 'Tắt tiếng';
+
+  @override
+  String get videoPlayerUnmute => 'Bật tiếng';
+
+  @override
+  String get videoPlayerFullScreen => 'Toàn màn hình';
+
+  @override
+  String get videoPlayerExitFullScreen => 'Thoát toàn màn hình';
+
+  @override
+  String get videoPlayerPlaybackSpeed => 'Tốc độ phát';
+
+  @override
+  String get videoPlayerLoadFailed => 'Không tải được video';
+
+  @override
+  String get profileAppearanceLanguageLabel => 'Ngôn ngữ';
 }

@@ -13,6 +13,8 @@ library;
 export 'src/di.module.dart' show FeatureCollectionsPackageModule;
 export 'src/domain/entities/collection.dart';
 export 'src/domain/services/collections_sync_controller.dart';
+export 'src/presentation/bloc/collections_list/collections_list_bloc.dart';
+export 'src/presentation/bloc/collections_list/collections_list_state.dart';
 export 'src/presentation/collections_routes.dart';
 export 'src/presentation/screens/collection_detail_screen.dart';
 export 'src/presentation/screens/collection_form_screen.dart';

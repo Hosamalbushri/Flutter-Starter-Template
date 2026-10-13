@@ -37,6 +37,19 @@ final class _BookmarksModule extends FeatureModule {
   const _BookmarksModule();
 
   @override
+  String get id => 'bookmarks';
+
+  @override
+  Set<String> get requiredFeatures => const {'collections'};
+
+  @override
+  FeatureNavigationRegistration get navigation =>
+      const FeatureNavigationRegistration(
+        routePath: '/bookmarks',
+        isShellBranch: true,
+      );
+
+  @override
   FeatureSyncController get syncController {
     final ctrl = getIt<BookmarksSyncController>();
     return _FeatureSync(onStart: ctrl.start, onStop: ctrl.stop);
@@ -52,6 +65,13 @@ final class _CollectionsModule extends FeatureModule {
   const _CollectionsModule();
 
   @override
+  String get id => 'collections';
+
+  @override
+  FeatureNavigationRegistration get navigation =>
+      const FeatureNavigationRegistration(routePath: CollectionsRoutes.list);
+
+  @override
   FeatureSyncController get syncController {
     final ctrl = getIt<CollectionsSyncController>();
     return _FeatureSync(onStart: ctrl.start, onStop: ctrl.stop);
@@ -65,6 +85,16 @@ final class _CollectionsModule extends FeatureModule {
 // fst:feature:notifications:start
 final class _NotificationsModule extends FeatureModule {
   const _NotificationsModule();
+
+  @override
+  String get id => 'notifications';
+
+  @override
+  FeatureNavigationRegistration get navigation =>
+      const FeatureNavigationRegistration(
+        routePath: NotificationsRoutes.feed,
+        isShellBranch: true,
+      );
 
   @override
   FeatureSyncController get syncController {

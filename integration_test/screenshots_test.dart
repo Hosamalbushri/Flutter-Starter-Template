@@ -32,7 +32,6 @@ import 'dart:async';
 
 import 'package:feature_auth/feature_auth.dart';
 import 'package:feature_bookmarks/feature_bookmarks.dart';
-import 'package:feature_bookmarks/src/presentation/bloc/bookmarks_list/bookmarks_list_bloc.dart';
 import 'package:feature_home/feature_home.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

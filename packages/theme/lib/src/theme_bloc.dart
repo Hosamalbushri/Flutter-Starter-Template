@@ -13,12 +13,14 @@ part 'theme_event.dart';
 
 const _kThemeModeKey = 'app.theme_mode';
 const _kThemeSchemeKey = 'app.theme_scheme';
+const _kLocaleKey = 'app.locale';
 
 @lazySingleton
 class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
   ThemeBloc(this._prefs, this._analytics) : super(_readInitial(_prefs)) {
     on<ThemeModeChanged>(_onModeChanged, transformer: sequential());
     on<ThemeSchemeChanged>(_onSchemeChanged, transformer: sequential());
+    on<ThemeLocaleChanged>(_onLocaleChanged, transformer: sequential());
   }
 
   final SharedPreferences _prefs;
@@ -37,7 +39,12 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
       orElse: () => ThemeState.defaultScheme,
     );
 
-    return ThemeState(mode: mode, scheme: scheme);
+    final localeRaw = prefs.getString(_kLocaleKey);
+    final locale = (localeRaw != null && localeRaw.isNotEmpty)
+        ? Locale(localeRaw)
+        : null;
+
+    return ThemeState(mode: mode, scheme: scheme, locale: locale);
   }
 
   Future<void> _onModeChanged(
@@ -58,5 +65,19 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
     emit(state.copyWith(scheme: event.scheme));
     await _prefs.setString(_kThemeSchemeKey, event.scheme.name);
     _analytics.trackThemeSchemeChanged(event.scheme.name).fire();
+  }
+
+  Future<void> _onLocaleChanged(
+    ThemeLocaleChanged event,
+    Emitter<ThemeState> emit,
+  ) async {
+    if (event.locale == state.locale) return;
+    emit(
+      state.copyWith(
+        locale: event.locale,
+        clearLocale: event.locale == null,
+      ),
+    );
+    await _prefs.setString(_kLocaleKey, event.locale?.languageCode ?? '');
   }
 }

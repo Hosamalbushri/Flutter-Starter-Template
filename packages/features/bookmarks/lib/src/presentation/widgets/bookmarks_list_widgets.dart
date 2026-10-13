@@ -159,24 +159,31 @@ class _SortMenuButton extends StatelessWidget {
         button: true,
         label: context.l10n.bookmarksSortTooltip,
         child: Container(
-          height: 56,
-          width: showLabel ? 116 : 56,
-          margin: const EdgeInsets.only(right: AppSpacing.sm),
+          constraints: BoxConstraints(
+            minHeight: 56,
+            minWidth: showLabel ? 116 : 56,
+          ),
+          margin: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.xs,
+          ),
           decoration: BoxDecoration(
             color: colorScheme.surface,
             borderRadius: BorderRadius.circular(AppRadius.sm),
             border: Border.all(color: colorScheme.outlineVariant),
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               FaIcon(
                 FontAwesomeIcons.filter,
-                size: 20,
+                size: AppIconSize.md,
                 color: colorScheme.primary,
               ),
               if (showLabel) ...[
-                const SizedBox(height: AppSpacing.xs),
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
                   context.l10n.bookmarksSortMenuLabel,
                   maxLines: 1,
@@ -238,7 +245,7 @@ class _SortMenuItem extends StatelessWidget {
             width: 22,
             child: FaIcon(
               icon,
-              size: 16,
+              size: AppIconSize.sm,
               color: selected ? colorScheme.primary : colorScheme.onSurface,
             ),
           ),
@@ -273,7 +280,7 @@ class _SyncStatusIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return switch (status) {
       BookmarksSyncStatus.syncing => const Padding(
-        padding: EdgeInsets.only(right: AppSpacing.md),
+        padding: EdgeInsetsDirectional.only(end: AppSpacing.md),
         child: SizedBox(
           width: _slotSize,
           height: _slotSize,

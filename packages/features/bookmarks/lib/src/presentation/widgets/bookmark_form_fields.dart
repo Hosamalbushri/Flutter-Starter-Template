@@ -74,8 +74,8 @@ class _UrlInput extends StatelessWidget {
               tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
               icon: const FaIcon(FontAwesomeIcons.xmark, size: 14),
               style: IconButton.styleFrom(
-                backgroundColor: _BookmarkFieldColors.surfaceHigh,
-                foregroundColor: _BookmarkFieldColors.mutedText,
+                backgroundColor: _BookmarkFieldColors.surfaceHigh(context),
+                foregroundColor: _BookmarkFieldColors.mutedText(context),
                 fixedSize: const Size(28, 28),
                 minimumSize: const Size(28, 28),
                 padding: EdgeInsets.zero,
@@ -90,7 +90,7 @@ class _UrlInput extends StatelessWidget {
           },
         ),
         filled: true,
-        fillColor: _BookmarkFieldColors.surfaceLow,
+        fillColor: _BookmarkFieldColors.surfaceLow(context),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.lg,
@@ -105,8 +105,8 @@ class _UrlInput extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          borderSide: const BorderSide(
-            color: _BookmarkFieldColors.primary,
+          borderSide: BorderSide(
+            color: _BookmarkFieldColors.primary(context),
             width: 2,
           ),
         ),
@@ -136,7 +136,7 @@ class _BookmarkPreviewEditorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: _BookmarkFieldColors.surface,
+        color: _BookmarkFieldColors.surface(context),
         borderRadius: BorderRadius.circular(AppRadius.lg),
         boxShadow: const [
           BoxShadow(
@@ -168,7 +168,7 @@ class _BookmarkPreviewEditorCard extends StatelessWidget {
                       BookmarkFormTitleChanged(value),
                     ),
                     style: context.textTheme.headlineSmall?.copyWith(
-                      color: _BookmarkFieldColors.text,
+                      color: _BookmarkFieldColors.text(context),
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0,
                     ),
@@ -186,7 +186,7 @@ class _BookmarkPreviewEditorCard extends StatelessWidget {
                       BookmarkFormDescriptionChanged(value),
                     ),
                     style: context.textTheme.bodyLarge?.copyWith(
-                      color: _BookmarkFieldColors.mutedText,
+                      color: _BookmarkFieldColors.mutedText(context),
                       letterSpacing: 0,
                     ),
                     decoration: _borderlessDecoration(
@@ -222,8 +222,8 @@ class _PreviewImagePlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 16 / 4.5,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 72),
       child: DecoratedBox(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -237,7 +237,7 @@ class _PreviewImagePlaceholder extends StatelessWidget {
           ),
         ),
         child: Align(
-          alignment: Alignment.bottomLeft,
+          alignment: AlignmentDirectional.bottomStart,
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.xl),
             child: Row(
@@ -248,22 +248,26 @@ class _PreviewImagePlaceholder extends StatelessWidget {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(AppRadius.xs),
                   ),
-                  child: const Padding(
-                    padding: EdgeInsets.all(AppSpacing.xs),
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.xs),
                     child: FaIcon(
                       FontAwesomeIcons.bookmark,
-                      size: 12,
-                      color: _BookmarkFieldColors.primary,
+                      size: AppIconSize.xs,
+                      color: _BookmarkFieldColors.primary(context),
                     ),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                Text(
-                  context.l10n.bookmarkPreviewLabel,
-                  style: context.textTheme.labelLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0,
+                Flexible(
+                  child: Text(
+                    context.l10n.bookmarkPreviewLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textTheme.labelLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0,
+                    ),
                   ),
                 ),
               ],
@@ -309,10 +313,10 @@ class _TagsPanel extends StatelessWidget {
                       Chip(
                         label: Text(tag),
                         avatar: const FaIcon(FontAwesomeIcons.check, size: 12),
-                        backgroundColor: const Color(0xFFD2E0FE),
+                        backgroundColor: context.colorScheme.secondaryContainer,
                         side: BorderSide.none,
-                        labelStyle: const TextStyle(
-                          color: Color(0xFF55637D),
+                        labelStyle: TextStyle(
+                          color: context.colorScheme.onSecondaryContainer,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0,
                         ),
@@ -351,9 +355,9 @@ class _FieldPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: _BookmarkFieldColors.surface,
+        color: _BookmarkFieldColors.surface(context),
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: _BookmarkFieldColors.surfaceHigh),
+        border: Border.all(color: _BookmarkFieldColors.surfaceHigh(context)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
@@ -362,14 +366,22 @@ class _FieldPanel extends StatelessWidget {
           children: [
             Row(
               children: [
-                FaIcon(icon, size: 16, color: _BookmarkFieldColors.mutedText),
+                FaIcon(
+                  icon,
+                  size: AppIconSize.sm,
+                  color: _BookmarkFieldColors.mutedText(context),
+                ),
                 const SizedBox(width: AppSpacing.sm),
-                Text(
-                  label,
-                  style: context.textTheme.labelLarge?.copyWith(
-                    color: _BookmarkFieldColors.mutedText,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0,
+                Expanded(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textTheme.labelLarge?.copyWith(
+                      color: _BookmarkFieldColors.mutedText(context),
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0,
+                    ),
                   ),
                 ),
               ],
@@ -384,10 +396,17 @@ class _FieldPanel extends StatelessWidget {
 }
 
 abstract final class _BookmarkFieldColors {
-  static const surface = Color(0xFFFFFFFF);
-  static const surfaceLow = Color(0xFFF2F4F6);
-  static const surfaceHigh = Color(0xFFE0E3E5);
-  static const primary = Color(0xFF0052FF);
-  static const text = Color(0xFF191C1E);
-  static const mutedText = Color(0xFF434656);
+  static Color surface(BuildContext context) => context.isDark
+      ? context.colorScheme.surfaceContainerLow
+      : const Color(0xFFFFFFFF);
+  static Color surfaceLow(BuildContext context) => context.isDark
+      ? context.colorScheme.surfaceContainerHigh
+      : const Color(0xFFF2F4F6);
+  static Color surfaceHigh(BuildContext context) => context.isDark
+      ? context.colorScheme.outlineVariant
+      : const Color(0xFFE0E3E5);
+  static Color primary(BuildContext context) => context.colorScheme.primary;
+  static Color text(BuildContext context) => context.colorScheme.onSurface;
+  static Color mutedText(BuildContext context) =>
+      context.colorScheme.onSurfaceVariant;
 }

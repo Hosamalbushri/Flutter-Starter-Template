@@ -30,7 +30,7 @@ class AppErrorView extends StatelessWidget {
           }
         : null;
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisSize: MainAxisSize.min,

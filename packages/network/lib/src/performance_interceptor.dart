@@ -1,17 +1,17 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:firebase_performance/firebase_performance.dart';
 
-/// Records a Firebase Performance [HttpMetric] for each request, capturing
-/// duration and response code. The metric is stashed in
-/// [RequestOptions.extra] on the way out and stopped on the matching response
-/// or error. Every Firebase call is guarded so monitoring can never break a
-/// request.
+import 'performance_tracker.dart';
+
+/// Records an [HttpPerformanceMetric] for each request, capturing duration and
+/// response code. The metric is stashed in [RequestOptions.extra] on the way
+/// out and stopped on the matching response or error. Every tracker call is
+/// guarded so monitoring can never break a request.
 class PerformanceInterceptor extends Interceptor {
   PerformanceInterceptor(this._performance);
 
-  final FirebasePerformance _performance;
+  final PerformanceTracker _performance;
 
   static const _metricKey = '__perf_metric__';
 
@@ -20,7 +20,7 @@ class PerformanceInterceptor extends Interceptor {
     try {
       final metric = _performance.newHttpMetric(
         options.uri.toString(),
-        _methodOf(options.method),
+        PerformanceHttpMethod.fromString(options.method),
       );
       options.extra[_metricKey] = metric;
       unawaited(metric.start());
@@ -47,7 +47,7 @@ class PerformanceInterceptor extends Interceptor {
 
   void _stop(RequestOptions options, int? statusCode) {
     final metric = options.extra.remove(_metricKey);
-    if (metric is! HttpMetric) return;
+    if (metric is! HttpPerformanceMetric) return;
     try {
       if (statusCode != null) metric.httpResponseCode = statusCode;
       unawaited(metric.stop());
@@ -55,17 +55,4 @@ class PerformanceInterceptor extends Interceptor {
       // Ignore: best-effort reporting.
     }
   }
-
-  HttpMethod _methodOf(String method) => switch (method.toUpperCase()) {
-    'GET' => HttpMethod.Get,
-    'POST' => HttpMethod.Post,
-    'PUT' => HttpMethod.Put,
-    'DELETE' => HttpMethod.Delete,
-    'PATCH' => HttpMethod.Patch,
-    'HEAD' => HttpMethod.Head,
-    'OPTIONS' => HttpMethod.Options,
-    'TRACE' => HttpMethod.Trace,
-    'CONNECT' => HttpMethod.Connect,
-    _ => HttpMethod.Get,
-  };
 }

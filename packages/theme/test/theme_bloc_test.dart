@@ -105,5 +105,36 @@ void main() {
         expect: () => <ThemeState>[],
       );
     });
+
+    group('setLocale', () {
+      blocTest<ThemeBloc, ThemeState>(
+        'emits new locale and persists languageCode to prefs',
+        build: () => bloc,
+        act: (bloc) => bloc.add(const ThemeLocaleChanged(Locale('ar'))),
+        expect: () => [
+          predicate<ThemeState>(
+            (s) => s.locale == const Locale('ar'),
+          ),
+        ],
+        verify: (_) {
+          verify(() => mockPrefs.setString('app.locale', 'ar')).called(1);
+        },
+      );
+
+      blocTest<ThemeBloc, ThemeState>(
+        'clears locale when null is passed',
+        build: () {
+          when(() => mockPrefs.getString('app.locale')).thenReturn('ar');
+          return ThemeBloc(mockPrefs, mockAnalytics);
+        },
+        act: (bloc) => bloc.add(const ThemeLocaleChanged(null)),
+        expect: () => [
+          predicate<ThemeState>((s) => s.locale == null),
+        ],
+        verify: (_) {
+          verify(() => mockPrefs.setString('app.locale', '')).called(1);
+        },
+      );
+    });
   });
 }

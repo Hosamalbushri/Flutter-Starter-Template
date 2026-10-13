@@ -1,5 +1,7 @@
+// fst:firebase:start
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
+// fst:firebase:end
 
 abstract class AnalyticsService {
   Future<void> logEvent(String name, {Map<String, Object>? parameters});
@@ -15,6 +17,7 @@ abstract class AnalyticsService {
   Future<void> setUserProperty({required String name, required String? value});
 }
 
+// fst:firebase:start
 class FirebaseAnalyticsService implements AnalyticsService {
   FirebaseAnalyticsService(this._analytics);
 
@@ -62,6 +65,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
     }
   }
 }
+// fst:firebase:end
 
 /// An [AnalyticsService] that records nothing.
 ///

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../theme/app_icon_size.dart';
 import '../theme/app_theme.dart';
 import 'app_loading.dart';
 
@@ -14,8 +15,8 @@ class AppNetworkImage extends StatelessWidget {
     this.fit = BoxFit.cover,
     this.width,
     this.height,
-    this.placeholderSize = 24.0,
-    this.errorIconSize = 24.0,
+    this.placeholderSize = AppIconSize.lg,
+    this.errorIconSize = AppIconSize.lg,
     this.color,
     this.colorBlendMode,
     this.borderRadius = BorderRadius.zero,

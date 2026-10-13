@@ -14,6 +14,7 @@ import 'package:feature_auth/feature_auth.dart';
 // fst:auth:end
 import 'package:flutter_starter_template/app/router.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 // fst:auth:start
 import '../test_utils.dart';
@@ -135,6 +136,19 @@ void main() {
         ),
         login,
       );
+    });
+
+    test('generated feature routes remain behind the auth redirect', () {
+      final deepLink = gate(splashCompleted: true);
+      expect(
+        resolve(
+          auth: const AuthState.initial(),
+          location: '/activity',
+          deepLink: deepLink,
+        ),
+        login,
+      );
+      expect(deepLink.pendingRedirect, '/activity');
     });
 
     test('allows the login route', () {
@@ -342,6 +356,33 @@ void main() {
     test('allows any route without an auth gate', () {
       final deepLink = gate(splashCompleted: true);
       expect(resolveNoAuth(location: '/bookmarks', deepLink: deepLink), isNull);
+    });
+  });
+
+  group('debug UI showcase route guard', () {
+    test('registers /dev/ui-showcase only when includeDebugRoutes is true', () {
+      final debugRouter = buildRouterWithDeepLink(
+        null,
+        featureRoutes: const [],
+        includeDebugRoutes: true,
+      ).router;
+      final prodRouter = buildRouterWithDeepLink(
+        null,
+        featureRoutes: const [],
+        includeDebugRoutes: false,
+      ).router;
+
+      final debugPaths = debugRouter.configuration.routes
+          .whereType<GoRoute>()
+          .map((r) => r.path)
+          .toSet();
+      final prodPaths = prodRouter.configuration.routes
+          .whereType<GoRoute>()
+          .map((r) => r.path)
+          .toSet();
+
+      expect(debugPaths, contains(debugUiShowcasePath));
+      expect(prodPaths, isNot(contains(debugUiShowcasePath)));
     });
   });
 }

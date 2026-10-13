@@ -15,3 +15,9 @@ final class ThemeSchemeChanged extends ThemeEvent {
 
   final FlexScheme scheme;
 }
+
+final class ThemeLocaleChanged extends ThemeEvent {
+  const ThemeLocaleChanged(this.locale);
+
+  final Locale? locale;
+}

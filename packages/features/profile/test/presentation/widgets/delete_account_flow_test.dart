@@ -1,5 +1,4 @@
-import 'package:feature_auth/src/presentation/bloc/delete_account_cubit.dart';
-import 'package:feature_auth/src/presentation/bloc/delete_account_state.dart';
+import 'package:feature_auth/feature_auth.dart';
 import 'package:feature_profile/src/presentation/bloc/profile_bloc.dart';
 import 'package:feature_profile/src/presentation/bloc/profile_state.dart';
 import 'package:feature_profile/src/presentation/widgets/profile_widgets.dart';

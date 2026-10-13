@@ -682,4 +682,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeCreateCollection => 'Create collection';
+
+  @override
+  String get bookmarkAttachGallery => 'Gallery';
+
+  @override
+  String get bookmarkAttachCamera => 'Camera';
+
+  @override
+  String get bookmarkAttachVideo => 'Video';
+
+  @override
+  String get bookmarkAttachRecord => 'Record';
+
+  @override
+  String get bookmarkRemoveVideoLabel => 'Remove video';
+
+  @override
+  String get videoPlayerPlay => 'Play';
+
+  @override
+  String get videoPlayerPause => 'Pause';
+
+  @override
+  String get videoPlayerMute => 'Mute';
+
+  @override
+  String get videoPlayerUnmute => 'Unmute';
+
+  @override
+  String get videoPlayerFullScreen => 'Full screen';
+
+  @override
+  String get videoPlayerExitFullScreen => 'Exit full screen';
+
+  @override
+  String get videoPlayerPlaybackSpeed => 'Playback speed';
+
+  @override
+  String get videoPlayerLoadFailed => 'Failed to load video';
+
+  @override
+  String get profileAppearanceLanguageLabel => 'Language';
 }

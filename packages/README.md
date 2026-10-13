@@ -7,25 +7,32 @@ members. The root app depends on these through their entry points (e.g.
 packages directly, so implementation details and versions stay owned in one
 place.
 
-| Package | Responsibility |
-|---|---|
-| `app_ui` | Design system — theming, generic widgets, layout, animation |
-| `architecture` | Pure-Dart architecture primitives (`Failure`, `Result`, `UseCase`) |
-| `network` | `Dio`/`Retrofit` client + retry/performance interceptors |
-| `analytics` | Firebase-backed analytics service + route observer |
-| `config` | Environment config + Firebase Remote Config |
-| `storage` | `SharedPreferences` provisioning + iOS Keychain reinstall reset |
-| `sync` | Offline-first sync engine — scheduler + revision-based delta CRUD with conflict detection (pure Dart) |
-| `app_platform` | Device integrations — media, notifications, permissions, share |
-| `theme` | `ThemeBloc` + persisted theme state |
-| `shared_contracts` | Cross-feature *business* vocabulary (`AuthUser`, reader interfaces, the app-wide `Session` lifecycle) used by 2+ features |
-| `shared_ui` | Cross-feature *presentation* widgets needing Flutter — the `SessionScope` accessor + shared visuals |
-| `test_utils` | Shared `mocktail` export, cross-package mocks/fakes, shared fixtures, test images |
+| Package | Category | Responsibility |
+|---|---|---|
+| `architecture` | Shared Domain Contracts | Pure-Dart architecture primitives (`Failure`, `Result`, `UseCase`) |
+| `shared_contracts` | Shared Domain Contracts | Cross-feature *business* vocabulary (`AuthUser`, reader interfaces, the app-wide `Session` lifecycle) used by 2+ features |
+| `app_ui` | UI & Design System | Design system — tokens (`AppSpacing`, `AppRadius`, `AppElevation`, `AppIconSize`, `AppDurations`, `AppBreakpoints`), generic widgets, layout, animation |
+| `localization` | UI & Design System | Generated `AppLocalizations` (`en`, `vi`, `ar` LTR/RTL) and `context.l10n` extension |
+| `theme` | UI & Design System | `ThemeBloc`, `AppColors` `ThemeExtension`, and persisted theme state |
+| `shared_ui` | UI & Design System | Cross-feature *presentation* widgets needing Flutter — the `SessionScope` accessor + shared visuals |
+| `analytics` | Infrastructure & Service | Analytics service port + Firebase adapter + route observer |
+| `config` | Infrastructure & Service | Environment config + Remote Config service port |
+| `database` / `database_drift` | Infrastructure & Service | Centralized local persistence (ObjectBox default or Drift alternative) |
+| `network` | Infrastructure & Service | `Dio`/`Retrofit` client + auth/retry/performance interceptors |
+| `rev_sync` (`published/rev_sync`) | Infrastructure & Service | Offline-first sync engine — scheduler + revision-based delta CRUD with conflict detection (pure Dart) |
+| `storage` | Infrastructure & Service | `SharedPreferences` + `FlutterSecureStorage` provisioning (`AuthTokenStore`, iOS Keychain reinstall reset) |
+| `app_platform` | Platform Integration | Device integrations — crash reporting port, media, notifications, permissions, share |
+| `sync_connectivity_plus` | Platform Integration | `connectivity_plus` adapter implementing `ConnectivitySource` for `rev_sync` |
+| `test_utils` | Dev & Testing Utilities | Shared `mocktail` export, cross-package mocks/fakes, shared fixtures, test images (`dev_dependencies` only) |
 
 Dependency direction is `app → features → shared_contracts / shared_ui →
-app_ui / infra → architecture`. A package must not depend on the root app, and
-a feature must not depend on another feature outside the documented capability
-allowlist (enforced by `test/architecture/`).
+app_ui / localization / theme / platform / infra → architecture / rev_sync`. A
+package must not depend on the root app, no package may import another
+package's private `lib/src/`, and a feature must not depend on another feature
+outside the documented capability allowlist (enforced by `test/architecture/`
+and `fst validate-features`). See [`docs/architecture.md`](../docs/architecture.md)
+for the complete package architecture, `FeatureModule`, DI, public API, and UI
+contracts.
 
 ## Dependency injection — the micro-package pattern
 

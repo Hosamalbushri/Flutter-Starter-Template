@@ -26,9 +26,9 @@ workspace:
   - packages/analytics
   - packages/config
   - packages/architecture
-  # fst:backend:start
+  # fst:network:start
   - packages/network
-  # fst:backend:end
+  # fst:network:end
   - packages/app_platform
   - packages/storage
   # fst:backend:start
@@ -60,6 +60,7 @@ workspace:
   - packages/features/splash
   - packages/features/home
   - packages/features/profile
+  # fst:packages — `fst create-package` inserts reusable packages above this line
   # fst:features — `fst add-feature` inserts new feature packages above this line
 
 # Dependencies specify other packages that your package needs in order to work.
@@ -73,9 +74,9 @@ dependencies:
   analytics: ^0.1.0
   config: ^0.1.0
   architecture: ^0.1.0
-  # fst:backend:start
+  # fst:network:start
   network: ^0.1.0
-  # fst:backend:end
+  # fst:network:end
   app_platform: ^0.1.0
   storage: ^0.1.0
   # fst:revsync:start

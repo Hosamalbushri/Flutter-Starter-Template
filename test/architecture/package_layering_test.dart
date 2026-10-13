@@ -1,29 +1,109 @@
-// Architecture guardrail: enforces the layering between the workspace
-// packages under `packages/` (the workspace packages / `app_ui` / `test_utils` set).
+// Architecture guardrail: enforces package categories, permitted dependency
+// directions, layer ranks, and DAG (cycle-free) structure across all workspace
+// packages under `packages/` and `published/rev_sync`.
 //
-// Pub already forbids true dependency *cycles*, but it does not enforce a
-// *direction*. This test does: every package is assigned a layer rank, and a
-// package may only depend (at runtime) on packages in a strictly lower layer.
-// That keeps the dependency graph a DAG flowing one way — e.g. architecture
-// stays a pure leaf nothing reaches up into, and network can't quietly
-// start depending on theme.
-//
-// Only runtime `dependencies:` are checked. `dev_dependencies:` are excluded
-// on purpose: `test_utils` (the shared test harness, the top layer) is a dev
-// dependency of almost every package, and that back-edge is intentional and
-// test-only — it isn't a runtime layering violation.
-//
-// When you add a new workspace package, give it a layer in [_layers] (the
-// coverage test below fails until you do). When you add a dependency that
-// points the wrong way, either it's a mistake, or the layering is wrong and
-// the ranks need rethinking — don't just bump a number to silence it.
-//
-// Pure file-scan, no third-party dependency, runs in the normal
-// `fvm flutter test` / CI flow.
+// Preserve all `// fst:` sentinel comments so `fst create`, `fst add-feature`,
+// and `fst remove-feature` continue to rewrite this file deterministically.
 
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+
+/// Explicit architectural categories for every package in the repository.
+enum PackageCategory {
+  /// 1. Root application shell (`lib/`): composes features, DI, routing, theme,
+  ///    and localization. No workspace package may depend on the shell.
+  applicationShell,
+
+  /// 2. Feature packages (`packages/features/*`): vertical feature slices.
+  feature,
+
+  /// 3. Shared domain contracts (`architecture`, `shared_contracts`): pure
+  ///    domain primitives and narrow cross-feature read/state interfaces.
+  sharedDomainContracts,
+
+  /// 4. UI and design-system packages (`app_ui`, `localization`, `theme`,
+  ///    `shared_ui`): design tokens, reusable widgets, localization, and
+  ///    cross-feature presentation scopes.
+  uiDesignSystem,
+
+  /// 5. Infrastructure and service packages (`analytics`, `config`, `database`,
+  ///    `database_drift`, `network`, `rev_sync`, `storage`).
+  infrastructureService,
+
+  /// 6. Platform integration packages (`app_platform`,
+  ///    `sync_connectivity_plus`).
+  platformIntegration,
+
+  /// 7. Development and testing utilities (`test_utils`): shared fakes,
+  ///    fixtures, and test helpers. Never allowed in runtime `dependencies:`.
+  devTestUtilities,
+}
+
+/// Permitted runtime dependency directions between package categories.
+const Map<PackageCategory, Set<PackageCategory>>
+_allowedCategoryDependencies = {
+  PackageCategory.applicationShell: {
+    PackageCategory.feature,
+    PackageCategory.sharedDomainContracts,
+    PackageCategory.uiDesignSystem,
+    PackageCategory.infrastructureService,
+    PackageCategory.platformIntegration,
+  },
+  PackageCategory.feature: {
+    PackageCategory.feature, // subject to layer rank + capability allowlist
+    PackageCategory.sharedDomainContracts,
+    PackageCategory.uiDesignSystem,
+    PackageCategory.infrastructureService,
+    PackageCategory.platformIntegration,
+  },
+  PackageCategory.sharedDomainContracts: {
+    PackageCategory.sharedDomainContracts,
+  },
+  PackageCategory.uiDesignSystem: {
+    PackageCategory.uiDesignSystem,
+    PackageCategory.sharedDomainContracts,
+    PackageCategory.infrastructureService,
+  },
+  PackageCategory.infrastructureService: {
+    PackageCategory.infrastructureService,
+    PackageCategory.sharedDomainContracts,
+  },
+  PackageCategory.platformIntegration: {
+    PackageCategory.platformIntegration,
+    PackageCategory.infrastructureService,
+    PackageCategory.sharedDomainContracts,
+  },
+  PackageCategory.devTestUtilities: {
+    PackageCategory.sharedDomainContracts,
+    PackageCategory.uiDesignSystem,
+    PackageCategory.infrastructureService,
+    PackageCategory.platformIntegration,
+  },
+};
+
+/// Explicit category assignment for non-feature workspace packages.
+/// Any package named `feature_<name>` is automatically classified as
+/// [PackageCategory.feature].
+const Map<String, PackageCategory> _nonFeatureCategories = {
+  'architecture': PackageCategory.sharedDomainContracts,
+  'shared_contracts': PackageCategory.sharedDomainContracts,
+  'app_ui': PackageCategory.uiDesignSystem,
+  'localization': PackageCategory.uiDesignSystem,
+  'theme': PackageCategory.uiDesignSystem,
+  'shared_ui': PackageCategory.uiDesignSystem,
+  'analytics': PackageCategory.infrastructureService,
+  'config': PackageCategory.infrastructureService,
+  'database': PackageCategory.infrastructureService,
+  'database_drift': PackageCategory.infrastructureService,
+  'network': PackageCategory.infrastructureService,
+  'rev_sync': PackageCategory.infrastructureService,
+  'storage': PackageCategory.infrastructureService,
+  'app_platform': PackageCategory.platformIntegration,
+  'sync_connectivity_plus': PackageCategory.platformIntegration,
+  'test_utils': PackageCategory.devTestUtilities,
+  // fst:package-categories — `fst create-package` inserts categories above
+};
 
 /// Layer rank per workspace package. A package may depend only on packages
 /// with a strictly smaller rank.
@@ -31,7 +111,7 @@ const _layers = <String, int>{
   // 0 — pure-Dart foundation; depends on nothing in the workspace.
   'architecture': 0,
   'rev_sync': 0, // offline-first sync engine; pure Dart, no workspace deps
-  // 1 — primitives: no workspace deps, or only on architecture.
+  // 1 — primitives: no workspace deps, or only on architecture / rev_sync.
   'config': 1, // firebase_remote_config wrapper
   'storage': 1, // shared_preferences / secure storage
   'analytics': 1, // -> architecture
@@ -48,9 +128,9 @@ const _layers = <String, int>{
   // fst:backend:end
   // 2 — composed infra built on the primitives.
   'shared_ui': 2, // cross-feature presentation contracts -> shared_contracts
-  // fst:backend:start
+  // fst:network:start
   'network': 2, // -> config
-  // fst:backend:end
+  // fst:network:end
   'app_platform': 2, // -> analytics, architecture
   'theme': 2, // -> analytics, architecture
   // 3 — shared test harness, sits on top of what it provides fakes for.
@@ -75,7 +155,19 @@ const _layers = <String, int>{
   'feature_bookmarks': 5, // -> feature_collections
   // fst:feature:bookmarks:end
   'feature_profile': 5, // -> feature_auth
+  // fst:package-layers — `fst create-package` inserts package layers above
+  // fst:feature-layers — `fst add-feature` inserts generated features above
 };
+
+PackageCategory? categoryForPackage(String name, {String? rootPackageName}) {
+  if (rootPackageName != null && name == rootPackageName) {
+    return PackageCategory.applicationShell;
+  }
+  if (name.startsWith('feature_')) {
+    return PackageCategory.feature;
+  }
+  return _nonFeatureCategories[name];
+}
 
 void main() {
   final packagesDir = Directory('packages');
@@ -90,9 +182,11 @@ void main() {
     );
   });
 
+  final rootPubspecLines = File('pubspec.yaml').readAsLinesSync();
+  final rootPackageName = _packageName(rootPubspecLines) ?? 'app';
   final packages = _discoverPackages(packagesDir);
 
-  test('every workspace package has a layer assigned', () {
+  test('every workspace package has a layer and category assigned', () {
     final unranked =
         packages.keys.where((name) => !_layers.containsKey(name)).toList()
           ..sort();
@@ -104,47 +198,227 @@ void main() {
           'a layer rank so its dependency direction is enforced:\n\n'
           '${unranked.map((p) => '  $p').join('\n')}',
     );
+
+    final uncategorized = packages.keys
+        .where(
+          (name) =>
+              categoryForPackage(name, rootPackageName: rootPackageName) ==
+              null,
+        )
+        .toList()
+      ..sort();
+    expect(
+      uncategorized,
+      isEmpty,
+      reason:
+          'These workspace packages have no PackageCategory assigned:\n\n'
+          '${uncategorized.map((p) => '  $p').join('\n')}',
+    );
   });
 
-  test('packages only depend on strictly lower layers', () {
-    final workspaceNames = packages.keys.toSet();
-    final violations = <String>[];
-
-    packages.forEach((name, pubspec) {
-      final fromRank = _layers[name];
-      if (fromRank == null) return; // reported by the coverage test above
-
-      for (final dep in _runtimeDependencies(pubspec)) {
-        if (!workspaceNames.contains(dep)) continue; // third-party dep
-        final toRank = _layers[dep];
-        if (toRank == null) continue; // reported by the coverage test above
-
-        if (toRank >= fromRank) {
-          final kind = toRank == fromRank ? 'same-layer' : 'upward';
-          violations.add(
-            '$name (layer $fromRank) -> $dep (layer $toRank)  [$kind]',
-          );
-        }
-      }
-    });
+  test('packages only depend on strictly lower layers and permitted categories', () {
+    final dependencyGraph = <String, Set<String>>{
+      for (final entry in packages.entries)
+        entry.key: _runtimeDependencies(entry.value),
+    };
+    final violations = validateLayeringAndCategories(
+      dependencyGraph: dependencyGraph,
+      layers: _layers,
+      rootPackageName: rootPackageName,
+    );
 
     expect(
       violations,
       isEmpty,
       reason:
-          'These runtime dependencies violate the package layering '
-          '(a package may only depend on strictly lower layers). Fix the '
-          'dependency, or rethink the ranks in _layers if the intended '
-          'architecture changed:\n\n${violations.map((v) => '  $v').join('\n')}',
+          'These runtime dependencies violate package layering or category '
+          'contracts:\n\n${violations.map((v) => '  $v').join('\n')}',
     );
+  });
+
+  test('root application shell only depends on permitted runtime categories', () {
+    final rootDeps = _runtimeDependencies(rootPubspecLines);
+    final violations = <String>[];
+    for (final dep in rootDeps) {
+      if (!packages.containsKey(dep)) continue;
+      final depCategory = categoryForPackage(
+        dep,
+        rootPackageName: rootPackageName,
+      );
+      if (depCategory == null) continue;
+      final allowed =
+          _allowedCategoryDependencies[PackageCategory.applicationShell]!;
+      if (!allowed.contains(depCategory)) {
+        violations.add(
+          '$rootPackageName (${PackageCategory.applicationShell.name}) -> '
+          '$dep (${depCategory.name}) [forbidden category]',
+        );
+      }
+    }
+    expect(violations, isEmpty);
+  });
+
+  test('workspace package graph is a DAG with no circular dependencies', () {
+    final dependencyGraph = <String, Set<String>>{
+      for (final entry in packages.entries)
+        entry.key: _runtimeDependencies(entry.value),
+      rootPackageName: _runtimeDependencies(rootPubspecLines),
+    };
+    final cycles = detectDependencyCycles(dependencyGraph);
+    expect(
+      cycles,
+      isEmpty,
+      reason:
+          'Circular package dependencies detected:\n\n'
+          '${cycles.map((c) => '  $c').join('\n')}',
+    );
+  });
+
+  group('layering & category enforcement regression tests', () {
+    test('accepts valid downward dependencies across permitted categories', () {
+      final violations = validateLayeringAndCategories(
+        dependencyGraph: {
+          'architecture': const {},
+          'shared_contracts': const {'architecture'},
+          'app_ui': const {},
+          'localization': const {},
+          'analytics': const {'architecture'},
+          'theme': const {'analytics', 'architecture'},
+          'feature_home': const {'app_ui', 'localization', 'shared_contracts'},
+        },
+        layers: _layers,
+        rootPackageName: 'my_app',
+      );
+      expect(violations, isEmpty);
+    });
+
+    test('rejects upward, same-layer, devTestUtilities, shell, and forbidden category dependencies', () {
+      final violations = validateLayeringAndCategories(
+        dependencyGraph: {
+          'architecture': const {'app_ui'}, // upward + forbidden category (sharedDomainContracts -> uiDesignSystem)
+          'config': const {'storage'}, // same-layer (1 -> 1)
+          'network': const {'app_ui'}, // forbidden category (infrastructureService -> uiDesignSystem)
+          'feature_home': const {'test_utils', 'my_app'}, // devTestUtilities + applicationShell in runtime deps
+        },
+        layers: _layers,
+        rootPackageName: 'my_app',
+      );
+      expect(
+        violations,
+        containsAll([
+          contains('architecture (layer 0) -> app_ui (layer 1)  [upward]'),
+          contains(
+            'architecture (sharedDomainContracts) -> app_ui (uiDesignSystem)  [forbidden-category]',
+          ),
+          contains('config (layer 1) -> storage (layer 1)  [same-layer]'),
+          contains(
+            'network (infrastructureService) -> app_ui (uiDesignSystem)  [forbidden-category]',
+          ),
+          contains(
+            'feature_home (feature) -> test_utils (devTestUtilities)  [forbidden-category]',
+          ),
+          contains('feature_home -> my_app  [depends-on-application-shell]'),
+        ]),
+      );
+    });
+
+    test('detects 2-node and 3-node circular package references', () {
+      final cycles = detectDependencyCycles({
+        'pkg_a': const {'pkg_b'},
+        'pkg_b': const {'pkg_c'},
+        'pkg_c': const {'pkg_a'},
+      });
+      expect(cycles, isNotEmpty);
+      expect(cycles.first, contains('pkg_a -> pkg_b -> pkg_c -> pkg_a'));
+    });
   });
 }
 
+List<String> validateLayeringAndCategories({
+  required Map<String, Set<String>> dependencyGraph,
+  required Map<String, int> layers,
+  required String rootPackageName,
+}) {
+  final workspaceNames = dependencyGraph.keys.toSet();
+  final violations = <String>[];
+
+  dependencyGraph.forEach((name, deps) {
+    final fromRank = layers[name];
+    final fromCategory = categoryForPackage(
+      name,
+      rootPackageName: rootPackageName,
+    );
+
+    for (final dep in deps) {
+      if (dep == rootPackageName) {
+        violations.add('$name -> $dep  [depends-on-application-shell]');
+        continue;
+      }
+      if (!workspaceNames.contains(dep) && !_nonFeatureCategories.containsKey(dep)) {
+        continue;
+      }
+      final toRank = layers[dep];
+      if (fromRank != null && toRank != null && toRank >= fromRank) {
+        final kind = toRank == fromRank ? 'same-layer' : 'upward';
+        violations.add(
+          '$name (layer $fromRank) -> $dep (layer $toRank)  [$kind]',
+        );
+      }
+
+      final toCategory = categoryForPackage(
+        dep,
+        rootPackageName: rootPackageName,
+      );
+      if (fromCategory != null && toCategory != null) {
+        final allowed = _allowedCategoryDependencies[fromCategory] ?? const {};
+        if (!allowed.contains(toCategory)) {
+          violations.add(
+            '$name (${fromCategory.name}) -> $dep (${toCategory.name})  [forbidden-category]',
+          );
+        }
+      }
+    }
+  });
+
+  return violations;
+}
+
+List<String> detectDependencyCycles(Map<String, Set<String>> dependencyGraph) {
+  final cycles = <String>[];
+  final visited = <String>{};
+  final activeStack = <String>[];
+  final activeSet = <String>{};
+
+  void dfs(String node) {
+    visited.add(node);
+    activeStack.add(node);
+    activeSet.add(node);
+
+    final deps = dependencyGraph[node] ?? const <String>{};
+    for (final dep in deps) {
+      if (!dependencyGraph.containsKey(dep)) continue;
+      if (activeSet.contains(dep)) {
+        final cycleStart = activeStack.indexOf(dep);
+        final cyclePath = [...activeStack.sublist(cycleStart), dep].join(' -> ');
+        cycles.add(cyclePath);
+      } else if (!visited.contains(dep)) {
+        dfs(dep);
+      }
+    }
+
+    activeStack.removeLast();
+    activeSet.remove(node);
+  }
+
+  for (final node in dependencyGraph.keys) {
+    if (!visited.contains(node)) {
+      dfs(node);
+    }
+  }
+  return cycles;
+}
+
 /// Maps each workspace package name to the lines of its `pubspec.yaml`.
-///
-/// Descends one extra level into container directories that have no pubspec of
-/// their own (e.g. `packages/features/`), so the nested feature packages are
-/// ranked and checked like every other workspace package.
 Map<String, List<String>> _discoverPackages(Directory packagesDir) {
   final result = <String, List<String>>{};
 
@@ -161,9 +435,12 @@ Map<String, List<String>> _discoverPackages(Directory packagesDir) {
     if (File('${entity.path}/pubspec.yaml').existsSync()) {
       add(entity);
     } else {
-      // Container directory (e.g. packages/features/) — descend one level.
       entity.listSync().whereType<Directory>().forEach(add);
     }
+  }
+  final revSyncDir = Directory('published/rev_sync');
+  if (revSyncDir.existsSync()) {
+    add(revSyncDir);
   }
   return result;
 }
@@ -176,10 +453,6 @@ String? _packageName(List<String> lines) {
   return null;
 }
 
-/// Names listed under the top-level `dependencies:` block of a pubspec.
-///
-/// Intentionally ignores `dev_dependencies:` and nested keys (e.g. the
-/// `sdk: flutter` under `flutter:`).
 Set<String> _runtimeDependencies(List<String> lines) {
   final deps = <String>{};
   final entry = RegExp('^  ([a-zA-Z0-9_]+):');
@@ -190,7 +463,6 @@ Set<String> _runtimeDependencies(List<String> lines) {
       inDependencies = true;
       continue;
     }
-    // A new top-level key (no leading whitespace) ends the block.
     if (inDependencies && line.isNotEmpty && !line.startsWith(' ')) {
       inDependencies = false;
     }

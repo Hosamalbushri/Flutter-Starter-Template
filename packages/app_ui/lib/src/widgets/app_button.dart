@@ -43,12 +43,15 @@ class AppButton extends StatelessWidget {
           }
         : null;
     final child = isLoading
-        ? SizedBox(
-            width: _spinnerSize,
-            height: _spinnerSize,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: _spinnerColor(context),
+        ? Semantics(
+            label: label,
+            child: SizedBox(
+              width: _spinnerSize,
+              height: _spinnerSize,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: _spinnerColor(context),
+              ),
             ),
           )
         : Text(label);
@@ -141,9 +144,9 @@ class AppButton extends StatelessWidget {
     };
 
     final radius = switch (size) {
-      AppButtonSize.small => 10.0,
-      AppButtonSize.medium => 14.0,
-      AppButtonSize.large => 16.0,
+      AppButtonSize.small => AppRadius.smd,
+      AppButtonSize.medium => AppRadius.button,
+      AppButtonSize.large => AppRadius.lg,
     };
 
     return ButtonStyle(
@@ -161,7 +164,9 @@ class AppButton extends StatelessWidget {
         ),
       ),
       elevation: WidgetStatePropertyAll(
-        variant == AppButtonVariant.primary ? 2 : 0,
+        variant == AppButtonVariant.primary
+            ? AppElevation.md - 1
+            : AppElevation.none,
       ),
       textStyle: const WidgetStatePropertyAll(
         TextStyle(
@@ -202,6 +207,14 @@ class _PressScaleState extends State<_PressScale> {
   static const _pressedScale = 0.97;
 
   bool _pressed = false;
+
+  @override
+  void didUpdateWidget(_PressScale oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!widget.enabled && _pressed) {
+      _pressed = false;
+    }
+  }
 
   void _setPressed(bool value) {
     if (_pressed != value) setState(() => _pressed = value);

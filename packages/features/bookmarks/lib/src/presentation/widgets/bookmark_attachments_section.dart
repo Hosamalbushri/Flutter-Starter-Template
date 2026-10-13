@@ -37,12 +37,12 @@ class BookmarkAttachmentsSection extends StatelessWidget {
               children: [
                 FaIcon(
                   FontAwesomeIcons.images,
-                  size: 16,
+                  size: AppIconSize.sm,
                   color: colorScheme.onSurfaceVariant,
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
-                  'MEDIA',
+                  context.l10n.bookmarkMediaLabel.toUpperCase(),
                   style: context.textTheme.labelLarge?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w700,
@@ -120,9 +120,9 @@ class _ImageAttachmentTile extends StatelessWidget {
                   height: _thumbnailSize,
                 ),
         ),
-        Positioned(
+        PositionedDirectional(
           top: AppSpacing.xs,
-          right: AppSpacing.xs,
+          end: AppSpacing.xs,
           child: Semantics(
             button: true,
             label: context.l10n.bookmarkRemoveImageLabel,
@@ -155,6 +155,7 @@ class _AttachmentActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       children: [
         Row(
@@ -162,7 +163,7 @@ class _AttachmentActionButtons extends StatelessWidget {
             Expanded(
               child: _AttachmentActionButton(
                 icon: FontAwesomeIcons.image,
-                label: 'Gallery',
+                label: l10n.bookmarkAttachGallery,
                 onPressed: () => context.read<BookmarkFormBloc>().add(
                   const BookmarkFormImagesPicked(),
                 ),
@@ -172,7 +173,7 @@ class _AttachmentActionButtons extends StatelessWidget {
             Expanded(
               child: _AttachmentActionButton(
                 icon: FontAwesomeIcons.camera,
-                label: 'Camera',
+                label: l10n.bookmarkAttachCamera,
                 onPressed: () => context.read<BookmarkFormBloc>().add(
                   const BookmarkFormCameraImageTaken(),
                 ),
@@ -186,7 +187,7 @@ class _AttachmentActionButtons extends StatelessWidget {
             Expanded(
               child: _AttachmentActionButton(
                 icon: FontAwesomeIcons.video,
-                label: 'Video',
+                label: l10n.bookmarkAttachVideo,
                 onPressed: () => context.read<BookmarkFormBloc>().add(
                   const BookmarkFormVideoPicked(),
                 ),
@@ -196,7 +197,7 @@ class _AttachmentActionButtons extends StatelessWidget {
             Expanded(
               child: _AttachmentActionButton(
                 icon: FontAwesomeIcons.video,
-                label: 'Record',
+                label: l10n.bookmarkAttachRecord,
                 onPressed: () => context.read<BookmarkFormBloc>().add(
                   const BookmarkFormCameraVideoTaken(),
                 ),
@@ -240,7 +241,7 @@ class _AttachmentActionButton extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          FaIcon(icon, size: 24),
+          FaIcon(icon, size: AppIconSize.lg),
           const SizedBox(height: AppSpacing.sm),
           Text(
             label,

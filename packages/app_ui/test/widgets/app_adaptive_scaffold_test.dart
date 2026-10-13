@@ -30,6 +30,31 @@ void main() {
   }
 
   group('AppAdaptiveScaffold', () {
+    for (final testCase in <(double, bool, bool)>[
+      (599, false, false),
+      (600, true, false),
+      (839, true, false),
+      (840, true, true),
+    ]) {
+      testWidgets(
+        'width ${testCase.$1.toInt()} selects the documented navigation mode',
+        (tester) async {
+          await pumpAt(tester, testCase.$1);
+
+          expect(
+            find.byType(NavigationRail),
+            testCase.$2 ? findsOneWidget : findsNothing,
+          );
+          if (testCase.$2) {
+            final rail = tester.widget<NavigationRail>(
+              find.byType(NavigationRail),
+            );
+            expect(rail.extended, testCase.$3);
+          }
+        },
+      );
+    }
+
     testWidgets('compact width uses a floating bottom bar, not a rail', (
       tester,
     ) async {

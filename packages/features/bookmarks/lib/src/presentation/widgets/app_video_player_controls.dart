@@ -69,14 +69,18 @@ class _FullscreenBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      top: 16,
-      left: 16,
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    return PositionedDirectional(
+      top: AppSpacing.lg,
+      start: AppSpacing.lg,
       child: SafeArea(
         child: CircleAvatar(
           backgroundColor: Colors.black45,
           child: IconButton(
-            icon: const FaIcon(FontAwesomeIcons.arrowLeft, color: Colors.white),
+            icon: FaIcon(
+              isRtl ? FontAwesomeIcons.arrowRight : FontAwesomeIcons.arrowLeft,
+              color: Colors.white,
+            ),
             tooltip: MaterialLocalizations.of(context).backButtonTooltip,
             onPressed: () => Navigator.of(context).pop(),
           ),
