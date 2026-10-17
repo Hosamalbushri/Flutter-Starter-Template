@@ -20,6 +20,13 @@ class SessionScope extends InheritedWidget {
     return scope!.session;
   }
 
+  /// Returns the nearest session when one is available.
+  ///
+  /// Useful for reusable previews and isolated widget tests that render
+  /// identity-aware chrome without constructing the full authenticated app.
+  static Session? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<SessionScope>()?.session;
+
   @override
   bool updateShouldNotify(SessionScope oldWidget) =>
       session != oldWidget.session;

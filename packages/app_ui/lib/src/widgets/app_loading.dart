@@ -4,7 +4,7 @@ import '../../app_ui.dart';
 
 /// Centered circular progress indicator with consistent sizing.
 class AppLoading extends StatelessWidget {
-  const AppLoading({super.key, this.size = 32, this.label});
+  const AppLoading({super.key, this.size = AppIconSize.loading, this.label});
 
   final double size;
   final String? label;
@@ -23,7 +23,9 @@ class AppLoading extends StatelessWidget {
             SizedBox(
               width: size,
               height: size,
-              child: const CircularProgressIndicator(strokeWidth: 3),
+              child: const CircularProgressIndicator(
+                strokeWidth: AppBorderWidth.progress,
+              ),
             ),
             if (label != null) ...[
               const SizedBox(height: AppSpacing.md),

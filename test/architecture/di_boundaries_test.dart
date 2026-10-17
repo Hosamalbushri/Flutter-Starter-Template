@@ -26,194 +26,222 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_contracts/shared_contracts.dart';
 
 void main() {
-  test('feature packages do not reference unrelated Feature*PackageModule or manual getIt registrations', () {
-    final violations = <String>[];
-    final featuresDir = Directory('packages/features');
-    for (final featureDir in featuresDir.listSync().whereType<Directory>()) {
-      final pubspecFile = File('${featureDir.path}/pubspec.yaml');
-      if (!pubspecFile.existsSync()) continue;
-      final pkgName = _packageName(pubspecFile.readAsLinesSync());
-      if (pkgName == null) continue;
-      final libDir = Directory('${featureDir.path}/lib');
-      if (!libDir.existsSync()) continue;
+  test(
+    'feature packages do not reference unrelated Feature*PackageModule or manual getIt registrations',
+    () {
+      final violations = <String>[];
+      final featuresDir = Directory('packages/features');
+      for (final featureDir in featuresDir.listSync().whereType<Directory>()) {
+        final pubspecFile = File('${featureDir.path}/pubspec.yaml');
+        if (!pubspecFile.existsSync()) continue;
+        final pkgName = _packageName(pubspecFile.readAsLinesSync());
+        if (pkgName == null) continue;
+        final libDir = Directory('${featureDir.path}/lib');
+        if (!libDir.existsSync()) continue;
 
-      for (final file
-          in libDir
-              .listSync(recursive: true)
-              .whereType<File>()
-              .where((f) => f.path.endsWith('.dart'))) {
-        final relPath = _posix(file.path);
-        violations.addAll(
-          validateFeatureDiFile(
-            packageName: pkgName,
-            filePath: relPath,
-            lines: file.readAsLinesSync(),
-          ),
-        );
+        for (final file
+            in libDir
+                .listSync(recursive: true)
+                .whereType<File>()
+                .where((f) => f.path.endsWith('.dart'))) {
+          final relPath = _posix(file.path);
+          violations.addAll(
+            validateFeatureDiFile(
+              packageName: pkgName,
+              filePath: relPath,
+              lines: file.readAsLinesSync(),
+            ),
+          );
+        }
       }
-    }
 
-    expect(
-      violations,
-      isEmpty,
-      reason:
-          'Feature packages violated DI boundaries:\n\n'
-          '${violations.map((v) => '  $v').join('\n')}',
-    );
-  });
+      expect(
+        violations,
+        isEmpty,
+        reason:
+            'Feature packages violated DI boundaries:\n\n'
+            '${violations.map((v) => '  $v').join('\n')}',
+      );
+    },
+  );
 
-  test('non-feature workspace packages do not call getIt.register* outside generated *.module.dart', () {
-    final violations = <String>[];
-    final packagesDir = Directory('packages');
-    for (final entity in packagesDir.listSync().whereType<Directory>()) {
-      if (_posix(entity.path).endsWith('/features')) continue;
-      final libDir = Directory('${entity.path}/lib');
-      if (!libDir.existsSync()) continue;
-      for (final file
-          in libDir
-              .listSync(recursive: true)
-              .whereType<File>()
-              .where((f) => f.path.endsWith('.dart'))) {
-        final relPath = _posix(file.path);
-        if (relPath.endsWith('.module.dart')) continue;
-        final lines = file.readAsLinesSync();
-        for (var i = 0; i < lines.length; i++) {
-          if (RegExp(r'\bgetIt\s*\.\s*register').hasMatch(lines[i])) {
-            violations.add(
-              '$relPath:${i + 1} calls getIt.register* manually outside generated module',
-            );
+  test(
+    'non-feature workspace packages do not call getIt.register* outside generated *.module.dart',
+    () {
+      final violations = <String>[];
+      final packagesDir = Directory('packages');
+      for (final entity in packagesDir.listSync().whereType<Directory>()) {
+        if (_posix(entity.path).endsWith('/features')) continue;
+        final libDir = Directory('${entity.path}/lib');
+        if (!libDir.existsSync()) continue;
+        for (final file
+            in libDir
+                .listSync(recursive: true)
+                .whereType<File>()
+                .where((f) => f.path.endsWith('.dart'))) {
+          final relPath = _posix(file.path);
+          if (relPath.endsWith('.module.dart')) continue;
+          final lines = file.readAsLinesSync();
+          for (var i = 0; i < lines.length; i++) {
+            if (RegExp(r'\bgetIt\s*\.\s*register').hasMatch(lines[i])) {
+              violations.add(
+                '$relPath:${i + 1} calls getIt.register* manually outside generated module',
+              );
+            }
           }
         }
       }
-    }
-    expect(violations, isEmpty);
-  });
+      expect(violations, isEmpty);
+    },
+  );
 
-  test('lib/app/di/injection.dart orders infrastructure modules deterministically before feature modules', () {
-    final injectionSource = File('lib/app/di/injection.dart').readAsStringSync();
-    final violations = validateInjectionModuleOrdering(injectionSource);
-    expect(
-      violations,
-      isEmpty,
-      reason:
-          'lib/app/di/injection.dart violated deterministic DI module ordering:\n\n'
-          '${violations.map((v) => '  $v').join('\n')}',
-    );
-  });
+  test(
+    'lib/app/di/injection.dart orders infrastructure modules deterministically before feature modules',
+    () {
+      final injectionSource = File(
+        'lib/app/di/injection.dart',
+      ).readAsStringSync();
+      final violations = validateInjectionModuleOrdering(injectionSource);
+      expect(
+        violations,
+        isEmpty,
+        reason:
+            'lib/app/di/injection.dart violated deterministic DI module ordering:\n\n'
+            '${violations.map((v) => '  $v').join('\n')}',
+      );
+    },
+  );
 
-  test('registerReaderFallbacks safely provides fallbacks when optional features are absent and preserves real bindings', () async {
-    final container = GetIt.asNewInstance();
-    addTearDown(container.reset);
+  test(
+    'registerReaderFallbacks safely provides fallbacks when optional features are absent and preserves real bindings',
+    () async {
+      final container = GetIt.asNewInstance();
+      addTearDown(container.reset);
 
-    registerReaderFallbacks(container);
-    // Calling twice must be idempotent.
-    registerReaderFallbacks(container);
+      registerReaderFallbacks(container);
+      // Calling twice must be idempotent.
+      registerReaderFallbacks(container);
 
-    expect(container.isRegistered<BookmarkStatsReader>(), isTrue);
-    expect(container.isRegistered<CollectionsReader>(), isTrue);
+      expect(container.isRegistered<BookmarkStatsReader>(), isTrue);
+      expect(container.isRegistered<CollectionsReader>(), isTrue);
 
-    final statsResult = await container<BookmarkStatsReader>()();
-    expect(statsResult, isA<Ok<BookmarkStats>>());
-    expect((statsResult as Ok<BookmarkStats>).value.total, 0);
+      final statsResult = await container<BookmarkStatsReader>()();
+      expect(statsResult, isA<Ok<BookmarkStats>>());
+      expect((statsResult as Ok<BookmarkStats>).value.total, 0);
 
-    final collectionsResult = await container<CollectionsReader>()();
-    expect(collectionsResult, isA<Ok<List<CollectionSummary>>>());
-    expect((collectionsResult as Ok<List<CollectionSummary>>).value, isEmpty);
+      final collectionsResult = await container<CollectionsReader>()();
+      expect(collectionsResult, isA<Ok<List<CollectionSummary>>>());
+      expect((collectionsResult as Ok<List<CollectionSummary>>).value, isEmpty);
 
-    // When a real feature implementation is already registered, fallback must
-    // not overwrite it.
-    final containerWithReal = GetIt.asNewInstance();
-    addTearDown(containerWithReal.reset);
-    const customReader = _CustomBookmarkStatsReader();
-    containerWithReal.registerSingleton<BookmarkStatsReader>(customReader);
+      // When a real feature implementation is already registered, fallback must
+      // not overwrite it.
+      final containerWithReal = GetIt.asNewInstance();
+      addTearDown(containerWithReal.reset);
+      const customReader = _CustomBookmarkStatsReader();
+      containerWithReal.registerSingleton<BookmarkStatsReader>(customReader);
 
-    registerReaderFallbacks(containerWithReal);
-    expect(
-      identical(containerWithReal<BookmarkStatsReader>(), customReader),
-      isTrue,
-    );
-  });
+      registerReaderFallbacks(containerWithReal);
+      expect(
+        identical(containerWithReal<BookmarkStatsReader>(), customReader),
+        isTrue,
+      );
+    },
+  );
 
   group('DI boundary regression tests', () {
-    test('accepts compliant feature DI anchor, presentation locator, and constructor-injected data/domain', () {
-      expect(
-        validateFeatureDiFile(
-          packageName: 'feature_orders',
-          filePath: 'packages/features/orders/lib/src/di.dart',
-          lines: const [
-            '@InjectableInit.microPackage()',
-            'void initOrdersFeature() {}',
-          ],
-        ),
-        isEmpty,
-      );
-      expect(
-        validateFeatureDiFile(
+    test(
+      'accepts compliant feature DI anchor, presentation locator, and constructor-injected data/domain',
+      () {
+        expect(
+          validateFeatureDiFile(
+            packageName: 'feature_orders',
+            filePath: 'packages/features/orders/lib/src/di.dart',
+            lines: const [
+              '@InjectableInit.microPackage()',
+              'void initOrdersFeature() {}',
+            ],
+          ),
+          isEmpty,
+        );
+        expect(
+          validateFeatureDiFile(
+            packageName: 'feature_orders',
+            filePath:
+                'packages/features/orders/lib/src/presentation/screens/orders_screen.dart',
+            lines: const [
+              'final cubit = getIt<OrdersCubit>();',
+            ],
+          ),
+          isEmpty,
+        );
+        expect(
+          validateFeatureDiFile(
+            packageName: 'feature_orders',
+            filePath:
+                'packages/features/orders/lib/src/data/repositories/orders_repository_impl.dart',
+            lines: const [
+              '@LazySingleton(as: OrdersRepository)',
+              'class OrdersRepositoryImpl implements OrdersRepository {}',
+            ],
+          ),
+          isEmpty,
+        );
+      },
+    );
+
+    test(
+      'rejects service locator in domain/ or data/, foreign Feature*PackageModule, and manual getIt.register*',
+      () {
+        const getItImportLine =
+            'import '
+            "'package:get_it/get_it.dart';";
+        const locatorImportLine =
+            'import '
+            "'../../locator.dart';";
+
+        final domainViolations = validateFeatureDiFile(
           packageName: 'feature_orders',
           filePath:
-              'packages/features/orders/lib/src/presentation/screens/orders_screen.dart',
+              'packages/features/orders/lib/src/domain/usecases/get_orders.dart',
           lines: const [
-            'final cubit = getIt<OrdersCubit>();',
+            getItImportLine,
+            'final repo = getIt<OrdersRepository>();',
           ],
-        ),
-        isEmpty,
-      );
-      expect(
-        validateFeatureDiFile(
+        );
+        expect(
+          domainViolations,
+          contains(
+            contains('domain/ or data/ layer must not use service locator'),
+          ),
+        );
+
+        final dataViolations = validateFeatureDiFile(
           packageName: 'feature_orders',
           filePath:
               'packages/features/orders/lib/src/data/repositories/orders_repository_impl.dart',
-          lines: const [
-            '@LazySingleton(as: OrdersRepository)',
-            'class OrdersRepositoryImpl implements OrdersRepository {}',
+          lines: [
+            locatorImportLine,
+            'void bad() => getIt.registerSingleton<String>("leak");',
+            'const other = FeatureBookmarksPackageModule;',
           ],
-        ),
-        isEmpty,
-      );
-    });
+        );
+        expect(
+          dataViolations,
+          containsAll([
+            contains('domain/ or data/ layer must not use service locator'),
+            contains('manual getIt.register* call outside generated module'),
+            contains(
+              'references foreign feature DI module FeatureBookmarksPackageModule',
+            ),
+          ]),
+        );
+      },
+    );
 
-    test('rejects service locator in domain/ or data/, foreign Feature*PackageModule, and manual getIt.register*', () {
-      const getItImportLine = 'import ' "'package:get_it/get_it.dart';";
-      const locatorImportLine = 'import ' "'../../locator.dart';";
-
-      final domainViolations = validateFeatureDiFile(
-        packageName: 'feature_orders',
-        filePath:
-            'packages/features/orders/lib/src/domain/usecases/get_orders.dart',
-        lines: const [
-          getItImportLine,
-          'final repo = getIt<OrdersRepository>();',
-        ],
-      );
-      expect(
-        domainViolations,
-        contains(contains('domain/ or data/ layer must not use service locator')),
-      );
-
-      final dataViolations = validateFeatureDiFile(
-        packageName: 'feature_orders',
-        filePath:
-            'packages/features/orders/lib/src/data/repositories/orders_repository_impl.dart',
-        lines: [
-          locatorImportLine,
-          'void bad() => getIt.registerSingleton<String>("leak");',
-          'const other = FeatureBookmarksPackageModule;',
-        ],
-      );
-      expect(
-        dataViolations,
-        containsAll([
-          contains('domain/ or data/ layer must not use service locator'),
-          contains('manual getIt.register* call outside generated module'),
-          contains(
-            'references foreign feature DI module FeatureBookmarksPackageModule',
-          ),
-        ]),
-      );
-    });
-
-    test('rejects feature modules registered before infrastructure modules in injection.dart', () {
-      const badInjection = '''
+    test(
+      'rejects feature modules registered before infrastructure modules in injection.dart',
+      () {
+        const badInjection = '''
 @InjectableInit(
   externalPackageModulesBefore: [
     ExternalModule(FeatureHomePackageModule),
@@ -222,16 +250,17 @@ void main() {
 )
 Future<void> configureDependencies() async {}
 ''';
-      final violations = validateInjectionModuleOrdering(badInjection);
-      expect(
-        violations,
-        contains(
+        final violations = validateInjectionModuleOrdering(badInjection);
+        expect(
+          violations,
           contains(
-            'Infrastructure module StoragePackageModule is registered after feature module FeatureHomePackageModule',
+            contains(
+              'Infrastructure module StoragePackageModule is registered after feature module FeatureHomePackageModule',
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
   });
 }
 
@@ -289,10 +318,9 @@ List<String> validateFeatureDiFile({
 
 List<String> validateInjectionModuleOrdering(String injectionSource) {
   final violations = <String>[];
-  final modules = RegExp(r'ExternalModule\(\s*([A-Za-z0-9_]+)\s*\)')
-      .allMatches(injectionSource)
-      .map((m) => m.group(1)!)
-      .toList();
+  final modules = RegExp(
+    r'ExternalModule\(\s*([A-Za-z0-9_]+)\s*\)',
+  ).allMatches(injectionSource).map((m) => m.group(1)!).toList();
 
   if (modules.isEmpty) {
     violations.add('No ExternalModule registrations found in injection.dart');

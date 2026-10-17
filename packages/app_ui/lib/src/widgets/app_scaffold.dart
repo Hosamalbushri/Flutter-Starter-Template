@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../app_ui.dart';
 
@@ -12,6 +11,7 @@ class AppScaffold extends StatelessWidget {
     super.key,
     required this.body,
     this.title,
+    this.subtitle,
     this.appBar,
     this.actions,
     this.leading,
@@ -23,6 +23,11 @@ class AppScaffold extends StatelessWidget {
     this.isLoading = false,
     this.backgroundColor,
     this.resizeToAvoidBottomInset,
+    this.profileAvatar,
+    this.notificationCount,
+    this.notificationTooltip,
+    this.onNotificationTap,
+    this.searchAction,
   }) : assert(
          appBar == null || title == null,
          'Provide either `title` or a custom `appBar`, not both.',
@@ -30,6 +35,7 @@ class AppScaffold extends StatelessWidget {
 
   final Widget body;
   final String? title;
+  final String? subtitle;
   final PreferredSizeWidget? appBar;
   final List<Widget>? actions;
   final Widget? leading;
@@ -41,11 +47,28 @@ class AppScaffold extends StatelessWidget {
   final bool isLoading;
   final Color? backgroundColor;
   final bool? resizeToAvoidBottomInset;
+  final Widget? profileAvatar;
+  final int? notificationCount;
+  final String? notificationTooltip;
+  final VoidCallback? onNotificationTap;
+  final Widget? searchAction;
+
+  /// Returns the bottom navigation bar inset from an ancestor [AppAdaptiveScaffold], if any.
+  static double bottomBarInsetOf(BuildContext context) {
+    return AppAdaptiveScaffold.bottomBarInsetOf(context);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final hasAdaptiveBottomBar =
+        AppAdaptiveNavigationScope.bottomBarHeightOf(context) > 0;
     Widget content = Padding(padding: padding, child: body);
-    if (safeArea) content = SafeArea(child: content);
+    if (safeArea) {
+      content = SafeArea(
+        bottom: !hasAdaptiveBottomBar,
+        child: content,
+      );
+    }
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -53,31 +76,16 @@ class AppScaffold extends StatelessWidget {
       appBar:
           appBar ??
           (title != null
-              ? AppBar(
-                  title: Text(
-                    title!,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  centerTitle: true,
-                  // Flat app bar styling (elevation, scrolled-under
-                  // elevation) now comes from the theme's `appBarTheme`.
-                  leading:
-                      leading ??
-                      (Navigator.of(context).canPop()
-                          ? IconButton(
-                              icon: FaIcon(
-                                Directionality.of(context) == TextDirection.rtl
-                                    ? FontAwesomeIcons.chevronRight
-                                    : FontAwesomeIcons.chevronLeft,
-                              ),
-                              iconSize: AppIconSize.md,
-                              onPressed: () => Navigator.of(context).maybePop(),
-                              tooltip: MaterialLocalizations.of(
-                                context,
-                              ).backButtonTooltip,
-                            )
-                          : null),
+              ? AppTopBar(
+                  title: title!,
+                  subtitle: subtitle,
+                  leading: leading,
                   actions: actions,
+                  profileAvatar: profileAvatar,
+                  notificationCount: notificationCount,
+                  notificationTooltip: notificationTooltip,
+                  onNotificationTap: onNotificationTap,
+                  searchAction: searchAction,
                 )
               : null),
       drawer: drawer,
@@ -94,11 +102,12 @@ class AppScaffold extends StatelessWidget {
                 ? Stack(
                     key: const ValueKey('AppScaffoldLoading'),
                     children: [
-                      // Blurred dark overlay
                       Positioned.fill(
                         child: BackdropFilter(
                           filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                          child: const ColoredBox(color: Colors.black26),
+                          child: ColoredBox(
+                            color: context.semanticColors.scrim,
+                          ),
                         ),
                       ),
                       // Elevated glassmorphism loading card
@@ -109,7 +118,7 @@ class AppScaffold extends StatelessWidget {
                             vertical: AppSpacing.xxxl,
                           ),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).cardColor,
+                            color: context.semanticColors.surfaceElevated,
                             borderRadius: BorderRadius.circular(AppRadius.xl),
                             boxShadow: AppElevation.cardShadow,
                           ),

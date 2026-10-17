@@ -3,11 +3,22 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.firebase-perf")
-    id("com.google.firebase.crashlytics")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+// Firebase configuration is intentionally local and git-ignored. A fresh
+// template must still compile with its no-op/bootstrap fallbacks; once the
+// config is materialized, apply the Firebase build plugins for the real app.
+val googleServicesFile = file("google-services.json")
+if (googleServicesFile.exists()) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.firebase-perf")
+    apply(plugin = "com.google.firebase.crashlytics")
+} else {
+    logger.warn(
+        "google-services.json is absent; Firebase Android Gradle plugins are disabled.",
+    )
 }
 
 // Release signing is configured via android/key.properties (git-ignored).
@@ -100,4 +111,3 @@ flutter {
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 }
-

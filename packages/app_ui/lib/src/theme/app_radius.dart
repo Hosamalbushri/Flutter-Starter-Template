@@ -24,4 +24,7 @@ abstract final class AppRadius {
 
   /// 20px - elevated overlays and dialogs.
   static const double xl = 20;
+
+  /// Fully rounded controls whose radius should exceed their height.
+  static const double full = 999;
 }

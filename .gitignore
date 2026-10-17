@@ -36,6 +36,9 @@ coverage/
 
 # Golden test failure output
 test/**/golden/failures/
+**/golden/failures/
+test/visual/failures/
+**/failures/
 
 # -------------------------------------------------------------------------
 # Android (in addition to android/.gitignore)

@@ -11,3 +11,4 @@ export 'src/di.module.dart' show FeatureHomePackageModule;
 export 'src/presentation/bloc/home_bloc.dart';
 export 'src/presentation/bloc/home_state.dart';
 export 'src/presentation/screens/home_screen.dart';
+export 'src/presentation/widgets/home_widgets.dart' show HomeBody;

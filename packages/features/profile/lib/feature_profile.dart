@@ -10,3 +10,4 @@ export 'src/di.module.dart' show FeatureProfilePackageModule;
 export 'src/presentation/bloc/profile_bloc.dart';
 export 'src/presentation/bloc/profile_state.dart';
 export 'src/presentation/screens/profile_screen.dart';
+export 'src/presentation/widgets/profile_widgets.dart' show ProfileBody;

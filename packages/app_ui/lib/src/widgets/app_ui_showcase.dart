@@ -9,7 +9,7 @@ import '../../app_ui.dart';
 /// skeletons, dialogs, and responsive layout primitives with live controls for:
 /// - Light / Dark theme mode
 /// - English (`en`, LTR) / Arabic (`ar`, RTL) directionality & copy
-/// - Representative viewport widths (`320`, `360`, `390`, `600`, `800`, `1200`)
+/// - Representative viewport widths (`320`, `360`, `390`, `600`, `840`, `1200`)
 /// - Text scale factors (`1.0x`, `1.5x`, `2.0x`)
 class AppUiShowcaseScreen extends StatefulWidget {
   const AppUiShowcaseScreen({
@@ -30,7 +30,7 @@ class AppUiShowcaseScreen extends StatefulWidget {
     360,
     390,
     600,
-    800,
+    840,
     1200,
   ];
 
@@ -191,8 +191,7 @@ class _ShowcaseControlPanel extends StatelessWidget {
                 onSelected: (_) => onWidthChanged(null),
               ),
               const SizedBox(width: AppSpacing.xs),
-              for (final width
-                  in AppUiShowcaseScreen.representativeWidths) ...[
+              for (final width in AppUiShowcaseScreen.representativeWidths) ...[
                 ChoiceChip(
                   key: ValueKey('showcase_width_${width.toInt()}'),
                   label: Text('${width.toInt()}px'),
@@ -248,7 +247,103 @@ class _ShowcaseBody extends StatelessWidget {
               background: colorScheme.error,
               foreground: colorScheme.onError,
             ),
+            _SemanticBadge(
+              label: isArabic ? 'سطح مرتفع' : 'Elevated Surface',
+              background: semantic.surfaceElevated,
+              foreground: colorScheme.onSurface,
+            ),
+            _SemanticBadge(
+              label: isArabic ? 'معطل' : 'Disabled',
+              background: semantic.disabled,
+              foreground: semantic.onDisabled,
+            ),
           ],
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        _SectionTitle(
+          title: isArabic ? 'التدرج الطباعي' : 'Typography Hierarchy',
+        ),
+        AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                isArabic ? 'عنوان الصفحة' : 'Page title',
+                style: AppTypography.pageTitle(context.textTheme),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                isArabic ? 'عنوان القسم' : 'Section title',
+                style: AppTypography.sectionTitle(context.textTheme),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                isArabic ? 'عنوان البطاقة' : 'Card title',
+                style: AppTypography.cardTitle(context.textTheme),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                isArabic
+                    ? 'نص أساسي مريح للقراءة ويدعم التشكيل.'
+                    : 'Comfortable body text with predictable line height.',
+                style: AppTypography.body(context.textTheme),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                isArabic ? 'نص ثانوي ووصف موجز' : 'Secondary body and caption',
+                style: AppTypography.secondaryBody(
+                  context.textTheme,
+                )?.copyWith(color: semantic.mutedForeground),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                isArabic ? '١٢٣٬٤٥٦' : '123,456',
+                style: AppTypography.numeric(context.textTheme),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        _SectionTitle(
+          title: isArabic ? 'المسافات والزوايا' : 'Spacing & Radius',
+        ),
+        const AppCard(
+          child: Wrap(
+            spacing: AppSpacing.md,
+            runSpacing: AppSpacing.md,
+            children: [
+              _TokenSample(
+                label: '4',
+                size: AppSpacing.xs,
+                radius: AppRadius.xs,
+              ),
+              _TokenSample(
+                label: '8',
+                size: AppSpacing.sm,
+                radius: AppRadius.sm,
+              ),
+              _TokenSample(
+                label: '12',
+                size: AppSpacing.md,
+                radius: AppRadius.md,
+              ),
+              _TokenSample(
+                label: '16',
+                size: AppSpacing.lg,
+                radius: AppRadius.lg,
+              ),
+              _TokenSample(
+                label: '24',
+                size: AppSpacing.xxl,
+                radius: AppRadius.xl,
+              ),
+              _TokenSample(
+                label: '32',
+                size: AppSpacing.xxxl,
+                radius: AppRadius.full,
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: AppSpacing.xl),
         _SectionTitle(title: isArabic ? 'الأزرار (AppButton)' : 'Buttons'),
@@ -313,6 +408,35 @@ class _ShowcaseBody extends StatelessWidget {
           label: isArabic ? 'حقل معطل' : 'Disabled Field',
           hint: isArabic ? 'غير قابل للتعديل' : 'Read-only value',
           enabled: false,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        AppSelector<String>(
+          label: isArabic ? 'المحدد' : 'Selector',
+          hint: isArabic ? 'اختر خياراً' : 'Choose an option',
+          prefixIcon: FontAwesomeIcons.list,
+          items: isArabic
+              ? const ['الخيار الأول', 'الخيار الثاني']
+              : const ['First option', 'Second option'],
+          itemLabel: (item) => item,
+          onChanged: (_) {},
+        ),
+        const SizedBox(height: AppSpacing.md),
+        AppSearchField(
+          label: isArabic ? 'بحث' : 'Search',
+          hint: isArabic ? 'ابحث في العناصر' : 'Search items',
+          clearTooltip: isArabic ? 'مسح البحث' : 'Clear search',
+        ),
+        const SizedBox(height: AppSpacing.md),
+        AppButton(
+          label: isArabic ? 'عرض إشعار' : 'Show Snackbar',
+          variant: AppButtonVariant.outlined,
+          onPressed: () => AppSnackbar.show(
+            context,
+            message: isArabic
+                ? 'تم حفظ التغييرات بنجاح.'
+                : 'Changes saved successfully.',
+            variant: AppSnackbarVariant.success,
+          ),
         ),
         const SizedBox(height: AppSpacing.xl),
         _SectionTitle(
@@ -438,6 +562,66 @@ class _ShowcaseBody extends StatelessWidget {
         const SizedBox(height: AppSpacing.xl),
         _SectionTitle(
           title: isArabic
+              ? 'شريط التطبيق العلوي (AppTopBar)'
+              : 'App Top Bar (AppTopBar)',
+        ),
+        AppTopBar(
+          title: isArabic ? 'الصفحة الرئيسية' : 'Dashboard',
+          subtitle: isArabic ? 'مرحباً بك مجدداً' : 'Welcome back',
+          actions: [
+            IconButton(
+              icon: const FaIcon(
+                FontAwesomeIcons.bell,
+                size: AppIconSize.sm,
+              ),
+              onPressed: () {},
+              tooltip: isArabic ? 'الإشعارات' : 'Notifications',
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        _SectionTitle(
+          title: isArabic
+              ? 'المجموعات والتخطيط (AppGroupSection)'
+              : 'Grouped Section (AppGroupSection)',
+        ),
+        AppGroupSection(
+          title: isArabic ? 'إعدادات الحساب' : 'Account Settings',
+          description: isArabic
+              ? 'إدارة تفاصيل الملف الشخصي والأمان'
+              : 'Manage profile details and security',
+          children: [
+            ListTile(
+              leading: const FaIcon(
+                FontAwesomeIcons.user,
+                size: AppIconSize.md,
+              ),
+              title: Text(isArabic ? 'الملف الشخصي' : 'Profile'),
+              trailing: const FaIcon(
+                FontAwesomeIcons.chevronRight,
+                size: AppIconSize.xs,
+              ),
+              onTap: () {},
+            ),
+            ListTile(
+              leading: const FaIcon(
+                FontAwesomeIcons.shieldHalved,
+                size: AppIconSize.md,
+              ),
+              title: Text(
+                isArabic ? 'الأمان وكلمة المرور' : 'Security & Password',
+              ),
+              trailing: const FaIcon(
+                FontAwesomeIcons.chevronRight,
+                size: AppIconSize.xs,
+              ),
+              onTap: () {},
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        _SectionTitle(
+          title: isArabic
               ? 'التخطيط المتجاوب (AppListDetailPane)'
               : 'Responsive Master-Detail (AppListDetailPane)',
         ),
@@ -532,6 +716,38 @@ class _SemanticBadge extends StatelessWidget {
           fontWeight: FontWeight.w700,
         ),
       ),
+    );
+  }
+}
+
+class _TokenSample extends StatelessWidget {
+  const _TokenSample({
+    required this.label,
+    required this.size,
+    required this.radius,
+  });
+
+  final String label;
+  final double size;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: kMinInteractiveDimension + size,
+          height: kMinInteractiveDimension + size,
+          decoration: BoxDecoration(
+            color: context.colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(radius),
+            border: Border.all(color: context.semanticColors.divider),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(label, style: AppTypography.caption(context.textTheme)),
+      ],
     );
   }
 }

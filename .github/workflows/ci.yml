@@ -34,6 +34,7 @@ jobs:
   changes:
     name: Detect changes
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       pull-requests: read
@@ -116,11 +117,44 @@ jobs:
               - '.github/workflows/ci.yml'
       # fst:template-only:end
 
+  # Verify the independently published CLI itself before using it to scaffold
+  # fixtures. Its test suite owns rollback/failure-injection coverage.
+  cli-quality:
+    name: CLI Analyze & Test
+    needs: changes
+    if: needs.changes.outputs.cli == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Check out CLI submodule
+        run: git submodule update --init published/cli
+
+      - name: Set up Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Resolve CLI dependencies
+        working-directory: published/cli
+        run: dart pub get --enforce-lockfile
+
+      - name: Analyze CLI
+        working-directory: published/cli
+        run: dart analyze --fatal-infos
+
+      - name: Test CLI
+        working-directory: published/cli
+        run: dart test
+
   analyze-and-test:
     name: Analyze & Test
     needs: changes
     if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -276,6 +310,7 @@ jobs:
           name: coverage
           path: coverage/lcov.info
           if-no-files-found: ignore
+          retention-days: 7
 
       # Fail the build if line coverage drops below the threshold. Generated
       # files are excluded so the percentage reflects hand-written code only.
@@ -321,6 +356,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.cli == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
@@ -598,6 +634,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.cli == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
@@ -711,6 +748,14 @@ jobs:
           dart test packages/inventory_storage
           flutter test packages/inventory_ui
 
+          # Complete the independent-package lifecycle, then validate twice to
+          # prove recreation has no stale registrations and validation is
+          # idempotent.
+          "${cli[@]}" remove-package inventory_ui --yes
+          "${cli[@]}" create-package inventory_ui --type ui --dependency inventory_contracts --dependency inventory_storage --no-verify
+          "${cli[@]}" validate-package inventory_ui
+          "${cli[@]}" validate-package inventory_ui
+
       - name: Analyze the scaffold
         working-directory: ${{ runner.temp }}/analyze-smoke
         run: flutter analyze
@@ -729,6 +774,7 @@ jobs:
 
       - name: Build the selected generated scaffold
         if: matrix.name == 'no-firebase-no-backend-jwt-drift' || matrix.name == 'feature-registration'
+        timeout-minutes: 30
         working-directory: ${{ runner.temp }}/analyze-smoke
         run: flutter build apk --debug --flavor dev
   # fst:template-only:end
@@ -745,6 +791,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -766,6 +813,12 @@ jobs:
           flutter-version: 3.44.0
           channel: stable
           cache: true
+
+      - name: Report Android build toolchain
+        run: |
+          flutter --version
+          java -version
+          ./android/gradlew --version
 
       # Cache Gradle's downloaded dependencies and wrapper so the Android build
       # doesn't refetch the toolchain + dependencies every run. Keyed on the
@@ -836,7 +889,22 @@ jobs:
       # The app uses Android flavors (dev/staging/prod), so a flavor is
       # required. dev is the natural debug target.
       - name: Build debug APK
-        run: flutter build apk --debug --flavor dev
+        timeout-minutes: 30
+        run: |
+          set -o pipefail
+          flutter build apk --debug --flavor dev -v 2>&1 | tee android-build.log
+
+      - name: Upload Android build diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-build-diagnostics
+          path: |
+            android-build.log
+            ~/.gradle/daemon/**/daemon-*.out.log
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7
 
   # iOS counterpart of build-android: catches the CocoaPods/SPM/Podfile and
   # native-plugin breakage class that only surfaces when Xcode actually
@@ -849,6 +917,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.code == 'true'
     runs-on: macos-15
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -1020,6 +1089,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.code == 'true'
     runs-on: macos-15
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -1059,3 +1129,4 @@ jobs:
           name: golden-failures
           path: 'packages/app_ui/test/**/failures/**'
           if-no-files-found: ignore
+          retention-days: 7

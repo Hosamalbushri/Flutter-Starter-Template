@@ -56,10 +56,15 @@ class AppErrorView extends StatelessWidget {
             ).animateFadeIn(delay: AppDurations.fast),
             if (onRetry != null) ...[
               const SizedBox(height: AppSpacing.xxl),
-              FilledButton.tonalIcon(
+              AppButton(
                 onPressed: effectiveOnRetry,
-                icon: const FaIcon(FontAwesomeIcons.rotateRight),
-                label: Text(retryLabel ?? 'Retry'),
+                icon: FontAwesomeIcons.rotateRight,
+                label:
+                    retryLabel ??
+                    MaterialLocalizations.of(
+                      context,
+                    ).refreshIndicatorSemanticLabel,
+                variant: AppButtonVariant.tonal,
               ).animateSlideUp(delay: AppDurations.medium),
             ],
           ],

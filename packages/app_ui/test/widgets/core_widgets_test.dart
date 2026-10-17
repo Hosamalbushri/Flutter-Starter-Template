@@ -145,7 +145,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Retry'), findsOneWidget);
+      final context = tester.element(find.byType(AppErrorView));
+      final localizedRefresh = MaterialLocalizations.of(
+        context,
+      ).refreshIndicatorSemanticLabel;
+      expect(find.text(localizedRefresh), findsOneWidget);
       expect(
         find.byWidgetPredicate(
           (w) =>
@@ -165,7 +169,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Retry'));
+      await tester.tap(find.byType(AppButton));
       expect(tapped, isTrue);
     });
 
@@ -195,7 +199,7 @@ void main() {
       expect(find.byType(SafeArea), findsOneWidget);
     });
 
-    testWidgets('renders AppBar when title is provided', (tester) async {
+    testWidgets('renders AppTopBar when title is provided', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: AppScaffold(title: 'Test Screen', body: Text('Content')),
@@ -203,6 +207,8 @@ void main() {
       );
 
       expect(find.text('Test Screen'), findsOneWidget);
+      expect(find.byType(AppTopBar), findsOneWidget);
+      expect(find.byType(AppBar), findsOneWidget);
     });
 
     testWidgets('renders custom appBar when provided', (tester) async {

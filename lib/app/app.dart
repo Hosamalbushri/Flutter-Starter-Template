@@ -83,9 +83,6 @@ class _AppState extends State<App> {
     // fst:auth:end
     final features = widget.features ?? enabledFeatures;
     validateFeatureModules(features);
-    for (final feature in features) {
-      unawaited(feature.initialize());
-    }
     final result = buildRouterWithDeepLink(
       _session,
       featureRoutes: [
@@ -119,10 +116,13 @@ class _AppState extends State<App> {
 
   void _onSessionChanged() {
     // Sync runs only for a settled, signed-in user — not while signing out or
-    // still restoring (both leave no active user).
-    final session = _session!;
+    // still restoring (both leave no active user). Without the auth pillar,
+    // nothing gates sync, so it remains active for the app lifetime.
+    final session = _session;
     _setSyncActive(
-      active: session.currentUser != null && !session.isSigningOut,
+      active:
+          session == null ||
+          (session.currentUser != null && !session.isSigningOut),
     );
   }
 
@@ -198,7 +198,9 @@ class _AppState extends State<App> {
       ),
     );
     // fst:auth:start
-    app = SessionScope(session: _session!, child: app);
+    if (_session != null) {
+      app = SessionScope(session: _session!, child: app);
+    }
     // fst:auth:end
     return DeepLinkScope(deepLink: _deepLink, child: app);
   }

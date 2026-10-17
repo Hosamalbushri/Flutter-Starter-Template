@@ -168,6 +168,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeAppBarTitle => 'الرئيسية';
 
   @override
+  String get homeWelcomeSubtitle => 'معرفتك المحفوظة، منظمة في مكان واحد';
+
+  @override
+  String get homeLoadError =>
+      'تعذر تحميل لوحة المعلومات. يرجى المحاولة مجددًا.';
+
+  @override
   String get homeViewAllBookmarks => 'عرض الكل';
 
   @override
@@ -258,6 +265,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get profileAppBarTitle => 'الملف الشخصي';
+
+  @override
+  String get profileSettingsSubtitle => 'إعدادات الحساب والتطبيق';
 
   @override
   String get profileSectionAppearance => 'المظهر';

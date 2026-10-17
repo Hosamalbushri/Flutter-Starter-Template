@@ -22,4 +22,7 @@ abstract final class AppDurations {
 
   /// 600ms - long fades.
   static const Duration xxslow = Duration(milliseconds: 600);
+
+  /// A deliberately slow loop used only for skeleton shimmer motion.
+  static const Duration shimmer = Duration(milliseconds: 1400);
 }

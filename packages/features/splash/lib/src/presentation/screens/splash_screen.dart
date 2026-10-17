@@ -33,9 +33,12 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _bootstrap() async {
+    // fst:auth:start
+    final session = SessionScope.maybeOf(context);
+    // fst:auth:end
     await Future.wait<void>([
       // fst:auth:start
-      SessionScope.of(context).restore(),
+      if (session != null) session.restore(),
       // fst:auth:end
       Future<void>.delayed(SplashScreen._minDisplay),
     ]);

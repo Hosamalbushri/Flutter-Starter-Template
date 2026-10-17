@@ -19,6 +19,9 @@ abstract final class AppIconSize {
   /// 28px - emphasized list/stat icons.
   static const double xl = 28;
 
+  /// 32px - progress indicators and compact illustrations.
+  static const double loading = 32;
+
   /// 40px - avatars and hero glyphs.
   static const double xxl = 40;
 

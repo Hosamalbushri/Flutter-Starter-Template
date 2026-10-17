@@ -5,7 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 void main() {
   group('Step 3 & 4 — Responsive widths, text scaling, RTL/LTR & themes', () {
-    const widths = <double>[320, 360, 390, 600, 800, 1200];
+    const widths = <double>[320, 360, 390, 600, 840, 1200];
     const scales = <double>[1, 1.5, 2];
 
     for (final width in widths) {
@@ -322,60 +322,63 @@ void main() {
     );
   });
 
-  group('Step 7 — Performance regression verification (aspect-specific MediaQuery)', () {
-    testWidgets(
-      'BuildContextBreakpoints (MediaQuery.sizeOf) does not rebuild when keyboard viewInsets change',
-      (tester) async {
-        _BreakpointProbe.buildCount = 0;
-        var viewInsets = EdgeInsets.zero;
+  group(
+    'Step 7 — Performance regression verification (aspect-specific MediaQuery)',
+    () {
+      testWidgets(
+        'BuildContextBreakpoints (MediaQuery.sizeOf) does not rebuild when keyboard viewInsets change',
+        (tester) async {
+          _BreakpointProbe.buildCount = 0;
+          var viewInsets = EdgeInsets.zero;
 
-        await tester.pumpWidget(
-          MaterialApp(
-            home: StatefulBuilder(
-              builder: (context, setState) {
-                final baseMedia = MediaQuery.of(context);
-                return MediaQuery(
-                  data: baseMedia.copyWith(
-                    size: const Size(390, 844),
-                    viewInsets: viewInsets,
-                  ),
-                  child: Scaffold(
-                    body: Column(
-                      children: [
-                        const _BreakpointProbe(),
-                        TextButton(
-                          onPressed: () => setState(
-                            () => viewInsets = const EdgeInsets.only(
-                              bottom: 320,
-                            ),
-                          ),
-                          child: const Text('Show Keyboard'),
-                        ),
-                      ],
+          await tester.pumpWidget(
+            MaterialApp(
+              home: StatefulBuilder(
+                builder: (context, setState) {
+                  final baseMedia = MediaQuery.of(context);
+                  return MediaQuery(
+                    data: baseMedia.copyWith(
+                      size: const Size(390, 844),
+                      viewInsets: viewInsets,
                     ),
-                  ),
-                );
-              },
+                    child: Scaffold(
+                      body: Column(
+                        children: [
+                          const _BreakpointProbe(),
+                          TextButton(
+                            onPressed: () => setState(
+                              () => viewInsets = const EdgeInsets.only(
+                                bottom: 320,
+                              ),
+                            ),
+                            child: const Text('Show Keyboard'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-        );
+          );
 
-        expect(_BreakpointProbe.buildCount, 1);
+          expect(_BreakpointProbe.buildCount, 1);
 
-        // Simulate keyboard inset animation frame — size has not changed!
-        await tester.tap(find.text('Show Keyboard'));
-        await tester.pump();
+          // Simulate keyboard inset animation frame — size has not changed!
+          await tester.tap(find.text('Show Keyboard'));
+          await tester.pump();
 
-        expect(
-          _BreakpointProbe.buildCount,
-          1,
-          reason:
-              'Widgets reading context.isCompact / MediaQuery.sizeOf must not '
-              'rebuild when only MediaQuery.viewInsets changes.',
-        );
-      },
-    );
-  });
+          expect(
+            _BreakpointProbe.buildCount,
+            1,
+            reason:
+                'Widgets reading context.isCompact / MediaQuery.sizeOf must not '
+                'rebuild when only MediaQuery.viewInsets changes.',
+          );
+        },
+      );
+    },
+  );
 
   group('Step 9 — AppUiShowcaseScreen interactive controls', () {
     testWidgets(

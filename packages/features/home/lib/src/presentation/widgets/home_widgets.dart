@@ -26,6 +26,7 @@ class _HomeBodyState extends State<HomeBody> {
   static const double _bottomInset = 112;
 
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   final ValueNotifier<String> _selectedFilterIdNotifier = ValueNotifier<String>(
     'all',
   );
@@ -43,31 +44,88 @@ class _HomeBodyState extends State<HomeBody> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     _selectedFilterIdNotifier.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final username = SessionScope.maybeOf(context)?.currentUser?.username;
+    final identityName = username == null || username.trim().isEmpty
+        ? context.l10n.homeAppBarTitle
+        : username.trim();
+    final identityInitial = identityName.characters.first.toUpperCase();
+
     return AppScaffold(
-      title: context.l10n.homeAppBarTitle,
+      appBar: AppTopBar(
+        title: context.l10n.loginHeadline,
+        subtitle: identityName,
+        variant: AppTopBarVariant.dashboard,
+        profileAvatar: DecoratedBox(
+          key: const ValueKey('home-dashboard-identity'),
+          decoration: BoxDecoration(
+            color: context.colorScheme.primary,
+            borderRadius: BorderRadius.circular(AppRadius.button),
+          ),
+          child: Center(
+            child: Text(
+              identityInitial,
+              style: context.textTheme.titleLarge?.copyWith(
+                color: context.colorScheme.onPrimary,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ),
+        searchAction: IconButton(
+          key: const ValueKey('home-top-bar-search'),
+          tooltip: context.l10n.homeSearchTitle,
+          onPressed: _searchFocusNode.requestFocus,
+          icon: const FaIcon(
+            FontAwesomeIcons.magnifyingGlass,
+            size: AppIconSize.sm,
+          ),
+        ),
+        actions: [
+          IconButton(
+            key: const ValueKey('home-top-bar-notifications'),
+            tooltip: context.l10n.notificationsAppBarTitle,
+            onPressed: () => context.go('/notifications'),
+            icon: const FaIcon(
+              FontAwesomeIcons.bell,
+              size: AppIconSize.sm,
+            ),
+          ),
+          IconButton(
+            key: const ValueKey('home-top-bar-refresh'),
+            tooltip: context.l10n.commonRetry,
+            onPressed: () => context.read<HomeBloc>().add(
+              const HomeLoadRequested(),
+            ),
+            icon: const FaIcon(
+              FontAwesomeIcons.rotateLeft,
+              size: AppIconSize.sm,
+            ),
+          ),
+        ],
+      ),
       padding: EdgeInsets.zero,
       backgroundColor: context.colorScheme.surfaceContainerLow,
-      floatingActionButton: Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.sizeOf(context).width < AppBreakpoints.medium
-              ? 32 + MediaQuery.paddingOf(context).bottom
-              : 0,
-        ),
-        child: FloatingActionButton(
-          heroTag: 'home-add-bookmark-fab',
-          onPressed: () => context.push<void>('/bookmarks/new'),
-          tooltip: context.l10n.bookmarksAddTooltip,
-          child: const FaIcon(FontAwesomeIcons.plus),
-        ).animateScale(delay: 500.ms),
-      ),
       body: BlocBuilder<HomeBloc, HomeState>(
         builder: (context, state) {
+          if (state.isLoading && state.totalBookmarks == 0) {
+            return const _HomeLoadingState();
+          }
+          if (state.failure != null && state.totalBookmarks == 0) {
+            return AppErrorView(
+              title: context.l10n.errorUnknown,
+              message: context.l10n.homeLoadError,
+              retryLabel: context.l10n.commonRetry,
+              onRetry: () =>
+                  context.read<HomeBloc>().add(const HomeLoadRequested()),
+            );
+          }
           return LayoutBuilder(
             builder: (context, constraints) {
               return SingleChildScrollView(
@@ -92,6 +150,7 @@ class _HomeBodyState extends State<HomeBody> {
                           listenable: _searchController,
                           builder: (context, _) => _SearchSection(
                             controller: _searchController,
+                            focusNode: _searchFocusNode,
                             onChanged: (_) {},
                           ).animateFadeIn(delay: 100.ms),
                         ),
@@ -213,6 +272,49 @@ class _HomeBodyState extends State<HomeBody> {
       keywords: const ['tool', 'app', 'extension', 'package'],
     ),
   ];
+}
+
+class _HomeLoadingState extends StatelessWidget {
+  const _HomeLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: context.l10n.commonLoading,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: const Padding(
+            padding: EdgeInsets.all(AppSpacing.xl),
+            child: AppShimmer(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AppSkeleton.line(width: 180, height: 28),
+                  SizedBox(height: AppSpacing.sm),
+                  AppSkeleton.line(width: 280),
+                  SizedBox(height: AppSpacing.lg),
+                  AppSkeleton(height: 64),
+                  SizedBox(height: AppSpacing.lg),
+                  Row(
+                    children: [
+                      Expanded(child: AppSkeleton(height: 80)),
+                      SizedBox(width: AppSpacing.sm),
+                      Expanded(child: AppSkeleton(height: 80)),
+                      SizedBox(width: AppSpacing.sm),
+                      Expanded(child: AppSkeleton(height: 80)),
+                    ],
+                  ),
+                  SizedBox(height: AppSpacing.xl),
+                  AppSkeleton(height: 180),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _HomeFilter {

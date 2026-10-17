@@ -93,6 +93,8 @@ class AppTextField extends StatelessWidget {
             }
           : null,
       autofillHints: autofillHints,
+      textAlignVertical: TextAlignVertical.center,
+      style: AppTypography.body(context.textTheme),
       // Border, fill, and radius now come from the theme's
       // `inputDecorationTheme` (see `_componentThemes` in `app_theme.dart`),
       // so only field-specific decoration bits are set here.

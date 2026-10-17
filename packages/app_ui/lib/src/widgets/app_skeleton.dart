@@ -13,7 +13,7 @@ class AppShimmer extends StatefulWidget {
     super.key,
     required this.child,
     this.enabled = true,
-    this.duration = const Duration(milliseconds: 1400),
+    this.duration = AppDurations.shimmer,
   });
 
   final Widget child;
@@ -38,16 +38,28 @@ class _AppShimmerState extends State<AppShimmer>
   @override
   void initState() {
     super.initState();
-    if (widget.enabled) _controller.repeat();
+  }
+
+  bool _shouldAnimate(BuildContext context) =>
+      widget.enabled && !MediaQuery.disableAnimationsOf(context);
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_shouldAnimate(context)) {
+      if (!_controller.isAnimating) _controller.repeat();
+    } else {
+      _controller.stop();
+    }
   }
 
   @override
   void didUpdateWidget(AppShimmer oldWidget) {
     super.didUpdateWidget(oldWidget);
     _controller.duration = widget.duration;
-    if (widget.enabled && !_controller.isAnimating) {
+    if (_shouldAnimate(context) && !_controller.isAnimating) {
       _controller.repeat();
-    } else if (!widget.enabled && _controller.isAnimating) {
+    } else if (!_shouldAnimate(context) && _controller.isAnimating) {
       _controller.stop();
     }
   }
@@ -60,15 +72,10 @@ class _AppShimmerState extends State<AppShimmer>
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.enabled) return widget.child;
+    if (!_shouldAnimate(context)) return widget.child;
 
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = colorScheme.brightness == Brightness.dark;
-    final base = colorScheme.surfaceContainerHighest;
-    final highlight = Color.alphaBlend(
-      Colors.white.withValues(alpha: isDark ? 0.10 : 0.55),
-      base,
-    );
+    final base = context.semanticColors.skeletonBase;
+    final highlight = context.semanticColors.skeletonHighlight;
 
     final isRtl = Directionality.of(context) == TextDirection.rtl;
 
@@ -104,7 +111,9 @@ class _SlidingGradientTransform extends GradientTransform {
 
   @override
   Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
-    final directionFactor = isRtl ? (1 - slidePercent * 2) : (slidePercent * 2 - 1);
+    final directionFactor = isRtl
+        ? (1 - slidePercent * 2)
+        : (slidePercent * 2 - 1);
     return Matrix4.translationValues(
       bounds.width * directionFactor,
       0,
@@ -122,14 +131,17 @@ class AppSkeleton extends StatelessWidget {
   const AppSkeleton({
     super.key,
     this.width,
-    this.height = 16,
+    this.height = AppSpacing.lg,
     this.borderRadius = const BorderRadius.all(Radius.circular(AppRadius.sm)),
   }) : shape = BoxShape.rectangle;
 
   /// A thin rounded bar approximating a line of text.
-  const AppSkeleton.line({super.key, this.width, this.height = 12})
-    : shape = BoxShape.rectangle,
-      borderRadius = const BorderRadius.all(Radius.circular(6));
+  const AppSkeleton.line({
+    super.key,
+    this.width,
+    this.height = AppSpacing.md,
+  }) : shape = BoxShape.rectangle,
+       borderRadius = const BorderRadius.all(Radius.circular(AppRadius.xs));
 
   /// A circular placeholder, e.g. an avatar.
   const AppSkeleton.circle({super.key, required double size})
@@ -150,7 +162,7 @@ class AppSkeleton extends StatelessWidget {
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          color: context.semanticColors.skeletonBase,
           shape: shape,
           borderRadius: shape == BoxShape.circle ? null : borderRadius,
         ),
@@ -177,7 +189,10 @@ class AppSkeletonListTile extends StatelessWidget {
       child: Row(
         children: [
           if (hasLeading) ...[
-            const AppSkeleton(width: 40, height: 40),
+            const AppSkeleton(
+              width: AppIconSize.xxl,
+              height: AppIconSize.xxl,
+            ),
             const SizedBox(width: AppSpacing.lg),
           ],
           const Expanded(

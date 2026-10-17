@@ -168,6 +168,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeAppBarTitle => 'Home';
 
   @override
+  String get homeWelcomeSubtitle =>
+      'Your saved knowledge, organized in one place';
+
+  @override
+  String get homeLoadError =>
+      'We could not load your dashboard. Please try again.';
+
+  @override
   String get homeViewAllBookmarks => 'View all';
 
   @override
@@ -254,6 +262,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileAppBarTitle => 'Profile';
+
+  @override
+  String get profileSettingsSubtitle => 'Account and application settings';
 
   @override
   String get profileSectionAppearance => 'Appearance';

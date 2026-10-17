@@ -14,7 +14,7 @@ class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(AppSpacing.lg),
+    this.padding = const EdgeInsets.all(AppSpacing.card),
     this.onTap,
     this.margin,
     this.color,
@@ -47,8 +47,14 @@ class AppCard extends StatelessWidget {
 
     final card = Card(
       margin: margin,
-      color: color,
-      shape: RoundedRectangleBorder(borderRadius: radius),
+      color: color ?? context.semanticColors.surfaceElevated,
+      shape: RoundedRectangleBorder(
+        borderRadius: radius,
+        side: BorderSide(
+          color: context.semanticColors.divider,
+          width: AppBorderWidth.hairline,
+        ),
+      ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         borderRadius: radius,

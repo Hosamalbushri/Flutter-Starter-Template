@@ -7,7 +7,6 @@ import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_ar.dart';
 import 'app_localizations_en.dart';
-import 'app_localizations_vi.dart';
 
 // ignore_for_file: type=lint
 
@@ -97,7 +96,6 @@ abstract class AppLocalizations {
   static const List<Locale> supportedLocales = <Locale>[
     Locale('ar'),
     Locale('en'),
-    Locale('vi'),
   ];
 
   /// No description provided for @appTitle.
@@ -412,6 +410,18 @@ abstract class AppLocalizations {
   /// **'Home'**
   String get homeAppBarTitle;
 
+  /// Supporting text below the home screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'Your saved knowledge, organized in one place'**
+  String get homeWelcomeSubtitle;
+
+  /// Error shown when the home dashboard cannot be loaded.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not load your dashboard. Please try again.'**
+  String get homeLoadError;
+
   /// No description provided for @homeViewAllBookmarks.
   ///
   /// In en, this message translates to:
@@ -561,6 +571,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Profile'**
   String get profileAppBarTitle;
+
+  /// Supporting text below the profile screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'Account and application settings'**
+  String get profileSettingsSubtitle;
 
   /// No description provided for @profileSectionAppearance.
   ///
@@ -1426,7 +1442,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['ar', 'en', 'vi'].contains(locale.languageCode);
+      <String>['ar', 'en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -1439,8 +1455,6 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsAr();
     case 'en':
       return AppLocalizationsEn();
-    case 'vi':
-      return AppLocalizationsVi();
   }
 
   throw FlutterError(

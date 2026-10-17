@@ -22,6 +22,18 @@ rootProject.layout.buildDirectory.value(newBuildDir)
 subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
+
+    configurations.configureEach {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "androidx.test" && requested.name == "runner") {
+                // Flutter's integration_test plugin requests runner:1.2+.
+                // Keep Android builds deterministic and avoid repeated remote
+                // metadata probes for that dynamic version during every build.
+                useVersion("1.7.0")
+                because("integration_test declares a dynamic runner version")
+            }
+        }
+    }
 }
 subprojects {
     project.evaluationDependsOn(":app")

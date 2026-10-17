@@ -562,8 +562,8 @@ change-password, delete-account, and sign-out actions are gone), and removes
 auth wiring from the router and DI graph. The splash screen waits its minimum
 display time then proceeds directly.
 
-**`--no-backend`** — Scaffolds a fully local-only app. This flag is a
-composite: it implies `--no-auth` (no server means no JWT), removes the three
+**`--no-backend`** — Scaffolds a fully local-only app by default. It defaults
+auth off (explicit `--auth --auth-provider jwt` retains the JWT client), removes the three
 server-backed demo features (`bookmarks`, `collections`, `notifications`), and
 strips the `network` and `sync_connectivity_plus` packages along with the sync
 cursor store. The `rev_sync` engine itself **stays** — `database` entities use
@@ -580,8 +580,13 @@ depends on it).
 
 ### Composition rules
 
-- `--no-backend` implies `--no-auth`.
-- `--minimal` = `--no-backend --no-firebase`.
+- `--no-backend` defaults to `--no-auth`; explicit JWT auth is supported.
+- `--minimal` forces `--no-backend --no-firebase --no-auth`.
+- Firebase Auth requires Firebase, backend, and auth to remain enabled.
+
+See the [CLI compatibility matrix](docs/compatibility.md) for every supported
+pillar combination, rejected flag combinations, schema policy, and migration
+guidance.
 
 ### Branding & auth provider
 

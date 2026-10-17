@@ -60,6 +60,7 @@ class ProfileBody extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget body = AppScaffold(
       title: context.l10n.profileAppBarTitle,
+      subtitle: context.l10n.profileSettingsSubtitle,
       padding: EdgeInsets.zero,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(

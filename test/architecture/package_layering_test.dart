@@ -41,46 +41,46 @@ enum PackageCategory {
 }
 
 /// Permitted runtime dependency directions between package categories.
-const Map<PackageCategory, Set<PackageCategory>>
-_allowedCategoryDependencies = {
-  PackageCategory.applicationShell: {
-    PackageCategory.feature,
-    PackageCategory.sharedDomainContracts,
-    PackageCategory.uiDesignSystem,
-    PackageCategory.infrastructureService,
-    PackageCategory.platformIntegration,
-  },
-  PackageCategory.feature: {
-    PackageCategory.feature, // subject to layer rank + capability allowlist
-    PackageCategory.sharedDomainContracts,
-    PackageCategory.uiDesignSystem,
-    PackageCategory.infrastructureService,
-    PackageCategory.platformIntegration,
-  },
-  PackageCategory.sharedDomainContracts: {
-    PackageCategory.sharedDomainContracts,
-  },
-  PackageCategory.uiDesignSystem: {
-    PackageCategory.uiDesignSystem,
-    PackageCategory.sharedDomainContracts,
-    PackageCategory.infrastructureService,
-  },
-  PackageCategory.infrastructureService: {
-    PackageCategory.infrastructureService,
-    PackageCategory.sharedDomainContracts,
-  },
-  PackageCategory.platformIntegration: {
-    PackageCategory.platformIntegration,
-    PackageCategory.infrastructureService,
-    PackageCategory.sharedDomainContracts,
-  },
-  PackageCategory.devTestUtilities: {
-    PackageCategory.sharedDomainContracts,
-    PackageCategory.uiDesignSystem,
-    PackageCategory.infrastructureService,
-    PackageCategory.platformIntegration,
-  },
-};
+const Map<PackageCategory, Set<PackageCategory>> _allowedCategoryDependencies =
+    {
+      PackageCategory.applicationShell: {
+        PackageCategory.feature,
+        PackageCategory.sharedDomainContracts,
+        PackageCategory.uiDesignSystem,
+        PackageCategory.infrastructureService,
+        PackageCategory.platformIntegration,
+      },
+      PackageCategory.feature: {
+        PackageCategory.feature, // subject to layer rank + capability allowlist
+        PackageCategory.sharedDomainContracts,
+        PackageCategory.uiDesignSystem,
+        PackageCategory.infrastructureService,
+        PackageCategory.platformIntegration,
+      },
+      PackageCategory.sharedDomainContracts: {
+        PackageCategory.sharedDomainContracts,
+      },
+      PackageCategory.uiDesignSystem: {
+        PackageCategory.uiDesignSystem,
+        PackageCategory.sharedDomainContracts,
+        PackageCategory.infrastructureService,
+      },
+      PackageCategory.infrastructureService: {
+        PackageCategory.infrastructureService,
+        PackageCategory.sharedDomainContracts,
+      },
+      PackageCategory.platformIntegration: {
+        PackageCategory.platformIntegration,
+        PackageCategory.infrastructureService,
+        PackageCategory.sharedDomainContracts,
+      },
+      PackageCategory.devTestUtilities: {
+        PackageCategory.sharedDomainContracts,
+        PackageCategory.uiDesignSystem,
+        PackageCategory.infrastructureService,
+        PackageCategory.platformIntegration,
+      },
+    };
 
 /// Explicit category assignment for non-feature workspace packages.
 /// Any package named `feature_<name>` is automatically classified as
@@ -199,14 +199,15 @@ void main() {
           '${unranked.map((p) => '  $p').join('\n')}',
     );
 
-    final uncategorized = packages.keys
-        .where(
-          (name) =>
-              categoryForPackage(name, rootPackageName: rootPackageName) ==
-              null,
-        )
-        .toList()
-      ..sort();
+    final uncategorized =
+        packages.keys
+            .where(
+              (name) =>
+                  categoryForPackage(name, rootPackageName: rootPackageName) ==
+                  null,
+            )
+            .toList()
+          ..sort();
     expect(
       uncategorized,
       isEmpty,
@@ -216,47 +217,53 @@ void main() {
     );
   });
 
-  test('packages only depend on strictly lower layers and permitted categories', () {
-    final dependencyGraph = <String, Set<String>>{
-      for (final entry in packages.entries)
-        entry.key: _runtimeDependencies(entry.value),
-    };
-    final violations = validateLayeringAndCategories(
-      dependencyGraph: dependencyGraph,
-      layers: _layers,
-      rootPackageName: rootPackageName,
-    );
-
-    expect(
-      violations,
-      isEmpty,
-      reason:
-          'These runtime dependencies violate package layering or category '
-          'contracts:\n\n${violations.map((v) => '  $v').join('\n')}',
-    );
-  });
-
-  test('root application shell only depends on permitted runtime categories', () {
-    final rootDeps = _runtimeDependencies(rootPubspecLines);
-    final violations = <String>[];
-    for (final dep in rootDeps) {
-      if (!packages.containsKey(dep)) continue;
-      final depCategory = categoryForPackage(
-        dep,
+  test(
+    'packages only depend on strictly lower layers and permitted categories',
+    () {
+      final dependencyGraph = <String, Set<String>>{
+        for (final entry in packages.entries)
+          entry.key: _runtimeDependencies(entry.value),
+      };
+      final violations = validateLayeringAndCategories(
+        dependencyGraph: dependencyGraph,
+        layers: _layers,
         rootPackageName: rootPackageName,
       );
-      if (depCategory == null) continue;
-      final allowed =
-          _allowedCategoryDependencies[PackageCategory.applicationShell]!;
-      if (!allowed.contains(depCategory)) {
-        violations.add(
-          '$rootPackageName (${PackageCategory.applicationShell.name}) -> '
-          '$dep (${depCategory.name}) [forbidden category]',
+
+      expect(
+        violations,
+        isEmpty,
+        reason:
+            'These runtime dependencies violate package layering or category '
+            'contracts:\n\n${violations.map((v) => '  $v').join('\n')}',
+      );
+    },
+  );
+
+  test(
+    'root application shell only depends on permitted runtime categories',
+    () {
+      final rootDeps = _runtimeDependencies(rootPubspecLines);
+      final violations = <String>[];
+      for (final dep in rootDeps) {
+        if (!packages.containsKey(dep)) continue;
+        final depCategory = categoryForPackage(
+          dep,
+          rootPackageName: rootPackageName,
         );
+        if (depCategory == null) continue;
+        final allowed =
+            _allowedCategoryDependencies[PackageCategory.applicationShell]!;
+        if (!allowed.contains(depCategory)) {
+          violations.add(
+            '$rootPackageName (${PackageCategory.applicationShell.name}) -> '
+            '$dep (${depCategory.name}) [forbidden category]',
+          );
+        }
       }
-    }
-    expect(violations, isEmpty);
-  });
+      expect(violations, isEmpty);
+    },
+  );
 
   test('workspace package graph is a DAG with no circular dependencies', () {
     final dependencyGraph = <String, Set<String>>{
@@ -292,35 +299,45 @@ void main() {
       expect(violations, isEmpty);
     });
 
-    test('rejects upward, same-layer, devTestUtilities, shell, and forbidden category dependencies', () {
-      final violations = validateLayeringAndCategories(
-        dependencyGraph: {
-          'architecture': const {'app_ui'}, // upward + forbidden category (sharedDomainContracts -> uiDesignSystem)
-          'config': const {'storage'}, // same-layer (1 -> 1)
-          'network': const {'app_ui'}, // forbidden category (infrastructureService -> uiDesignSystem)
-          'feature_home': const {'test_utils', 'my_app'}, // devTestUtilities + applicationShell in runtime deps
-        },
-        layers: _layers,
-        rootPackageName: 'my_app',
-      );
-      expect(
-        violations,
-        containsAll([
-          contains('architecture (layer 0) -> app_ui (layer 1)  [upward]'),
-          contains(
-            'architecture (sharedDomainContracts) -> app_ui (uiDesignSystem)  [forbidden-category]',
-          ),
-          contains('config (layer 1) -> storage (layer 1)  [same-layer]'),
-          contains(
-            'network (infrastructureService) -> app_ui (uiDesignSystem)  [forbidden-category]',
-          ),
-          contains(
-            'feature_home (feature) -> test_utils (devTestUtilities)  [forbidden-category]',
-          ),
-          contains('feature_home -> my_app  [depends-on-application-shell]'),
-        ]),
-      );
-    });
+    test(
+      'rejects upward, same-layer, devTestUtilities, shell, and forbidden category dependencies',
+      () {
+        final violations = validateLayeringAndCategories(
+          dependencyGraph: {
+            'architecture': const {
+              'app_ui',
+            }, // upward + forbidden category (sharedDomainContracts -> uiDesignSystem)
+            'config': const {'storage'}, // same-layer (1 -> 1)
+            'network': const {
+              'app_ui',
+            }, // forbidden category (infrastructureService -> uiDesignSystem)
+            'feature_home': const {
+              'test_utils',
+              'my_app',
+            }, // devTestUtilities + applicationShell in runtime deps
+          },
+          layers: _layers,
+          rootPackageName: 'my_app',
+        );
+        expect(
+          violations,
+          containsAll([
+            contains('architecture (layer 0) -> app_ui (layer 1)  [upward]'),
+            contains(
+              'architecture (sharedDomainContracts) -> app_ui (uiDesignSystem)  [forbidden-category]',
+            ),
+            contains('config (layer 1) -> storage (layer 1)  [same-layer]'),
+            contains(
+              'network (infrastructureService) -> app_ui (uiDesignSystem)  [forbidden-category]',
+            ),
+            contains(
+              'feature_home (feature) -> test_utils (devTestUtilities)  [forbidden-category]',
+            ),
+            contains('feature_home -> my_app  [depends-on-application-shell]'),
+          ]),
+        );
+      },
+    );
 
     test('detects 2-node and 3-node circular package references', () {
       final cycles = detectDependencyCycles({
@@ -354,7 +371,8 @@ List<String> validateLayeringAndCategories({
         violations.add('$name -> $dep  [depends-on-application-shell]');
         continue;
       }
-      if (!workspaceNames.contains(dep) && !_nonFeatureCategories.containsKey(dep)) {
+      if (!workspaceNames.contains(dep) &&
+          !_nonFeatureCategories.containsKey(dep)) {
         continue;
       }
       final toRank = layers[dep];
@@ -399,7 +417,10 @@ List<String> detectDependencyCycles(Map<String, Set<String>> dependencyGraph) {
       if (!dependencyGraph.containsKey(dep)) continue;
       if (activeSet.contains(dep)) {
         final cycleStart = activeStack.indexOf(dep);
-        final cyclePath = [...activeStack.sublist(cycleStart), dep].join(' -> ');
+        final cyclePath = [
+          ...activeStack.sublist(cycleStart),
+          dep,
+        ].join(' -> ');
         cycles.add(cyclePath);
       } else if (!visited.contains(dep)) {
         dfs(dep);

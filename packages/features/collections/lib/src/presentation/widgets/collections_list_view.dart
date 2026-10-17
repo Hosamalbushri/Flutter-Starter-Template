@@ -66,8 +66,9 @@ class _CollectionsListBody extends StatelessWidget {
           );
         }
 
-        final textScale =
-            MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
+        final textScale = MediaQuery.textScalerOf(
+          context,
+        ).scale(1).clamp(1.0, 2.0);
         final mainAxisExtent = 116 * (1 + (textScale - 1) * 0.45);
 
         return GridView.builder(

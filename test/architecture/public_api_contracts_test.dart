@@ -28,49 +28,55 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final workspacePackages = _discoverWorkspacePackages();
 
-  test('every workspace package has a single public barrel lib/<package>.dart', () {
-    final violations = <String>[];
-    for (final pkg in workspacePackages) {
-      violations.addAll(
-        validatePackageLibStructure(
-          packageName: pkg.name,
-          packageDir: pkg.dirPath,
-          libRelativeDartFiles: pkg.libRelativeDartFiles,
-        ),
+  test(
+    'every workspace package has a single public barrel lib/<package>.dart',
+    () {
+      final violations = <String>[];
+      for (final pkg in workspacePackages) {
+        violations.addAll(
+          validatePackageLibStructure(
+            packageName: pkg.name,
+            packageDir: pkg.dirPath,
+            libRelativeDartFiles: pkg.libRelativeDartFiles,
+          ),
+        );
+      }
+      expect(
+        violations,
+        isEmpty,
+        reason:
+            'Every workspace package must expose only `lib/<package>.dart` at '
+            'the top level of `lib/` and keep implementation files under '
+            '`lib/src/`:\n\n${violations.map((v) => '  $v').join('\n')}',
       );
-    }
-    expect(
-      violations,
-      isEmpty,
-      reason:
-          'Every workspace package must expose only `lib/<package>.dart` at '
-          'the top level of `lib/` and keep implementation files under '
-          '`lib/src/`:\n\n${violations.map((v) => '  $v').join('\n')}',
-    );
-  });
+    },
+  );
 
-  test('no workspace package barrel leaks internal or third-party implementation details', () {
-    final violations = <String>[];
-    for (final pkg in workspacePackages) {
-      final barrelFile = File('${pkg.dirPath}/lib/${pkg.name}.dart');
-      if (!barrelFile.existsSync()) continue;
-      violations.addAll(
-        validateBarrelExports(
-          packageName: pkg.name,
-          barrelPath: '${pkg.dirPath}/lib/${pkg.name}.dart',
-          lines: barrelFile.readAsLinesSync(),
-        ),
+  test(
+    'no workspace package barrel leaks internal or third-party implementation details',
+    () {
+      final violations = <String>[];
+      for (final pkg in workspacePackages) {
+        final barrelFile = File('${pkg.dirPath}/lib/${pkg.name}.dart');
+        if (!barrelFile.existsSync()) continue;
+        violations.addAll(
+          validateBarrelExports(
+            packageName: pkg.name,
+            barrelPath: '${pkg.dirPath}/lib/${pkg.name}.dart',
+            lines: barrelFile.readAsLinesSync(),
+          ),
+        );
+      }
+      expect(
+        violations,
+        isEmpty,
+        reason:
+            'Public barrel files leaked internal implementation symbols or '
+            'unwrapped third-party SDKs:\n\n'
+            '${violations.map((v) => '  $v').join('\n')}',
       );
-    }
-    expect(
-      violations,
-      isEmpty,
-      reason:
-          'Public barrel files leaked internal implementation symbols or '
-          'unwrapped third-party SDKs:\n\n'
-          '${violations.map((v) => '  $v').join('\n')}',
-    );
-  });
+    },
+  );
 
   group('public API contract regression tests', () {
     test('accepts compliant feature and infrastructure barrels', () {
@@ -115,73 +121,79 @@ void main() {
       );
     });
 
-    test('rejects extra top-level files outside lib/src/ or missing barrel', () {
-      final missingBarrel = validatePackageLibStructure(
-        packageName: 'feature_orders',
-        packageDir: 'packages/features/orders',
-        libRelativeDartFiles: const ['src/di.dart'],
-      );
-      expect(missingBarrel, contains(contains('missing public barrel')));
+    test(
+      'rejects extra top-level files outside lib/src/ or missing barrel',
+      () {
+        final missingBarrel = validatePackageLibStructure(
+          packageName: 'feature_orders',
+          packageDir: 'packages/features/orders',
+          libRelativeDartFiles: const ['src/di.dart'],
+        );
+        expect(missingBarrel, contains(contains('missing public barrel')));
 
-      final extraTopLevel = validatePackageLibStructure(
-        packageName: 'feature_orders',
-        packageDir: 'packages/features/orders',
-        libRelativeDartFiles: const [
-          'feature_orders.dart',
-          'orders_internal_helper.dart',
-        ],
-      );
-      expect(
-        extraTopLevel,
-        contains(contains('non-barrel file outside lib/src/')),
-      );
-    });
+        final extraTopLevel = validatePackageLibStructure(
+          packageName: 'feature_orders',
+          packageDir: 'packages/features/orders',
+          libRelativeDartFiles: const [
+            'feature_orders.dart',
+            'orders_internal_helper.dart',
+          ],
+        );
+        expect(
+          extraTopLevel,
+          contains(contains('non-barrel file outside lib/src/')),
+        );
+      },
+    );
 
-    test('rejects barrel exports of di.dart, locator.dart, data/, repositories/, usecases/, and firebase_*', () {
-      final featureLeaks = validateBarrelExports(
-        packageName: 'feature_orders',
-        barrelPath: 'packages/features/orders/lib/feature_orders.dart',
-        lines: const [
-          "export 'src/di.dart';",
-          "export 'src/locator.dart';",
-          "export 'src/data/repositories/orders_repository_impl.dart';",
-          "export 'src/domain/repositories/orders_repository.dart';",
-          "export 'src/domain/usecases/get_orders.dart';",
-        ],
-      );
-      expect(
-        featureLeaks,
-        containsAll([
-          contains('leaks internal DI anchor: src/di.dart'),
-          contains('leaks internal service locator: src/locator.dart'),
-          contains(
-            'feature barrel leaks internal layer: src/data/repositories/orders_repository_impl.dart',
-          ),
-          contains(
-            'feature barrel leaks internal layer: src/domain/repositories/orders_repository.dart',
-          ),
-          contains(
-            'feature barrel leaks internal layer: src/domain/usecases/get_orders.dart',
-          ),
-        ]),
-      );
+    test(
+      'rejects barrel exports of di.dart, locator.dart, data/, repositories/, usecases/, and firebase_*',
+      () {
+        final featureLeaks = validateBarrelExports(
+          packageName: 'feature_orders',
+          barrelPath: 'packages/features/orders/lib/feature_orders.dart',
+          lines: const [
+            "export 'src/di.dart';",
+            "export 'src/locator.dart';",
+            "export 'src/data/repositories/orders_repository_impl.dart';",
+            "export 'src/domain/repositories/orders_repository.dart';",
+            "export 'src/domain/usecases/get_orders.dart';",
+          ],
+        );
+        expect(
+          featureLeaks,
+          containsAll([
+            contains('leaks internal DI anchor: src/di.dart'),
+            contains('leaks internal service locator: src/locator.dart'),
+            contains(
+              'feature barrel leaks internal layer: src/data/repositories/orders_repository_impl.dart',
+            ),
+            contains(
+              'feature barrel leaks internal layer: src/domain/repositories/orders_repository.dart',
+            ),
+            contains(
+              'feature barrel leaks internal layer: src/domain/usecases/get_orders.dart',
+            ),
+          ]),
+        );
 
-      final infraLeaks = validateBarrelExports(
-        packageName: 'network',
-        barrelPath: 'packages/network/lib/network.dart',
-        lines: const [
-          "export 'package:firebase_performance/firebase_performance.dart';",
-          "export 'package:firebase_crashlytics/firebase_crashlytics.dart';",
-        ],
-      );
-      expect(
-        infraLeaks,
-        containsAll([
-          contains('firebase_performance'),
-          contains('firebase_crashlytics'),
-        ]),
-      );
-    });
+        final infraLeaks = validateBarrelExports(
+          packageName: 'network',
+          barrelPath: 'packages/network/lib/network.dart',
+          lines: const [
+            "export 'package:firebase_performance/firebase_performance.dart';",
+            "export 'package:firebase_crashlytics/firebase_crashlytics.dart';",
+          ],
+        );
+        expect(
+          infraLeaks,
+          containsAll([
+            contains('firebase_performance'),
+            contains('firebase_crashlytics'),
+          ]),
+        );
+      },
+    );
   });
 }
 
@@ -296,13 +308,14 @@ List<_WorkspacePackageInfo> _discoverWorkspacePackages() {
     final libDir = Directory('${dir.path}/lib');
     if (!libDir.existsSync()) return;
     final libPrefix = '${_posix(libDir.path)}/';
-    final files = libDir
-        .listSync(recursive: true)
-        .whereType<File>()
-        .where((f) => f.path.endsWith('.dart'))
-        .map((f) => _posix(f.path).substring(libPrefix.length))
-        .toList()
-      ..sort();
+    final files =
+        libDir
+            .listSync(recursive: true)
+            .whereType<File>()
+            .where((f) => f.path.endsWith('.dart'))
+            .map((f) => _posix(f.path).substring(libPrefix.length))
+            .toList()
+          ..sort();
     result.add(
       _WorkspacePackageInfo(
         name: name,

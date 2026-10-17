@@ -28,6 +28,13 @@
 # The fvm shim lives here, not only in setup.sh: setup.sh's dart()/flutter()
 # functions don't propagate to this child process, and this script is also run
 # standalone (e.g. by `fst add-feature`).
+#
+# Usage:
+#   tool/codegen.sh                     # Generate for all packages needing build
+#   tool/codegen.sh --package <dir>     # Generate only for specified package
+#   tool/codegen.sh <dir>...            # Generate only for specified packages
+#   tool/codegen.sh --full              # Force full rebuild of all packages
+#
 set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
@@ -35,6 +42,42 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."
 if command -v fvm >/dev/null 2>&1; then
   dart() { fvm dart "$@"; }
 fi
+
+target_packages=()
+force_full=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --package)
+      shift
+      target_packages+=("${1%/}")
+      ;;
+    --full)
+      force_full=1
+      ;;
+    -h|--help)
+      echo "Usage: tool/codegen.sh [--full] [--package <dir>] [dir...]"
+      exit 0
+      ;;
+    *)
+      target_packages+=("${1%/}")
+      ;;
+  esac
+  shift
+done
+
+should_build_pkg() {
+  local p="${1%/}"
+  if [[ ${#target_packages[@]} -eq 0 ]]; then
+    return 0
+  fi
+  for target in "${target_packages[@]}"; do
+    if [[ "$target" == "$p" || "$target" == "$p/" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
 
 run_pkg() {
   local dir="$1"
@@ -54,7 +97,9 @@ for pkg in packages/*/ packages/features/*/; do
   case "${pkg%/}" in
     packages/database | packages/database_drift) continue ;;
   esac
-  run_pkg "${pkg%/}"
+  if should_build_pkg "${pkg%/}"; then
+    run_pkg "${pkg%/}"
+  fi
 done
 
 # The Drift package owns build_runner output (app_database.g.dart) that the
@@ -66,23 +111,27 @@ done
 # regenerated + verified separately in CI.
 for db in packages/database packages/database_drift; do
   [ -f "$db/lib/src/app_database.dart" ] || continue
-  run_pkg "$db"
+  if should_build_pkg "$db"; then
+    run_pkg "$db"
 
-  # Re-dump the v1 schema. `fst create` may have removed tables, which would
-  # leave the committed snapshot describing a schema this project never had —
-  # and every future migration test replays from it. A no-op once the project
-  # has its own history, since only the current version is ever re-dumped.
-  if [ -d "$db/drift_schemas" ]; then
-    echo "::group::drift schema dump: $db"
-    (cd "$db" && dart run drift_dev schema dump \
-      lib/src/app_database.dart drift_schemas/)
-    echo "::endgroup::"
+    # Re-dump the v1 schema. `fst create` may have removed tables, which would
+    # leave the committed snapshot describing a schema this project never had —
+    # and every future migration test replays from it. A no-op once the project
+    # has its own history, since only the current version is ever re-dumped.
+    if [ -d "$db/drift_schemas" ]; then
+      echo "::group::drift schema dump: $db"
+      (cd "$db" && dart run drift_dev schema dump \
+        lib/src/app_database.dart drift_schemas/)
+      echo "::endgroup::"
+    fi
   fi
 done
 
-echo "::group::build_runner: app root"
-dart run build_runner build --delete-conflicting-outputs
-echo "::endgroup::"
+if should_build_pkg "." || should_build_pkg "app" || [[ ${#target_packages[@]} -eq 0 ]]; then
+  echo "::group::build_runner: app root"
+  dart run build_runner build --delete-conflicting-outputs
+  echo "::endgroup::"
+fi
 
 # The micro-package DI module (di.module.dart) is generated in a style that does
 # not match `dart format`, so normalize it here — otherwise the formatting guard

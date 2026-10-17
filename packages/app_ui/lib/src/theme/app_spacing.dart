@@ -29,4 +29,16 @@ abstract final class AppSpacing {
 
   /// 40px.
   static const double xxxxl = 40;
+
+  /// Default padding inside content cards.
+  static const double card = xl;
+
+  /// Horizontal page inset on compact windows.
+  static const double pageCompact = lg;
+
+  /// Horizontal page inset on medium windows.
+  static const double pageMedium = xxl;
+
+  /// Horizontal page inset on expanded windows.
+  static const double pageExpanded = xxxl;
 }

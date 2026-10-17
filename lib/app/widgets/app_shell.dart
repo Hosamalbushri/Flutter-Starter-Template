@@ -1,4 +1,7 @@
 import 'package:app_ui/app_ui.dart';
+// fst:feature:bookmarks:start
+import 'package:feature_bookmarks/feature_bookmarks.dart';
+// fst:feature:bookmarks:end
 // fst:feature:notifications:start
 import 'package:feature_notifications/feature_notifications.dart';
 // fst:feature:notifications:end
@@ -97,6 +100,14 @@ class _AppShellState extends State<AppShell> {
           initialLocation: index == widget.navigationShell.currentIndex,
         );
       },
+      // fst:feature:bookmarks:start
+      centerAction: AppCenterAction(
+        icon: FontAwesomeIcons.plus,
+        label: l10n.bookmarksAddTooltip,
+        tooltip: l10n.bookmarksAddTooltip,
+        onPressed: () => context.push(BookmarksRoutes.create),
+      ),
+      // fst:feature:bookmarks:end
       body: widget.navigationShell,
     );
   }

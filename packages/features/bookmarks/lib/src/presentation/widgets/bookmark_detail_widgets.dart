@@ -528,7 +528,9 @@ class _OpenInBrowserBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: _BookmarkDetailColors.background(context).withValues(alpha: 0.94),
+        color: _BookmarkDetailColors.background(
+          context,
+        ).withValues(alpha: 0.94),
         boxShadow: const [
           BoxShadow(
             color: Color(0x080A192F),

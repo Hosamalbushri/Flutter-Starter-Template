@@ -11,235 +11,258 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localization/localization.dart';
 
 void main() {
-  test('domain-only packages and feature domain/ layers never import UI, localization, routing, or BLoC', () {
-    final violations = <String>[];
+  test(
+    'domain-only packages and feature domain/ layers never import UI, localization, routing, or BLoC',
+    () {
+      final violations = <String>[];
 
-    final domainDirectories = <Directory>[
-      Directory('packages/architecture/lib'),
-      Directory('packages/shared_contracts/lib'),
-      Directory('published/rev_sync/lib'),
-    ];
-    final featuresDir = Directory('packages/features');
-    if (featuresDir.existsSync()) {
+      final domainDirectories = <Directory>[
+        Directory('packages/architecture/lib'),
+        Directory('packages/shared_contracts/lib'),
+        Directory('published/rev_sync/lib'),
+      ];
+      final featuresDir = Directory('packages/features');
+      if (featuresDir.existsSync()) {
+        for (final featureDir
+            in featuresDir.listSync().whereType<Directory>()) {
+          domainDirectories.add(Directory('${featureDir.path}/lib/src/domain'));
+        }
+      }
+
+      for (final dir in domainDirectories) {
+        if (!dir.existsSync()) continue;
+        for (final file
+            in dir
+                .listSync(recursive: true)
+                .whereType<File>()
+                .where((f) => f.path.endsWith('.dart'))) {
+          violations.addAll(
+            scanDomainFileForUiImports(
+              filePath: _posix(file.path),
+              lines: file.readAsLinesSync(),
+            ),
+          );
+        }
+      }
+
+      expect(
+        violations,
+        isEmpty,
+        reason:
+            'Domain-only packages and feature domain/ layers must remain free '
+            'of UI, design-system, localization, routing, and presentation '
+            'imports:\n\n${violations.map((v) => '  $v').join('\n')}',
+      );
+    },
+  );
+
+  test(
+    'app_ui does not contain application-specific business domain strings',
+    () {
+      final violations = <String>[];
+      final appUiLib = Directory('packages/app_ui/lib');
+      for (final file
+          in appUiLib
+              .listSync(recursive: true)
+              .whereType<File>()
+              .where((f) => f.path.endsWith('.dart'))) {
+        violations.addAll(
+          scanSharedUiForBusinessTerms(
+            filePath: _posix(file.path),
+            lines: file.readAsLinesSync(),
+          ),
+        );
+      }
+      expect(
+        violations,
+        isEmpty,
+        reason:
+            'packages/app_ui must remain a generic design-system package without '
+            'application-specific business copy:\n\n'
+            '${violations.map((v) => '  $v').join('\n')}',
+      );
+    },
+  );
+
+  test(
+    'feature packages do not duplicate design token classes or ThemeExtensions',
+    () {
+      final violations = <String>[];
+      final featuresDir = Directory('packages/features');
       for (final featureDir in featuresDir.listSync().whereType<Directory>()) {
-        domainDirectories.add(Directory('${featureDir.path}/lib/src/domain'));
-      }
-    }
-
-    for (final dir in domainDirectories) {
-      if (!dir.existsSync()) continue;
-      for (final file
-          in dir
-              .listSync(recursive: true)
-              .whereType<File>()
-              .where((f) => f.path.endsWith('.dart'))) {
-        violations.addAll(
-          scanDomainFileForUiImports(
-            filePath: _posix(file.path),
-            lines: file.readAsLinesSync(),
-          ),
-        );
-      }
-    }
-
-    expect(
-      violations,
-      isEmpty,
-      reason:
-          'Domain-only packages and feature domain/ layers must remain free '
-          'of UI, design-system, localization, routing, and presentation '
-          'imports:\n\n${violations.map((v) => '  $v').join('\n')}',
-    );
-  });
-
-  test('app_ui does not contain application-specific business domain strings', () {
-    final violations = <String>[];
-    final appUiLib = Directory('packages/app_ui/lib');
-    for (final file
-        in appUiLib
-            .listSync(recursive: true)
-            .whereType<File>()
-            .where((f) => f.path.endsWith('.dart'))) {
-      violations.addAll(
-        scanSharedUiForBusinessTerms(
-          filePath: _posix(file.path),
-          lines: file.readAsLinesSync(),
-        ),
-      );
-    }
-    expect(
-      violations,
-      isEmpty,
-      reason:
-          'packages/app_ui must remain a generic design-system package without '
-          'application-specific business copy:\n\n'
-          '${violations.map((v) => '  $v').join('\n')}',
-    );
-  });
-
-  test('feature packages do not duplicate design token classes or ThemeExtensions', () {
-    final violations = <String>[];
-    final featuresDir = Directory('packages/features');
-    for (final featureDir in featuresDir.listSync().whereType<Directory>()) {
-      final libDir = Directory('${featureDir.path}/lib');
-      if (!libDir.existsSync()) continue;
-      for (final file
-          in libDir
-              .listSync(recursive: true)
-              .whereType<File>()
-              .where((f) => f.path.endsWith('.dart'))) {
-        violations.addAll(
-          scanFeatureFileForDuplicateTokens(
-            filePath: _posix(file.path),
-            lines: file.readAsLinesSync(),
-          ),
-        );
-      }
-    }
-    expect(
-      violations,
-      isEmpty,
-      reason:
-          'Feature packages must use tokens from `package:app_ui` and '
-          '`package:theme` instead of defining duplicate token classes:\n\n'
-          '${violations.map((v) => '  $v').join('\n')}',
-    );
-  });
-
-  test('every feature package uses app_ui and localization in its presentation layer', () {
-    final violations = <String>[];
-    final featuresDir = Directory('packages/features');
-    for (final featureDir in featuresDir.listSync().whereType<Directory>()) {
-      final pubspecFile = File('${featureDir.path}/pubspec.yaml');
-      if (!pubspecFile.existsSync()) continue;
-      final pubspec = pubspecFile.readAsStringSync();
-      final pkgName = _packageName(pubspec.split('\n')) ?? featureDir.path;
-
-      if (!pubspec.contains('app_ui:')) {
-        violations.add('$pkgName pubspec.yaml does not depend on app_ui');
-      }
-      if (!pubspec.contains('localization:')) {
-        violations.add('$pkgName pubspec.yaml does not depend on localization');
-      }
-
-      final presentationDir = Directory(
-        '${featureDir.path}/lib/src/presentation',
-      );
-      if (presentationDir.existsSync()) {
-        final presentationSources = presentationDir
-            .listSync(recursive: true)
-            .whereType<File>()
-            .where((f) => f.path.endsWith('.dart'))
-            .map((f) => f.readAsStringSync())
-            .join('\n');
-        if (!presentationSources.contains(
-          "import 'package:localization/localization.dart';",
-        )) {
-          violations.add(
-            '$pkgName presentation layer does not import package:localization/localization.dart',
-          );
-        }
-        if (!presentationSources.contains(
-          "import 'package:app_ui/app_ui.dart';",
-        )) {
-          violations.add(
-            '$pkgName presentation layer does not import package:app_ui/app_ui.dart',
+        final libDir = Directory('${featureDir.path}/lib');
+        if (!libDir.existsSync()) continue;
+        for (final file
+            in libDir
+                .listSync(recursive: true)
+                .whereType<File>()
+                .where((f) => f.path.endsWith('.dart'))) {
+          violations.addAll(
+            scanFeatureFileForDuplicateTokens(
+              filePath: _posix(file.path),
+              lines: file.readAsLinesSync(),
+            ),
           );
         }
       }
-    }
-    expect(violations, isEmpty);
-  });
-
-  test('ARB localization catalogs maintain key parity, non-empty values, and placeholder parity across en, vi, and ar', () {
-    final l10nDir = Directory('packages/localization/lib/l10n');
-    final enMap = _decodeArb(File('${l10nDir.path}/app_en.arb'));
-    final viMap = _decodeArb(File('${l10nDir.path}/app_vi.arb'));
-    final arMap = _decodeArb(File('${l10nDir.path}/app_ar.arb'));
-
-    final violations = scanArbCatalogsForIntegrity(
-      referenceLocale: 'en',
-      referenceArb: enMap,
-      localizedArbs: {'vi': viMap, 'ar': arMap},
-    );
-    expect(
-      violations,
-      isEmpty,
-      reason:
-          'ARB catalogs must have complete, non-empty translations with '
-          'matching placeholders:\n\n${violations.map((v) => '  $v').join('\n')}',
-    );
-
-    final supportedCodes = AppLocalizations.supportedLocales
-        .map((l) => l.languageCode)
-        .toSet();
-    expect(supportedCodes, containsAll(['en', 'vi', 'ar']));
-  });
-
-  test('resolveSupportedLocale deterministically resolves exact, language-only, and unsupported locales', () {
-    const supported = AppLocalizations.supportedLocales;
-
-    expect(
-      resolveSupportedLocale(const [Locale('ar')], supported),
-      const Locale('ar'),
-    );
-    expect(
-      resolveSupportedLocale(const [Locale('ar', 'EG')], supported),
-      const Locale('ar'),
-    );
-    expect(
-      resolveSupportedLocale(const [Locale('vi', 'VN')], supported),
-      const Locale('vi'),
-    );
-    expect(
-      resolveSupportedLocale(const [Locale('fr', 'FR'), Locale('ar')], supported),
-      const Locale('ar'),
-    );
-    expect(
-      resolveSupportedLocale(const [Locale('de', 'DE')], supported),
-      const Locale('en'),
-    );
-    expect(
-      resolveSupportedLocale(null, supported),
-      const Locale('en'),
-    );
-    expect(
-      resolveSupportedLocale(const [], supported),
-      const Locale('en'),
-    );
-  });
-
-  test('feature presentation layers do not introduce hard-coded user-facing UI strings', () {
-    final violations = <String>[];
-    final featuresDir = Directory('packages/features');
-    for (final featureDir in featuresDir.listSync().whereType<Directory>()) {
-      final presentationDir = Directory(
-        '${featureDir.path}/lib/src/presentation',
+      expect(
+        violations,
+        isEmpty,
+        reason:
+            'Feature packages must use tokens from `package:app_ui` and '
+            '`package:theme` instead of defining duplicate token classes:\n\n'
+            '${violations.map((v) => '  $v').join('\n')}',
       );
-      if (!presentationDir.existsSync()) continue;
-      for (final file
-          in presentationDir
+    },
+  );
+
+  test(
+    'every feature package uses app_ui and localization in its presentation layer',
+    () {
+      final violations = <String>[];
+      final featuresDir = Directory('packages/features');
+      for (final featureDir in featuresDir.listSync().whereType<Directory>()) {
+        final pubspecFile = File('${featureDir.path}/pubspec.yaml');
+        if (!pubspecFile.existsSync()) continue;
+        final pubspec = pubspecFile.readAsStringSync();
+        final pkgName = _packageName(pubspec.split('\n')) ?? featureDir.path;
+
+        if (!pubspec.contains('app_ui:')) {
+          violations.add('$pkgName pubspec.yaml does not depend on app_ui');
+        }
+        if (!pubspec.contains('localization:')) {
+          violations.add(
+            '$pkgName pubspec.yaml does not depend on localization',
+          );
+        }
+
+        final presentationDir = Directory(
+          '${featureDir.path}/lib/src/presentation',
+        );
+        if (presentationDir.existsSync()) {
+          final presentationSources = presentationDir
               .listSync(recursive: true)
               .whereType<File>()
-              .where((f) => f.path.endsWith('.dart'))) {
-        violations.addAll(
-          scanPresentationForHardcodedText(
-            filePath: _posix(file.path),
-            lines: file.readAsLinesSync(),
-          ),
-        );
+              .where((f) => f.path.endsWith('.dart'))
+              .map((f) => f.readAsStringSync())
+              .join('\n');
+          if (!presentationSources.contains(
+            "import 'package:localization/localization.dart';",
+          )) {
+            violations.add(
+              '$pkgName presentation layer does not import package:localization/localization.dart',
+            );
+          }
+          if (!presentationSources.contains(
+            "import 'package:app_ui/app_ui.dart';",
+          )) {
+            violations.add(
+              '$pkgName presentation layer does not import package:app_ui/app_ui.dart',
+            );
+          }
+        }
       }
-    }
+      expect(violations, isEmpty);
+    },
+  );
 
-    expect(
-      violations,
-      isEmpty,
-      reason:
-          'Feature presentation widgets must use `context.l10n.*` instead of '
-          'hard-coded user-facing string literals:\n\n'
-          '${violations.map((v) => '  $v').join('\n')}',
-    );
-  });
+  test(
+    'ARB localization catalogs maintain key parity, non-empty values, and placeholder parity across en and ar',
+    () {
+      final l10nDir = Directory('packages/localization/lib/l10n');
+      final enMap = _decodeArb(File('${l10nDir.path}/app_en.arb'));
+      final arMap = _decodeArb(File('${l10nDir.path}/app_ar.arb'));
+
+      final violations = scanArbCatalogsForIntegrity(
+        referenceLocale: 'en',
+        referenceArb: enMap,
+        localizedArbs: {'ar': arMap},
+      );
+      expect(
+        violations,
+        isEmpty,
+        reason:
+            'ARB catalogs must have complete, non-empty translations with '
+            'matching placeholders:\n\n${violations.map((v) => '  $v').join('\n')}',
+      );
+
+      final supportedCodes = AppLocalizations.supportedLocales
+          .map((l) => l.languageCode)
+          .toSet();
+      expect(supportedCodes, containsAll(['en', 'ar']));
+      expect(supportedCodes, hasLength(2));
+    },
+  );
+
+  test(
+    'resolveSupportedLocale deterministically resolves exact, language-only, and unsupported locales',
+    () {
+      const supported = AppLocalizations.supportedLocales;
+
+      expect(
+        resolveSupportedLocale(const [Locale('ar')], supported),
+        const Locale('ar'),
+      );
+      expect(
+        resolveSupportedLocale(const [Locale('ar', 'EG')], supported),
+        const Locale('ar'),
+      );
+      expect(
+        resolveSupportedLocale(const [
+          Locale('fr', 'FR'),
+          Locale('ar'),
+        ], supported),
+        const Locale('ar'),
+      );
+      expect(
+        resolveSupportedLocale(const [Locale('de', 'DE')], supported),
+        const Locale('en'),
+      );
+      expect(
+        resolveSupportedLocale(null, supported),
+        const Locale('en'),
+      );
+      expect(
+        resolveSupportedLocale(const [], supported),
+        const Locale('en'),
+      );
+    },
+  );
+
+  test(
+    'feature presentation layers do not introduce hard-coded user-facing UI strings',
+    () {
+      final violations = <String>[];
+      final featuresDir = Directory('packages/features');
+      for (final featureDir in featuresDir.listSync().whereType<Directory>()) {
+        final presentationDir = Directory(
+          '${featureDir.path}/lib/src/presentation',
+        );
+        if (!presentationDir.existsSync()) continue;
+        for (final file
+            in presentationDir
+                .listSync(recursive: true)
+                .whereType<File>()
+                .where((f) => f.path.endsWith('.dart'))) {
+          violations.addAll(
+            scanPresentationForHardcodedText(
+              filePath: _posix(file.path),
+              lines: file.readAsLinesSync(),
+            ),
+          );
+        }
+      }
+
+      expect(
+        violations,
+        isEmpty,
+        reason:
+            'Feature presentation widgets must use `context.l10n.*` instead of '
+            'hard-coded user-facing string literals:\n\n'
+            '${violations.map((v) => '  $v').join('\n')}',
+      );
+    },
+  );
 
   testWidgets('AppScaffold renders direction-aware back icon in LTR and RTL', (
     tester,
@@ -287,141 +310,156 @@ void main() {
   });
 
   group('localization & UI boundary regression tests', () {
-    test('accepts pure Dart / foundation imports in domain layer and rejects UI/routing/bloc imports', () {
-      expect(
-        scanDomainFileForUiImports(
+    test(
+      'accepts pure Dart / foundation imports in domain layer and rejects UI/routing/bloc imports',
+      () {
+        expect(
+          scanDomainFileForUiImports(
+            filePath:
+                'packages/features/bookmarks/lib/src/domain/entities/bookmark.dart',
+            lines: const [
+              "import 'package:architecture/architecture.dart';",
+              "import 'package:flutter/foundation.dart';",
+            ],
+          ),
+          isEmpty,
+        );
+
+        final violations = scanDomainFileForUiImports(
           filePath:
               'packages/features/bookmarks/lib/src/domain/entities/bookmark.dart',
           lines: const [
-            "import 'package:architecture/architecture.dart';",
-            "import 'package:flutter/foundation.dart';",
+            "import 'package:flutter/material.dart';",
+            "import 'package:app_ui/app_ui.dart';",
+            "import 'package:localization/localization.dart';",
+            "import 'package:go_router/go_router.dart';",
+            "import 'package:flutter_bloc/flutter_bloc.dart';",
           ],
-        ),
-        isEmpty,
-      );
+        );
+        expect(violations, hasLength(5));
+      },
+    );
 
-      final violations = scanDomainFileForUiImports(
-        filePath:
-            'packages/features/bookmarks/lib/src/domain/entities/bookmark.dart',
-        lines: const [
-          "import 'package:flutter/material.dart';",
-          "import 'package:app_ui/app_ui.dart';",
-          "import 'package:localization/localization.dart';",
-          "import 'package:go_router/go_router.dart';",
-          "import 'package:flutter_bloc/flutter_bloc.dart';",
-        ],
-      );
-      expect(violations, hasLength(5));
-    });
+    test(
+      'detects duplicate design token classes and ThemeExtensions in feature packages',
+      () {
+        expect(
+          scanFeatureFileForDuplicateTokens(
+            filePath:
+                'packages/features/bookmarks/lib/src/presentation/widgets/card.dart',
+            lines: const [
+              'class BookmarkCard extends StatelessWidget {}',
+            ],
+          ),
+          isEmpty,
+        );
 
-    test('detects duplicate design token classes and ThemeExtensions in feature packages', () {
-      expect(
-        scanFeatureFileForDuplicateTokens(
+        final violations = scanFeatureFileForDuplicateTokens(
           filePath:
-              'packages/features/bookmarks/lib/src/presentation/widgets/card.dart',
+              'packages/features/bookmarks/lib/src/presentation/tokens.dart',
           lines: const [
-            'class BookmarkCard extends StatelessWidget {}',
+            'abstract final class BookmarkSpacing {}',
+            'class BookmarkPalette extends ThemeExtension<BookmarkPalette> {}',
           ],
-        ),
-        isEmpty,
-      );
+        );
+        expect(
+          violations,
+          containsAll([
+            contains('defines duplicate design token class BookmarkSpacing'),
+            contains('defines custom ThemeExtension outside package:theme'),
+          ]),
+        );
+      },
+    );
 
-      final violations = scanFeatureFileForDuplicateTokens(
-        filePath:
-            'packages/features/bookmarks/lib/src/presentation/tokens.dart',
-        lines: const [
-          'abstract final class BookmarkSpacing {}',
-          'class BookmarkPalette extends ThemeExtension<BookmarkPalette> {}',
-        ],
-      );
-      expect(
-        violations,
-        containsAll([
-          contains('defines duplicate design token class BookmarkSpacing'),
-          contains('defines custom ThemeExtension outside package:theme'),
-        ]),
-      );
-    });
+    test(
+      'detects application-specific business copy inside shared UI package',
+      () {
+        expect(
+          scanSharedUiForBusinessTerms(
+            filePath: 'packages/app_ui/lib/src/widgets/app_empty_state.dart',
+            lines: const [
+              'class AppEmptyState extends StatelessWidget {}',
+            ],
+          ),
+          isEmpty,
+        );
 
-    test('detects application-specific business copy inside shared UI package', () {
-      expect(
-        scanSharedUiForBusinessTerms(
+        final violations = scanSharedUiForBusinessTerms(
           filePath: 'packages/app_ui/lib/src/widgets/app_empty_state.dart',
           lines: const [
-            'class AppEmptyState extends StatelessWidget {}',
+            "const label = 'No bookmarks saved in collection';",
           ],
-        ),
-        isEmpty,
-      );
+        );
+        expect(violations, isNotEmpty);
+      },
+    );
 
-      final violations = scanSharedUiForBusinessTerms(
-        filePath: 'packages/app_ui/lib/src/widgets/app_empty_state.dart',
-        lines: const [
-          "const label = 'No bookmarks saved in collection';",
-        ],
-      );
-      expect(violations, isNotEmpty);
-    });
+    test(
+      'detects missing keys, empty values, and mismatched placeholders in ARB catalogs',
+      () {
+        expect(
+          scanArbCatalogsForIntegrity(
+            referenceLocale: 'en',
+            referenceArb: const {
+              'helloUser': 'Hello {name}',
+            },
+            localizedArbs: const {
+              'ar': {'helloUser': 'مرحباً {name}'},
+            },
+          ),
+          isEmpty,
+        );
 
-    test('detects missing keys, empty values, and mismatched placeholders in ARB catalogs', () {
-      expect(
-        scanArbCatalogsForIntegrity(
+        final violations = scanArbCatalogsForIntegrity(
           referenceLocale: 'en',
           referenceArb: const {
             'helloUser': 'Hello {name}',
+            'saveLabel': 'Save',
           },
           localizedArbs: const {
-            'ar': {'helloUser': 'مرحباً {name}'},
+            'ar': {
+              'helloUser': 'مرحباً {username}',
+              'saveLabel': '   ',
+            },
           },
-        ),
-        isEmpty,
-      );
+        );
+        expect(
+          violations,
+          containsAll([
+            contains('has empty translation for key "saveLabel"'),
+            contains('placeholder mismatch for key "helloUser"'),
+          ]),
+        );
+      },
+    );
 
-      final violations = scanArbCatalogsForIntegrity(
-        referenceLocale: 'en',
-        referenceArb: const {
-          'helloUser': 'Hello {name}',
-          'saveLabel': 'Save',
-        },
-        localizedArbs: const {
-          'ar': {
-            'helloUser': 'مرحباً {username}',
-            'saveLabel': '   ',
-          },
-        },
-      );
-      expect(
-        violations,
-        containsAll([
-          contains('has empty translation for key "saveLabel"'),
-          contains('placeholder mismatch for key "helloUser"'),
-        ]),
-      );
-    });
+    test(
+      'detects hard-coded user-facing UI text in feature presentation layers',
+      () {
+        expect(
+          scanPresentationForHardcodedText(
+            filePath:
+                'packages/features/bookmarks/lib/src/presentation/widgets/card.dart',
+            lines: const [
+              'Text(context.l10n.bookmarksTitle)',
+              'tooltip: context.l10n.commonDelete,',
+            ],
+          ),
+          isEmpty,
+        );
 
-    test('detects hard-coded user-facing UI text in feature presentation layers', () {
-      expect(
-        scanPresentationForHardcodedText(
+        final violations = scanPresentationForHardcodedText(
           filePath:
               'packages/features/bookmarks/lib/src/presentation/widgets/card.dart',
           lines: const [
-            'Text(context.l10n.bookmarksTitle)',
-            'tooltip: context.l10n.commonDelete,',
+            "Text('Attached Video'),",
+            "tooltip: 'Playback speed',",
           ],
-        ),
-        isEmpty,
-      );
-
-      final violations = scanPresentationForHardcodedText(
-        filePath:
-            'packages/features/bookmarks/lib/src/presentation/widgets/card.dart',
-        lines: const [
-          "Text('Attached Video'),",
-          "tooltip: 'Playback speed',",
-        ],
-      );
-      expect(violations, hasLength(2));
-    });
+        );
+        expect(violations, hasLength(2));
+      },
+    );
   });
 }
 
@@ -590,10 +628,9 @@ List<String> scanArbCatalogsForIntegrity({
 Set<String> _extractPlaceholders(String message) {
   // Ignore ICU plural/select headers like `{count, plural, ...}` by still
   // capturing the variable name before the comma or closing brace.
-  return RegExp(r'\{([A-Za-z0-9_]+)(?:,|\})')
-      .allMatches(message)
-      .map((m) => m.group(1)!)
-      .toSet();
+  return RegExp(
+    r'\{([A-Za-z0-9_]+)(?:,|\})',
+  ).allMatches(message).map((m) => m.group(1)!).toSet();
 }
 
 final RegExp _hardcodedUiPropRegex = RegExp(

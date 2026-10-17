@@ -12,6 +12,12 @@ abstract final class AppBreakpoints {
 
   /// Lower bound of the expanded window size class.
   static const double expanded = 840;
+
+  /// Lower bound for wide desktop canvases.
+  static const double large = 1200;
+
+  /// Comfortable maximum line/layout width for centered page content.
+  static const double contentMax = 720;
 }
 
 /// Window-size-class helpers derived from the current [MediaQuery] width.
@@ -31,4 +37,7 @@ extension BuildContextBreakpoints on BuildContext {
   /// Whether the screen width is at or above [AppBreakpoints.expanded].
   bool get isExpanded =>
       MediaQuery.sizeOf(this).width >= AppBreakpoints.expanded;
+
+  /// Whether the screen width is at or above [AppBreakpoints.large].
+  bool get isLarge => MediaQuery.sizeOf(this).width >= AppBreakpoints.large;
 }

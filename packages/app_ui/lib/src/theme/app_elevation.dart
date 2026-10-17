@@ -18,6 +18,9 @@ abstract final class AppElevation {
   /// 6 - prominently lifted surfaces (e.g. dialogs, FABs, overlays).
   static const double lg = 6;
 
+  /// 12 - floating navigation and modal surfaces.
+  static const double overlay = 12;
+
   /// A soft, multi-layered "lifted" shadow for cards and overlays.
   ///
   /// Combines a tight, low-opacity layer for contact shadow with a broader,

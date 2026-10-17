@@ -52,6 +52,14 @@
   "commonShare": "Share",
   "commonSignOut": "Sign out",
   "homeAppBarTitle": "Home",
+  "homeWelcomeSubtitle": "Your saved knowledge, organized in one place",
+  "@homeWelcomeSubtitle": {
+    "description": "Supporting text below the home screen title."
+  },
+  "homeLoadError": "We could not load your dashboard. Please try again.",
+  "@homeLoadError": {
+    "description": "Error shown when the home dashboard cannot be loaded."
+  },
   "homeViewAllBookmarks": "View all",
   "homeNoDescription": "No description",
   "homeRecentBookmarks": "Recent Bookmarks",
@@ -144,6 +152,10 @@
     "description": "Short fallback label shown on bookmark artwork when a bookmark has no tags."
   },
   "profileAppBarTitle": "Profile",
+  "profileSettingsSubtitle": "Account and application settings",
+  "@profileSettingsSubtitle": {
+    "description": "Supporting text below the profile screen title."
+  },
   "profileSectionAppearance": "Appearance",
   "profileSectionAccount": "Account",
   "profileChangePassword": "Change Password",

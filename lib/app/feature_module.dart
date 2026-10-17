@@ -68,6 +68,43 @@ abstract class FeatureModule {
   Iterable<RouteBase> get routes => const [];
 }
 
+/// A startup failure attributed to a specific optional feature.
+final class FeatureInitializationException implements Exception {
+  const FeatureInitializationException({
+    required this.featureId,
+    required this.cause,
+  });
+
+  final String featureId;
+  final Object cause;
+
+  @override
+  String toString() =>
+      'FeatureInitializationException: feature "$featureId" failed to '
+      'initialize: $cause';
+}
+
+/// Initializes feature modules in registry order before the app becomes ready.
+///
+/// Sequential execution makes ordering deterministic and prevents routes and
+/// background sync from becoming active while a feature is only partly ready.
+/// The original stack trace is retained and the failing feature is identified.
+Future<void> initializeFeatureModules(Iterable<FeatureModule> modules) async {
+  for (final module in modules) {
+    try {
+      await module.initialize();
+    } on Object catch (error, stackTrace) {
+      Error.throwWithStackTrace(
+        FeatureInitializationException(
+          featureId: module.id,
+          cause: error,
+        ),
+        stackTrace,
+      );
+    }
+  }
+}
+
 final RegExp _featureIdPattern = RegExp(r'^[a-z][a-z0-9_]*$');
 
 /// Validates the architectural contracts of the registered [modules]:

@@ -5,6 +5,28 @@ All notable changes to this template are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Package lifecycle generation, validation, dependency-impact analysis, safe
+  removal, and rollback coverage in `fst` 1.4.0.
+- A documented CLI compatibility and schema migration policy.
+
+### Changed
+
+- Feature initialization is now awaited in deterministic registry order before
+  session-scoped sync starts or the routed application is presented.
+- CI directly analyzes/tests the CLI and exercises feature/package removal and
+  recreation in generated-application smoke coverage.
+
+### Fixed
+
+- Contradictory `fst create` pillar/provider/API combinations fail before any
+  output is created.
+- Feature startup failures now identify the owning feature and render the safe
+  bootstrap error application instead of becoming unobserved futures.
+
 ## [1.7.0] - 2026-06-21
 
 Architecture clean-up release: the authenticated HTTP transport moves into the

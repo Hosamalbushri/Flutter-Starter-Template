@@ -232,12 +232,11 @@ class CrossFeatureImport {
 List<CrossFeatureImport> findDisallowedCrossFeatureImports(
   List<CrossFeatureImport> imports,
   Map<String, Set<String>> allowlist,
-) =>
-    imports
-        .where(
-          (i) => !(allowlist[i.sourceFeature]?.contains(i.targetFeature) ?? false),
-        )
-        .toList();
+) => imports
+    .where(
+      (i) => !(allowlist[i.sourceFeature]?.contains(i.targetFeature) ?? false),
+    )
+    .toList();
 
 final _importDirective = RegExp(
   r'''^\s*(?:import|export)\s+['"]([^'"]+)['"]''',

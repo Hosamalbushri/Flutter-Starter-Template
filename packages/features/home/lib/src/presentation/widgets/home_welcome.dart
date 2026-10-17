@@ -3,10 +3,12 @@ part of 'home_widgets.dart';
 class _SearchSection extends StatelessWidget {
   const _SearchSection({
     required this.controller,
+    required this.focusNode,
     required this.onChanged,
   });
 
   final TextEditingController controller;
+  final FocusNode focusNode;
   final ValueChanged<String> onChanged;
 
   @override
@@ -39,7 +41,9 @@ class _SearchSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppRadius.lg),
           ),
           child: TextField(
+            key: const ValueKey('home-search-field'),
             controller: controller,
+            focusNode: focusNode,
             onChanged: onChanged,
             textInputAction: TextInputAction.search,
             decoration: InputDecoration(
@@ -514,23 +518,41 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            title,
-            style: context.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: context.colorScheme.onSurface,
-            ),
-          ),
-        ),
-        if (actionLabel != null && onActionPressed != null)
-          TextButton(
+    final action = actionLabel != null && onActionPressed != null
+        ? TextButton(
             onPressed: onActionPressed,
             child: Text(actionLabel!),
-          ),
-      ],
+          )
+        : null;
+    final titleWidget = Text(
+      title,
+      style: context.textTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.w800,
+        color: context.colorScheme.onSurface,
+      ),
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final scaled = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
+        if (action != null && (constraints.maxWidth < 480 || scaled)) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              titleWidget,
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: action,
+              ),
+            ],
+          );
+        }
+        return Row(
+          children: [
+            Expanded(child: titleWidget),
+            ?action,
+          ],
+        );
+      },
     );
   }
 }

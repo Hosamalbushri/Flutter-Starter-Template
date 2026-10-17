@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 /// Pumps [child] inside a deterministic MaterialApp (a plain
-/// `ColorScheme.fromSeed` theme, no `google_fonts` network fetch) and captures
+/// `ColorScheme.fromSeed` theme, independent of the app theme) and captures
 /// a golden of the region keyed `golden`.
 Future<void> _pumpGolden(
   WidgetTester tester,
