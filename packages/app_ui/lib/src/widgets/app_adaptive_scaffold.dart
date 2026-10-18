@@ -49,12 +49,30 @@ class AppCenterAction {
     required this.onPressed,
     this.tooltip,
     this.label,
+    this.menuLabel,
+    this.quickActions = const [],
   });
 
   final FaIconData icon;
   final VoidCallback onPressed;
   final String? tooltip;
   final String? label;
+  final String? menuLabel;
+  final List<AppQuickAction> quickActions;
+}
+
+/// A shortcut revealed by the compact navigation's central action.
+@immutable
+class AppQuickAction {
+  const AppQuickAction({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final FaIconData icon;
+  final String label;
+  final VoidCallback onPressed;
 }
 
 /// Scaffolding that adapts its navigation affordance to the available width.
@@ -115,7 +133,7 @@ class AppAdaptiveScaffold extends StatelessWidget {
           final textScaler = MediaQuery.textScalerOf(context);
           final scaledTextHeight = textScaler.scale(12);
           final barHeight = (_bottomBarHeight + ((scaledTextHeight - 12) * 1.5))
-              .clamp(64.0, 92.0);
+              .clamp(62.0, 92.0);
           final viewPaddingBottom = MediaQuery.viewPaddingOf(context).bottom;
           final paddingBottom = MediaQuery.paddingOf(context).bottom;
           final bottomPadding = viewPaddingBottom > 0
@@ -280,13 +298,14 @@ class AppAdaptiveNavigationScope extends InheritedWidget {
 }
 
 /// Geometry of the compact navigation treatment.
-const double _bottomBarHeight = 64;
-const double _centerActionExtent = 56;
-const double _centerActionLift = 22;
-const double _centerActionSlotWidth = _centerActionExtent + 16;
+const double _bottomBarHeight = 62;
+const double _centerActionExtent = 48;
+const double _centerActionLift = 20;
+const double _centerActionSlotWidth = _centerActionExtent + 28;
+const double _floatingBarHorizontalInset = 12;
+const double _floatingBarBottomInset = 8;
 
-/// A bottom navigation bar with labelled destinations and an optional raised
-/// center action.
+/// An icon-only bottom navigation bar with an optional raised center action.
 ///
 /// The action occupies its own visual slot instead of becoming a destination,
 /// so selecting it never changes the active navigation branch.
@@ -312,7 +331,7 @@ class _FloatingBottomBar extends StatelessWidget {
     final textScaler = MediaQuery.textScalerOf(context);
     final scaledTextHeight = textScaler.scale(12);
     final barHeight = (_bottomBarHeight + ((scaledTextHeight - 12) * 1.5))
-        .clamp(64.0, 92.0);
+        .clamp(62.0, 92.0);
 
     // Keep the system-navigation inset stable when viewInsets replaces the
     // ordinary bottom padding while the keyboard is visible.
@@ -323,7 +342,7 @@ class _FloatingBottomBar extends StatelessWidget {
     final hasCenter = centerAction != null;
     final totalHeight =
         barHeight + (hasCenter ? _centerActionLift : 0.0) + bottomPadding;
-    final backgroundHeight = barHeight + bottomPadding;
+    final floatingSurfaceHeight = barHeight - _floatingBarBottomInset;
 
     return Align(
       alignment: Alignment.bottomCenter,
@@ -337,126 +356,129 @@ class _FloatingBottomBar extends StatelessWidget {
             alignment: Alignment.topCenter,
             children: [
               PositionedDirectional(
-                start: 0,
-                end: 0,
-                bottom: 0,
-                height: backgroundHeight,
-                child: _OptionalBackdropBlur(
-                  enabled: enableBackdropBlur,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color:
-                          (isDark
-                                  ? semantic.surfaceElevated
-                                  : context.colorScheme.surface)
-                              .withValues(
-                                alpha: enableBackdropBlur ? 0.90 : 0.98,
-                              ),
-                      border: Border(
-                        top: BorderSide(
-                          color: semantic.divider.withValues(
-                            alpha: isDark ? 0.35 : 0.60,
-                          ),
-                          width: AppBorderWidth.hairline,
+                start: _floatingBarHorizontalInset,
+                end: _floatingBarHorizontalInset,
+                bottom: bottomPadding + _floatingBarBottomInset,
+                height: floatingSurfaceHeight,
+                child: DecoratedBox(
+                  key: const ValueKey('bottomNavigationFloatingSurface'),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(AppRadius.xl),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(
+                          alpha: isDark ? 0.22 : 0.07,
                         ),
+                        blurRadius: 18,
+                        offset: const Offset(0, 5),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(
-                            alpha: isDark ? 0.28 : 0.05,
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(AppRadius.xl),
+                    child: _OptionalBackdropBlur(
+                      enabled: enableBackdropBlur,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color:
+                              (isDark
+                                      ? semantic.surfaceElevated
+                                      : context.colorScheme.surface)
+                                  .withValues(
+                                    alpha: enableBackdropBlur ? 0.92 : 0.99,
+                                  ),
+                          borderRadius: BorderRadius.circular(AppRadius.xl),
+                          border: Border.all(
+                            color: semantic.divider.withValues(
+                              alpha: isDark ? 0.38 : 0.55,
+                            ),
+                            width: AppBorderWidth.hairline,
                           ),
-                          blurRadius: 16,
-                          offset: const Offset(0, -2),
                         ),
-                      ],
+                        child: const SizedBox.expand(),
+                      ),
                     ),
-                    child: const SizedBox.expand(),
                   ),
                 ),
               ),
               PositionedDirectional(
-                start: 0,
-                end: 0,
-                bottom: bottomPadding,
-                height: barHeight,
+                start: _floatingBarHorizontalInset,
+                end: _floatingBarHorizontalInset,
+                bottom: bottomPadding + _floatingBarBottomInset,
+                height: floatingSurfaceHeight,
                 child: Material(
                   color: Colors.transparent,
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       final availableWidth = constraints.maxWidth;
                       final count = destinations.length;
+                      final slotWidth = hasCenter
+                          ? (availableWidth < 360
+                                ? (_centerActionExtent + 20)
+                                : _centerActionSlotWidth)
+                          : 0.0;
+                      final mid = count ~/ 2;
 
-                      if (!hasCenter) {
+                      Widget destinationSlot({
+                        required int index,
+                        required double width,
+                      }) => AnimatedContainer(
+                        key: ValueKey(
+                          'bottomNavigationDestinationSlot-$count-$index',
+                        ),
+                        duration: MediaQuery.disableAnimationsOf(context)
+                            ? Duration.zero
+                            : AppDurations.fast,
+                        curve: Curves.easeOutCubic,
+                        width: width,
+                        height: double.infinity,
+                        child: _BottomBarItem(
+                          index: index,
+                          destination: destinations[index],
+                          selected: index == selectedIndex,
+                          onTap: () => onDestinationSelected(index),
+                        ),
+                      );
+
+                      if (hasCenter) {
+                        final halfWidth = (availableWidth - slotWidth) / 2;
+
+                        List<Widget> sideSlots(int start, int end) {
+                          final sideCount = end - start;
+                          final itemWidth = halfWidth / sideCount;
+                          return [
+                            for (var i = start; i < end; i++)
+                              destinationSlot(
+                                index: i,
+                                width: itemWidth,
+                              ),
+                          ];
+                        }
+
                         return Row(
                           children: [
-                            for (var i = 0; i < count; i++)
-                              Expanded(
-                                child: _BottomBarItem(
-                                  index: i,
-                                  destination: destinations[i],
-                                  selected: i == selectedIndex,
-                                  onTap: () => onDestinationSelected(i),
-                                ),
-                              ),
+                            SizedBox(
+                              width: halfWidth,
+                              child: Row(children: sideSlots(0, mid)),
+                            ),
+                            SizedBox(width: slotWidth),
+                            SizedBox(
+                              width: halfWidth,
+                              child: Row(children: sideSlots(mid, count)),
+                            ),
                           ],
                         );
                       }
 
-                      final slotWidth = availableWidth < 360
-                          ? (_centerActionExtent + 8)
-                          : _centerActionSlotWidth;
-                      final halfWidth = (availableWidth - slotWidth) / 2;
-                      final mid = count ~/ 2;
-                      final startDestinations = destinations.sublist(0, mid);
-                      final endDestinations = destinations.sublist(mid);
-                      final maxPerSide = math.max(
-                        startDestinations.length,
-                        endDestinations.length,
-                      );
-                      final itemWidth = halfWidth / maxPerSide;
+                      final itemWidth = availableWidth / count;
 
                       return Row(
                         children: [
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                for (
-                                  var i = 0;
-                                  i < startDestinations.length;
-                                  i++
-                                )
-                                  SizedBox(
-                                    width: itemWidth,
-                                    child: _BottomBarItem(
-                                      index: i,
-                                      destination: startDestinations[i],
-                                      selected: i == selectedIndex,
-                                      onTap: () => onDestinationSelected(i),
-                                    ),
-                                  ),
-                              ],
+                          for (var i = 0; i < count; i++)
+                            destinationSlot(
+                              index: i,
+                              width: itemWidth,
                             ),
-                          ),
-                          SizedBox(width: slotWidth),
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                for (var i = 0; i < endDestinations.length; i++)
-                                  SizedBox(
-                                    width: itemWidth,
-                                    child: _BottomBarItem(
-                                      index: i + mid,
-                                      destination: endDestinations[i],
-                                      selected: (i + mid) == selectedIndex,
-                                      onTap: () =>
-                                          onDestinationSelected(i + mid),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
                         ],
                       );
                     },
@@ -465,7 +487,7 @@ class _FloatingBottomBar extends StatelessWidget {
               ),
               if (hasCenter)
                 Positioned(
-                  top: 0,
+                  top: 10,
                   child: _CenterActionButton(action: centerAction!),
                 ),
             ],
@@ -503,12 +525,78 @@ class _CenterActionButton extends StatefulWidget {
   State<_CenterActionButton> createState() => _CenterActionButtonState();
 }
 
-class _CenterActionButtonState extends State<_CenterActionButton> {
+class _CenterActionButtonState extends State<_CenterActionButton>
+    with SingleTickerProviderStateMixin {
+  final LayerLink _layerLink = LayerLink();
+  OverlayEntry? _menuEntry;
   bool _pressed = false;
+  late final AnimationController _menuController;
+
+  bool get _menuOpen => _menuEntry != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _menuController = AnimationController(
+      vsync: this,
+      duration: AppDurations.medium,
+      reverseDuration: AppDurations.fast,
+    );
+  }
+
+  @override
+  void dispose() {
+    _menuEntry?.remove();
+    _menuController.dispose();
+    super.dispose();
+  }
 
   void _setPressed(bool value) {
     if (_pressed == value) return;
     setState(() => _pressed = value);
+  }
+
+  void _toggleMenu() {
+    if (widget.action.quickActions.isEmpty) {
+      widget.action.onPressed();
+      return;
+    }
+    if (_menuOpen) {
+      _hideMenu();
+    } else {
+      _showMenu();
+    }
+  }
+
+  void _showMenu() {
+    final overlay = Overlay.of(context);
+    _menuEntry = OverlayEntry(
+      builder: (overlayContext) => _QuickActionsOverlay(
+        link: _layerLink,
+        animation: _menuController,
+        action: widget.action,
+        onDismiss: _hideMenu,
+        onSelected: (quickAction) {
+          _hideMenu(afterClosed: quickAction.onPressed);
+        },
+      ),
+    );
+    overlay.insert(_menuEntry!);
+    setState(() {});
+    _menuController.forward(from: 0);
+  }
+
+  Future<void> _hideMenu({VoidCallback? afterClosed}) async {
+    if (!_menuOpen) return;
+    if (!MediaQuery.disableAnimationsOf(context)) {
+      await _menuController.reverse();
+    } else {
+      _menuController.value = 0;
+    }
+    _menuEntry?.remove();
+    _menuEntry = null;
+    if (mounted) setState(() {});
+    afterClosed?.call();
   }
 
   @override
@@ -517,69 +605,294 @@ class _CenterActionButtonState extends State<_CenterActionButton> {
     final action = widget.action;
     final semanticLabel = action.label ?? action.tooltip ?? '';
 
-    return Semantics(
-      key: const ValueKey('bottomNavigationCenterActionSemantics'),
-      container: true,
-      button: true,
-      label: semanticLabel,
-      excludeSemantics: true,
-      child: Tooltip(
-        message: action.tooltip ?? action.label ?? '',
-        child: DecoratedBox(
-          key: const ValueKey('bottomNavigationCenterAction'),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            boxShadow: [
-              BoxShadow(
-                color: context.colorScheme.primary.withValues(
-                  alpha: context.isDark ? 0.45 : 0.28,
+    return CompositedTransformTarget(
+      link: _layerLink,
+      child: Semantics(
+        key: const ValueKey('bottomNavigationCenterActionSemantics'),
+        container: true,
+        button: true,
+        label: semanticLabel,
+        excludeSemantics: true,
+        child: Tooltip(
+          message: action.tooltip ?? action.label ?? '',
+          child: Transform.rotate(
+            angle: math.pi / 4,
+            child: DecoratedBox(
+              key: const ValueKey('bottomNavigationCenterAction'),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    context.colorScheme.primary,
+                    Color.lerp(
+                      context.colorScheme.primary,
+                      context.colorScheme.tertiary,
+                      0.45,
+                    )!,
+                  ],
                 ),
-                blurRadius: _pressed ? 6 : 14,
-                offset: Offset(0, _pressed ? 2 : 5),
-              ),
-              BoxShadow(
-                color: Colors.black.withValues(
-                  alpha: context.isDark ? 0.30 : 0.07,
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(
+                  color: context.colorScheme.surface,
+                  width: 3,
                 ),
-                blurRadius: _pressed ? 2 : 6,
-                offset: Offset(0, _pressed ? 1 : 2),
-              ),
-            ],
-          ),
-          child: AnimatedScale(
-            scale: _pressed ? 0.93 : 1,
-            duration: reduceMotion ? Duration.zero : AppDurations.xfast,
-            curve: Curves.easeOutCubic,
-            child: Material(
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              clipBehavior: Clip.antiAlias,
-              color: context.colorScheme.primary,
-              child: InkWell(
-                onHighlightChanged: _setPressed,
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  action.onPressed();
-                },
-                focusColor: context.colorScheme.onPrimary.withValues(
-                  alpha: 0.25,
-                ),
-                hoverColor: context.colorScheme.onPrimary.withValues(
-                  alpha: 0.15,
-                ),
-                splashColor: context.colorScheme.onPrimary.withValues(
-                  alpha: 0.20,
-                ),
-                highlightColor: context.colorScheme.onPrimary.withValues(
-                  alpha: 0.10,
-                ),
-                child: SizedBox.square(
-                  dimension: _centerActionExtent,
-                  child: Center(
-                    child: FaIcon(
-                      action.icon,
-                      color: context.colorScheme.onPrimary,
-                      size: AppIconSize.lg,
+                boxShadow: [
+                  BoxShadow(
+                    color: context.colorScheme.primary.withValues(
+                      alpha: context.isDark ? 0.36 : 0.24,
                     ),
+                    blurRadius: _pressed ? 6 : 14,
+                    offset: Offset(2, _pressed ? 1 : 4),
+                  ),
+                ],
+              ),
+              child: AnimatedScale(
+                scale: _pressed ? 0.91 : 1,
+                duration: reduceMotion ? Duration.zero : AppDurations.xfast,
+                curve: Curves.easeOutCubic,
+                child: Material(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onHighlightChanged: _setPressed,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      _toggleMenu();
+                    },
+                    focusColor: context.colorScheme.onPrimary.withValues(
+                      alpha: 0.25,
+                    ),
+                    hoverColor: context.colorScheme.onPrimary.withValues(
+                      alpha: 0.15,
+                    ),
+                    splashColor: context.colorScheme.onPrimary.withValues(
+                      alpha: 0.20,
+                    ),
+                    highlightColor: context.colorScheme.onPrimary.withValues(
+                      alpha: 0.10,
+                    ),
+                    child: SizedBox.square(
+                      dimension: _centerActionExtent,
+                      child: Center(
+                        child: Transform.rotate(
+                          angle: -math.pi / 4,
+                          child: AnimatedRotation(
+                            turns: _menuOpen ? 0.125 : 0,
+                            duration: reduceMotion
+                                ? Duration.zero
+                                : AppDurations.fast,
+                            curve: Curves.easeOutBack,
+                            child: FaIcon(
+                              action.icon,
+                              color: context.colorScheme.onPrimary,
+                              size: AppIconSize.lg,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickActionsOverlay extends StatelessWidget {
+  const _QuickActionsOverlay({
+    required this.link,
+    required this.animation,
+    required this.action,
+    required this.onDismiss,
+    required this.onSelected,
+  });
+
+  final LayerLink link;
+  final Animation<double> animation;
+  final AppCenterAction action;
+  final VoidCallback onDismiss;
+  final ValueChanged<AppQuickAction> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final semantic = context.semanticColors;
+    final width = math.min<double>(
+      MediaQuery.sizeOf(context).width - 32,
+      360,
+    );
+    final entrance = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOutBack,
+      reverseCurve: Curves.easeInCubic,
+    );
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: FadeTransition(
+            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+            child: GestureDetector(
+              key: const ValueKey('quickActionsDismissArea'),
+              behavior: HitTestBehavior.opaque,
+              onTap: onDismiss,
+              child: ColoredBox(
+                color: Colors.black.withValues(
+                  alpha: context.isDark ? 0.20 : 0.06,
+                ),
+              ),
+            ),
+          ),
+        ),
+        CompositedTransformFollower(
+          link: link,
+          showWhenUnlinked: false,
+          targetAnchor: Alignment.topCenter,
+          followerAnchor: Alignment.bottomCenter,
+          offset: const Offset(0, -16),
+          child: FadeTransition(
+            opacity: CurvedAnimation(
+              parent: animation,
+              curve: const Interval(0, 0.72, curve: Curves.easeOut),
+            ),
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 0.86, end: 1).animate(entrance),
+              alignment: Alignment.bottomCenter,
+              child: Material(
+                key: const ValueKey('quickActionsMenu'),
+                color: context.colorScheme.surface,
+                elevation: AppElevation.lg,
+                shadowColor: Colors.black.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(AppRadius.xl),
+                clipBehavior: Clip.antiAlias,
+                child: Container(
+                  width: width,
+                  padding: const EdgeInsets.fromLTRB(10, 12, 10, 10),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: semantic.divider.withValues(alpha: 0.55),
+                      width: AppBorderWidth.hairline,
+                    ),
+                    borderRadius: BorderRadius.circular(AppRadius.xl),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        action.menuLabel ?? action.label ?? '',
+                        style: context.textTheme.labelMedium?.copyWith(
+                          color: semantic.mutedForeground,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          for (final (index, quickAction)
+                              in action.quickActions.indexed)
+                            Expanded(
+                              child: Padding(
+                                padding: EdgeInsetsDirectional.only(
+                                  start: index == 0 ? 0 : 4,
+                                  end: index == action.quickActions.length - 1
+                                      ? 0
+                                      : 4,
+                                ),
+                                child: _QuickActionTile(
+                                  index: index,
+                                  count: action.quickActions.length,
+                                  animation: animation,
+                                  action: quickAction,
+                                  onTap: () => onSelected(quickAction),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _QuickActionTile extends StatelessWidget {
+  const _QuickActionTile({
+    required this.index,
+    required this.count,
+    required this.animation,
+    required this.action,
+    required this.onTap,
+  });
+
+  final int index;
+  final int count;
+  final Animation<double> animation;
+  final AppQuickAction action;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final start = 0.12 + (index * 0.08);
+    final itemAnimation = CurvedAnimation(
+      parent: animation,
+      curve: Interval(start, math.min(start + 0.55, 1), curve: Curves.easeOut),
+    );
+
+    return FadeTransition(
+      opacity: itemAnimation,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.24),
+          end: Offset.zero,
+        ).animate(itemAnimation),
+        child: Semantics(
+          button: true,
+          label: action.label,
+          excludeSemantics: true,
+          child: Material(
+            color: context.colorScheme.primaryContainer.withValues(alpha: 0.42),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              key: ValueKey('quickAction-$index'),
+              onTap: onTap,
+              child: SizedBox(
+                height: 72,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      FaIcon(
+                        action.icon,
+                        size: AppIconSize.md,
+                        color: context.colorScheme.primary,
+                      ),
+                      const SizedBox(height: 7),
+                      Text(
+                        action.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: context.textTheme.labelSmall?.copyWith(
+                          color: context.colorScheme.onSurface,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -612,7 +925,7 @@ class _BottomBarItem extends StatelessWidget {
     final semantic = context.semanticColors;
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final foreground = selected
-        ? semantic.navigationSelected
+        ? context.colorScheme.onPrimary
         : semantic.navigationUnselected;
 
     final effectiveBadgeCount = destination.badgeCount;
@@ -620,6 +933,23 @@ class _BottomBarItem extends StatelessWidget {
         (effectiveBadgeCount != null && effectiveBadgeCount > 0)
         ? '${destination.label}, $effectiveBadgeCount'
         : destination.label;
+    Widget destinationIcon({required bool selectedState}) => Badge(
+      isLabelVisible: destination.hasBadge || (effectiveBadgeCount ?? 0) > 0,
+      label: effectiveBadgeCount != null ? Text('$effectiveBadgeCount') : null,
+      backgroundColor: context.colorScheme.error,
+      textColor: context.colorScheme.onError,
+      textStyle: const TextStyle(
+        fontSize: 9,
+        fontWeight: FontWeight.w700,
+        height: 1.1,
+      ),
+      child: FaIcon(
+        selectedState ? destination.selectedIcon : destination.icon,
+        key: ValueKey('bottomNavigationIcon-$index-$selectedState'),
+        color: foreground,
+        size: 20,
+      ),
+    );
 
     return Semantics(
       key: ValueKey('bottomNavigationDestinationSemantics-$index'),
@@ -639,91 +969,50 @@ class _BottomBarItem extends StatelessWidget {
           focusColor: semantic.navigationSelected.withValues(alpha: 0.15),
           hoverColor: semantic.navigationSelected.withValues(alpha: 0.08),
           splashColor: semantic.navigationSelected.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          child: SizedBox(
-            height: double.infinity,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 2,
-                vertical: 4,
-              ),
-              child: AnimatedContainer(
-                key: ValueKey('bottomNavigationDestinationSurface-$index'),
-                duration: reduceMotion ? Duration.zero : AppDurations.fast,
-                curve: _curve,
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                decoration: BoxDecoration(
-                  color: selected
-                      ? foreground.withValues(
-                          alpha: context.isDark ? 0.14 : 0.09,
-                        )
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    AnimatedScale(
-                      scale: selected ? 1.06 : 1,
-                      duration: reduceMotion
-                          ? Duration.zero
-                          : AppDurations.fast,
-                      curve: _curve,
-                      child: AnimatedSwitcher(
-                        duration: reduceMotion
-                            ? Duration.zero
-                            : AppDurations.fast,
-                        switchInCurve: _curve,
-                        switchOutCurve: Curves.easeInCubic,
-                        child: Badge(
-                          isLabelVisible:
-                              destination.hasBadge ||
-                              (effectiveBadgeCount ?? 0) > 0,
-                          label: effectiveBadgeCount != null
-                              ? Text('$effectiveBadgeCount')
-                              : null,
-                          backgroundColor: context.colorScheme.error,
-                          textColor: context.colorScheme.onError,
-                          textStyle: const TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w700,
-                            height: 1.1,
+          borderRadius: BorderRadius.circular(AppRadius.full),
+          child: Center(
+            child: AnimatedContainer(
+              key: ValueKey('bottomNavigationDestinationSurface-$index'),
+              duration: reduceMotion ? Duration.zero : AppDurations.fast,
+              curve: _curve,
+              width: 42,
+              height: 42,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                gradient: selected
+                    ? LinearGradient(
+                        begin: AlignmentDirectional.topStart,
+                        end: AlignmentDirectional.bottomEnd,
+                        colors: [
+                          context.colorScheme.primary,
+                          Color.lerp(
+                            context.colorScheme.primary,
+                            context.colorScheme.tertiary,
+                            0.42,
+                          )!,
+                        ],
+                      )
+                    : null,
+                borderRadius: BorderRadius.circular(AppRadius.full),
+                boxShadow: selected
+                    ? [
+                        BoxShadow(
+                          color: context.colorScheme.primary.withValues(
+                            alpha: context.isDark ? 0.26 : 0.18,
                           ),
-                          child: FaIcon(
-                            selected
-                                ? destination.selectedIcon
-                                : destination.icon,
-                            key: ValueKey<bool>(selected),
-                            color: foreground,
-                            size: 21,
-                          ),
+                          blurRadius: 12,
+                          offset: const Offset(0, 3),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    AnimatedDefaultTextStyle(
-                      duration: reduceMotion
-                          ? Duration.zero
-                          : AppDurations.fast,
-                      curve: _curve,
-                      style: context.textTheme.labelSmall!.copyWith(
-                        color: foreground,
-                        fontSize: 11,
-                        fontWeight: selected
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                        letterSpacing: -0.1,
-                        height: 1.15,
-                      ),
-                      child: Text(
-                        destination.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
+                      ]
+                    : null,
+              ),
+              child: AnimatedSwitcher(
+                duration: reduceMotion ? Duration.zero : AppDurations.fast,
+                switchInCurve: _curve,
+                switchOutCurve: Curves.easeInCubic,
+                child: Center(
+                  key: ValueKey('iconOnlyDestination-$selected'),
+                  child: destinationIcon(selectedState: selected),
                 ),
               ),
             ),

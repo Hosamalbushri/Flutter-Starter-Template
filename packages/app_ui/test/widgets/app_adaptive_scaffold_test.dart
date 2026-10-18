@@ -64,8 +64,8 @@ void main() {
 
       expect(find.byType(NavigationRail), findsNothing);
       expect(tester.widget<Scaffold>(find.byType(Scaffold)).extendBody, isTrue);
-      // The reference treatment keeps short labels visible under each icon.
-      expect(find.text('Home'), findsOneWidget);
+      // Compact navigation remains icon-only; labels are available as tooltips.
+      expect(find.text('Home'), findsNothing);
       expect(find.byTooltip('Home'), findsOneWidget);
 
       // Tapping another destination reports its index.
@@ -127,13 +127,11 @@ void main() {
         const ValueKey('bottomNavigationCenterAction'),
       );
       expect(center, findsOneWidget);
-      expect(tester.getSize(center), const Size.square(56));
+      expect(tester.getSize(center), const Size.square(48));
 
       final decoration = tester.widget<DecoratedBox>(center).decoration;
-      expect(
-        (decoration as BoxDecoration).borderRadius,
-        BorderRadius.circular(AppRadius.lg),
-      );
+      expect((decoration as BoxDecoration).shape, BoxShape.rectangle);
+      expect(decoration.borderRadius, BorderRadius.circular(15));
 
       final firstDestination = tester.getRect(
         find.byKey(const ValueKey('bottomNavigationDestination-0')),
@@ -145,7 +143,64 @@ void main() {
       expect(selected, isNull);
     });
 
-    testWidgets('selected destination has the compact highlighted treatment', (
+    testWidgets('center action reveals animated quick actions and runs one', (
+      tester,
+    ) async {
+      var fallbackPressed = false;
+      var quickActionPressed = false;
+      tester.view
+        ..physicalSize = const Size(390, 800)
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: AppAdaptiveScaffold(
+            destinations: destinations,
+            selectedIndex: 0,
+            onDestinationSelected: (_) {},
+            centerAction: AppCenterAction(
+              icon: FontAwesomeIcons.plus,
+              label: 'Create',
+              menuLabel: 'Quick actions',
+              onPressed: () => fallbackPressed = true,
+              quickActions: [
+                AppQuickAction(
+                  icon: FontAwesomeIcons.link,
+                  label: 'Add link',
+                  onPressed: () => quickActionPressed = true,
+                ),
+                AppQuickAction(
+                  icon: FontAwesomeIcons.layerGroup,
+                  label: 'New collection',
+                  onPressed: () {},
+                ),
+              ],
+            ),
+            body: const Text('body'),
+          ),
+        ),
+      );
+
+      await tester.tap(
+        find.byKey(const ValueKey('bottomNavigationCenterAction')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('quickActionsMenu')), findsOneWidget);
+      expect(find.text('Quick actions'), findsOneWidget);
+      expect(find.text('Add link'), findsOneWidget);
+      expect(find.text('New collection'), findsOneWidget);
+      expect(fallbackPressed, isFalse);
+
+      await tester.tap(find.text('Add link'));
+      await tester.pumpAndSettle();
+
+      expect(quickActionPressed, isTrue);
+      expect(find.byKey(const ValueKey('quickActionsMenu')), findsNothing);
+    });
+
+    testWidgets('selected destination uses an icon-only branded treatment', (
       tester,
     ) async {
       await pumpAt(tester, 390);
@@ -156,12 +211,14 @@ void main() {
       final unselectedSurface = tester.widget<AnimatedContainer>(
         find.byKey(const ValueKey('bottomNavigationDestinationSurface-1')),
       );
-      final selectedDecoration = selectedSurface.decoration! as BoxDecoration;
-      final unselectedDecoration =
-          unselectedSurface.decoration! as BoxDecoration;
 
-      expect(selectedDecoration.color, isNot(Colors.transparent));
-      expect(unselectedDecoration.color, Colors.transparent);
+      expect(
+        (selectedSurface.decoration! as BoxDecoration).gradient,
+        isNotNull,
+      );
+      expect((unselectedSurface.decoration! as BoxDecoration).gradient, isNull);
+      expect(find.text('Home'), findsNothing);
+      expect(find.text('Search'), findsNothing);
     });
 
     testWidgets('backdrop blur is opt-in', (tester) async {
@@ -313,7 +370,8 @@ void main() {
             ),
           );
 
-          expect(find.text('Home'), findsOneWidget);
+          expect(find.text('Home'), findsNothing);
+          expect(find.byTooltip('Home'), findsOneWidget);
           expect(find.byType(Scaffold), findsOneWidget);
           expect(tester.takeException(), isNull);
         }
@@ -1320,9 +1378,9 @@ void main() {
               findsOneWidget,
             );
             expect(
-              find.text('Inset: 120'),
+              find.text('Inset: 116'),
               findsOneWidget,
-            ); // 64 bar + 22 lift + 34 padding
+            ); // 62 bar + 20 lift + 34 padding
 
             await tester.pumpWidget(
               appWithConfig(hideOnKeyboard: true, keyboardOpen: true),
@@ -1700,30 +1758,39 @@ void main() {
             ),
           );
 
-          // Verify active destination pill color and styling
+          // Verify the active destination becomes a branded command capsule.
           final surfaceContainer = tester.widget<AnimatedContainer>(
             find.byKey(const ValueKey('bottomNavigationDestinationSurface-0')),
           );
           final decoration = surfaceContainer.decoration as BoxDecoration?;
           expect(decoration, isNotNull);
-          expect(decoration!.color, isNotNull);
+          expect(decoration!.gradient, isNotNull);
           expect(
             decoration.borderRadius,
-            BorderRadius.circular(AppRadius.lg),
+            BorderRadius.circular(AppRadius.full),
           );
 
-          // Verify center action button background and colors
+          // Verify the center action uses the rotated geometric surface.
+          final centerDecoration =
+              tester
+                      .widget<DecoratedBox>(
+                        find.byKey(
+                          const ValueKey('bottomNavigationCenterAction'),
+                        ),
+                      )
+                      .decoration
+                  as BoxDecoration;
+          expect(centerDecoration.gradient, isNotNull);
+          expect(centerDecoration.shape, BoxShape.rectangle);
+          expect(centerDecoration.borderRadius, BorderRadius.circular(15));
           final centerMaterial = tester.widget<Material>(
             find.descendant(
               of: find.byKey(const ValueKey('bottomNavigationCenterAction')),
               matching: find.byType(Material),
             ),
           );
-          expect(centerMaterial.color, colorScheme.primary);
-          expect(
-            centerMaterial.borderRadius,
-            BorderRadius.circular(AppRadius.lg),
-          );
+          expect(centerMaterial.color, Colors.transparent);
+          expect(centerMaterial.shape, isA<RoundedRectangleBorder>());
         }
       });
 
@@ -1777,7 +1844,7 @@ void main() {
             matching: find.byType(AnimatedScale),
           ),
         );
-        expect(pressedScale.scale, 0.93);
+        expect(pressedScale.scale, 0.91);
 
         // Release
         await gesture.up();
@@ -1839,12 +1906,14 @@ void main() {
         );
         expect(badgeLabelFinder, findsOneWidget);
 
-        final labelFinder = find.text('Home');
         final badgeRect = tester.getRect(badgeLabelFinder);
-        final labelRect = tester.getRect(labelFinder);
+        final destinationRect = tester.getRect(
+          find.byKey(const ValueKey('bottomNavigationDestination-0')),
+        );
 
-        // Badge must be positioned above the text label without overlap
-        expect(badgeRect.bottom, lessThan(labelRect.top));
+        // The badge stays within the icon-only destination's touch target.
+        expect(destinationRect.contains(badgeRect.center), isTrue);
+        expect(find.text('Home'), findsNothing);
         expect(tester.takeException(), isNull);
       });
 
@@ -1917,30 +1986,18 @@ void main() {
             ),
           );
 
-          // Initially index 0 selected
-          var dest0TextStyle = tester
-              .widget<AnimatedDefaultTextStyle>(
-                find.descendant(
-                  of: find.byKey(
-                    const ValueKey('bottomNavigationDestinationSurface-0'),
-                  ),
-                  matching: find.byType(AnimatedDefaultTextStyle),
-                ),
-              )
-              .style;
-          expect(dest0TextStyle.fontWeight, FontWeight.w700);
-
-          var dest1TextStyle = tester
-              .widget<AnimatedDefaultTextStyle>(
-                find.descendant(
-                  of: find.byKey(
-                    const ValueKey('bottomNavigationDestinationSurface-1'),
-                  ),
-                  matching: find.byType(AnimatedDefaultTextStyle),
-                ),
-              )
-              .style;
-          expect(dest1TextStyle.fontWeight, FontWeight.w500);
+          // Initially index 0 is the expanded branded command.
+          BoxDecoration destinationDecoration(int index) =>
+              tester
+                      .widget<AnimatedContainer>(
+                        find.byKey(
+                          ValueKey('bottomNavigationDestinationSurface-$index'),
+                        ),
+                      )
+                      .decoration!
+                  as BoxDecoration;
+          expect(destinationDecoration(0).gradient, isNotNull);
+          expect(destinationDecoration(1).gradient, isNull);
 
           // Tap on index 1
           await tester.tap(
@@ -1949,29 +2006,8 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(selectedIndex, 1);
-          dest0TextStyle = tester
-              .widget<AnimatedDefaultTextStyle>(
-                find.descendant(
-                  of: find.byKey(
-                    const ValueKey('bottomNavigationDestinationSurface-0'),
-                  ),
-                  matching: find.byType(AnimatedDefaultTextStyle),
-                ),
-              )
-              .style;
-          expect(dest0TextStyle.fontWeight, FontWeight.w500);
-
-          dest1TextStyle = tester
-              .widget<AnimatedDefaultTextStyle>(
-                find.descendant(
-                  of: find.byKey(
-                    const ValueKey('bottomNavigationDestinationSurface-1'),
-                  ),
-                  matching: find.byType(AnimatedDefaultTextStyle),
-                ),
-              )
-              .style;
-          expect(dest1TextStyle.fontWeight, FontWeight.w700);
+          expect(destinationDecoration(0).gradient, isNull);
+          expect(destinationDecoration(1).gradient, isNotNull);
         },
       );
 

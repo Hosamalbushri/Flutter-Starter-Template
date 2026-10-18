@@ -5,6 +5,48 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 void main() {
   group('AppTopBar', () {
+    testWidgets('dashboard variant renders polished chrome and actions work', (
+      tester,
+    ) async {
+      var searchTaps = 0;
+      var notificationTaps = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light(),
+          home: Scaffold(
+            appBar: AppTopBar(
+              title: 'Welcome back',
+              subtitle: 'Alex Morgan',
+              variant: AppTopBarVariant.dashboard,
+              profileAvatar: const ColoredBox(color: Colors.blue),
+              onSearchTap: () => searchTaps++,
+              onNotificationTap: () => notificationTaps++,
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.byKey(const ValueKey('dashboardTopBarBackground')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('dashboardTopBarAvatarFrame')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('dashboardTopBarAction')),
+        findsNWidgets(2),
+      );
+      expect(tester.getSize(find.byType(AppTopBar)).height, 66);
+
+      await tester.tap(find.byType(IconButton).at(0));
+      await tester.tap(find.byType(IconButton).at(1));
+      expect(searchTaps, 1);
+      expect(notificationTaps, 1);
+    });
+
     testWidgets('dashboard variant stays compact at 320px in RTL at 2x', (
       tester,
     ) async {

@@ -165,6 +165,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonSignOut => 'Sign out';
 
   @override
+  String get quickActionsTitle => 'Quick actions';
+
+  @override
   String get homeAppBarTitle => 'Home';
 
   @override
@@ -267,16 +270,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSettingsSubtitle => 'Account and application settings';
 
   @override
+  String get profileAccountBadge => 'Personal workspace';
+
+  @override
+  String get profileCopyIdTooltip => 'Copy account ID';
+
+  @override
   String get profileSectionAppearance => 'Appearance';
+
+  @override
+  String get profileAppearanceSectionSubtitle => 'Theme, color and language';
 
   @override
   String get profileSectionAccount => 'Account';
 
   @override
+  String get profileAccountSectionSubtitle => 'Security and privacy controls';
+
+  @override
   String get profileChangePassword => 'Change Password';
 
   @override
+  String get profileChangePasswordSubtitle =>
+      'Update your account security credentials';
+
+  @override
   String get profileDeleteAccount => 'Delete Account';
+
+  @override
+  String get profileDeleteAccountSubtitle =>
+      'Permanently remove your account and data';
 
   @override
   String get profileDeleteAccountDialogTitle => 'Delete account?';
@@ -322,6 +345,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSectionAbout => 'About';
 
   @override
+  String get profileAboutSectionSubtitle => 'Version and application details';
+
+  @override
   String get profileUserIdCopied => 'User ID copied';
 
   @override
@@ -343,6 +369,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String profileAppVersionBuild(String version, String buildNumber) {
     return 'Version $version (build $buildNumber)';
   }
+
+  @override
+  String get profileAppStatus => 'Up to date';
 
   @override
   String get profileSignOutConfirmMessage =>
@@ -521,10 +550,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navHome => 'Home';
 
   @override
-  String get navBookmarks => 'Bookmarks';
+  String get navBookmarks => 'Saved';
 
   @override
-  String get navProfile => 'Profile';
+  String get navProfile => 'Account';
 
   @override
   String get navSettings => 'Settings';
@@ -548,7 +577,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookmarkRemoveImageLabel => 'Remove image';
 
   @override
-  String get navNotifications => 'Notifications';
+  String get navNotifications => 'Alerts';
 
   @override
   String get notificationsAppBarTitle => 'Notifications';
@@ -735,4 +764,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileAppearanceLanguageLabel => 'Language';
+
+  @override
+  String get systemSettingsTitle => 'System settings';
+
+  @override
+  String get systemSettingsSubtitle => 'Personalize your app experience';
+
+  @override
+  String get systemSettingsOpen => 'Open system settings';
+
+  @override
+  String get systemSettingsAppearance => 'Appearance and color';
+
+  @override
+  String get systemSettingsAppearanceHint =>
+      'Choose the appearance and accent that suit you';
+
+  @override
+  String get systemSettingsTypography => 'Type and reading';
+
+  @override
+  String get systemSettingsTypographyHint =>
+      'Change the font and text size across the app';
+
+  @override
+  String get systemSettingsFont => 'Font family';
+
+  @override
+  String get systemSettingsFontSystem => 'System font';
+
+  @override
+  String get systemSettingsFontSystemHint => 'Use the device\'s default font';
+
+  @override
+  String get systemSettingsFontPreview => 'English and نص عربي 123';
+
+  @override
+  String get systemSettingsBrowseFonts => 'Tap to choose a font family';
+
+  @override
+  String get systemSettingsSuggestedFonts => 'Suggested';
+
+  @override
+  String get systemSettingsFontLibrary => 'Choose a font family';
+
+  @override
+  String get systemSettingsFontLibraryHint =>
+      'Names load gradually; the font is loaded only after selection';
+
+  @override
+  String get systemSettingsFontSearchHint => 'Search by font name';
+
+  @override
+  String get systemSettingsFontNoResults => 'No matching font found';
+
+  @override
+  String get systemSettingsFontLoadError => 'The font list could not be loaded';
+
+  @override
+  String get systemSettingsRetry => 'Try again';
+
+  @override
+  String get systemSettingsTextSize => 'Text size';
+
+  @override
+  String get systemSettingsTextCompact => 'Small';
+
+  @override
+  String get systemSettingsTextStandard => 'Standard';
+
+  @override
+  String get systemSettingsTextLarge => 'Large';
+
+  @override
+  String get systemSettingsLanguageHint =>
+      'The interface language and direction update immediately';
+
+  @override
+  String get systemSettingsLanguageSystemHint =>
+      'Automatically follow the device language';
+
+  @override
+  String get systemSettingsPreviewTitle => 'Live preview';
+
+  @override
+  String get systemSettingsPreviewBody =>
+      'Font, color, and size changes appear here and across the app.';
+
+  @override
+  String get systemSettingsReset => 'Restore default settings';
 }

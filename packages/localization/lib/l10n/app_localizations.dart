@@ -404,6 +404,12 @@ abstract class AppLocalizations {
   /// **'Sign out'**
   String get commonSignOut;
 
+  /// No description provided for @quickActionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick actions'**
+  String get quickActionsTitle;
+
   /// No description provided for @homeAppBarTitle.
   ///
   /// In en, this message translates to:
@@ -578,11 +584,29 @@ abstract class AppLocalizations {
   /// **'Account and application settings'**
   String get profileSettingsSubtitle;
 
+  /// No description provided for @profileAccountBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal workspace'**
+  String get profileAccountBadge;
+
+  /// No description provided for @profileCopyIdTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy account ID'**
+  String get profileCopyIdTooltip;
+
   /// No description provided for @profileSectionAppearance.
   ///
   /// In en, this message translates to:
   /// **'Appearance'**
   String get profileSectionAppearance;
+
+  /// No description provided for @profileAppearanceSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme, color and language'**
+  String get profileAppearanceSectionSubtitle;
 
   /// No description provided for @profileSectionAccount.
   ///
@@ -590,17 +614,35 @@ abstract class AppLocalizations {
   /// **'Account'**
   String get profileSectionAccount;
 
+  /// No description provided for @profileAccountSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Security and privacy controls'**
+  String get profileAccountSectionSubtitle;
+
   /// No description provided for @profileChangePassword.
   ///
   /// In en, this message translates to:
   /// **'Change Password'**
   String get profileChangePassword;
 
+  /// No description provided for @profileChangePasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update your account security credentials'**
+  String get profileChangePasswordSubtitle;
+
   /// No description provided for @profileDeleteAccount.
   ///
   /// In en, this message translates to:
   /// **'Delete Account'**
   String get profileDeleteAccount;
+
+  /// No description provided for @profileDeleteAccountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently remove your account and data'**
+  String get profileDeleteAccountSubtitle;
 
   /// No description provided for @profileDeleteAccountDialogTitle.
   ///
@@ -680,6 +722,12 @@ abstract class AppLocalizations {
   /// **'About'**
   String get profileSectionAbout;
 
+  /// No description provided for @profileAboutSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Version and application details'**
+  String get profileAboutSectionSubtitle;
+
   /// No description provided for @profileUserIdCopied.
   ///
   /// In en, this message translates to:
@@ -721,6 +769,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Version {version} (build {buildNumber})'**
   String profileAppVersionBuild(String version, String buildNumber);
+
+  /// No description provided for @profileAppStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to date'**
+  String get profileAppStatus;
 
   /// No description provided for @profileSignOutConfirmMessage.
   ///
@@ -1061,13 +1115,13 @@ abstract class AppLocalizations {
   /// No description provided for @navBookmarks.
   ///
   /// In en, this message translates to:
-  /// **'Bookmarks'**
+  /// **'Saved'**
   String get navBookmarks;
 
   /// No description provided for @navProfile.
   ///
   /// In en, this message translates to:
-  /// **'Profile'**
+  /// **'Account'**
   String get navProfile;
 
   /// No description provided for @navSettings.
@@ -1109,7 +1163,7 @@ abstract class AppLocalizations {
   /// No description provided for @navNotifications.
   ///
   /// In en, this message translates to:
-  /// **'Notifications'**
+  /// **'Alerts'**
   String get navNotifications;
 
   /// No description provided for @notificationsAppBarTitle.
@@ -1429,6 +1483,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language'**
   String get profileAppearanceLanguageLabel;
+
+  /// No description provided for @systemSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'System settings'**
+  String get systemSettingsTitle;
+
+  /// No description provided for @systemSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Personalize your app experience'**
+  String get systemSettingsSubtitle;
+
+  /// No description provided for @systemSettingsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open system settings'**
+  String get systemSettingsOpen;
+
+  /// No description provided for @systemSettingsAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance and color'**
+  String get systemSettingsAppearance;
+
+  /// No description provided for @systemSettingsAppearanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the appearance and accent that suit you'**
+  String get systemSettingsAppearanceHint;
+
+  /// No description provided for @systemSettingsTypography.
+  ///
+  /// In en, this message translates to:
+  /// **'Type and reading'**
+  String get systemSettingsTypography;
+
+  /// No description provided for @systemSettingsTypographyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the font and text size across the app'**
+  String get systemSettingsTypographyHint;
+
+  /// No description provided for @systemSettingsFont.
+  ///
+  /// In en, this message translates to:
+  /// **'Font family'**
+  String get systemSettingsFont;
+
+  /// No description provided for @systemSettingsFontSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System font'**
+  String get systemSettingsFontSystem;
+
+  /// No description provided for @systemSettingsFontSystemHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the device\'s default font'**
+  String get systemSettingsFontSystemHint;
+
+  /// No description provided for @systemSettingsFontPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'English and نص عربي 123'**
+  String get systemSettingsFontPreview;
+
+  /// No description provided for @systemSettingsBrowseFonts.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to choose a font family'**
+  String get systemSettingsBrowseFonts;
+
+  /// No description provided for @systemSettingsSuggestedFonts.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested'**
+  String get systemSettingsSuggestedFonts;
+
+  /// No description provided for @systemSettingsFontLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a font family'**
+  String get systemSettingsFontLibrary;
+
+  /// No description provided for @systemSettingsFontLibraryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Names load gradually; the font is loaded only after selection'**
+  String get systemSettingsFontLibraryHint;
+
+  /// No description provided for @systemSettingsFontSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by font name'**
+  String get systemSettingsFontSearchHint;
+
+  /// No description provided for @systemSettingsFontNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching font found'**
+  String get systemSettingsFontNoResults;
+
+  /// No description provided for @systemSettingsFontLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'The font list could not be loaded'**
+  String get systemSettingsFontLoadError;
+
+  /// No description provided for @systemSettingsRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get systemSettingsRetry;
+
+  /// No description provided for @systemSettingsTextSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Text size'**
+  String get systemSettingsTextSize;
+
+  /// No description provided for @systemSettingsTextCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get systemSettingsTextCompact;
+
+  /// No description provided for @systemSettingsTextStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get systemSettingsTextStandard;
+
+  /// No description provided for @systemSettingsTextLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get systemSettingsTextLarge;
+
+  /// No description provided for @systemSettingsLanguageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The interface language and direction update immediately'**
+  String get systemSettingsLanguageHint;
+
+  /// No description provided for @systemSettingsLanguageSystemHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically follow the device language'**
+  String get systemSettingsLanguageSystemHint;
+
+  /// No description provided for @systemSettingsPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Live preview'**
+  String get systemSettingsPreviewTitle;
+
+  /// No description provided for @systemSettingsPreviewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Font, color, and size changes appear here and across the app.'**
+  String get systemSettingsPreviewBody;
+
+  /// No description provided for @systemSettingsReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore default settings'**
+  String get systemSettingsReset;
 }
 
 class _AppLocalizationsDelegate

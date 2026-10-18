@@ -59,6 +59,10 @@ part 'router.g.dart';
               name: 'change-password',
             ),
             // fst:auth:end
+            TypedGoRoute<SystemSettingsRoute>(
+              path: 'system-settings',
+              name: 'system-settings',
+            ),
           ],
         ),
       ],
@@ -143,6 +147,14 @@ class ChangePasswordRoute extends GoRouteData with $ChangePasswordRoute {
       const ChangePasswordScreen();
 }
 // fst:auth:end
+
+class SystemSettingsRoute extends GoRouteData with $SystemSettingsRoute {
+  const SystemSettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const SystemSettingsScreen();
+}
 
 // fst:feature:bookmarks:start
 class BookmarksListRoute extends GoRouteData with $BookmarksListRoute {

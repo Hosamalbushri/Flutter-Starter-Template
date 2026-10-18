@@ -165,6 +165,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commonSignOut => 'تسجيل الخروج';
 
   @override
+  String get quickActionsTitle => 'إجراءات سريعة';
+
+  @override
   String get homeAppBarTitle => 'الرئيسية';
 
   @override
@@ -270,16 +273,35 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profileSettingsSubtitle => 'إعدادات الحساب والتطبيق';
 
   @override
+  String get profileAccountBadge => 'مساحتك الشخصية';
+
+  @override
+  String get profileCopyIdTooltip => 'نسخ معرّف الحساب';
+
+  @override
   String get profileSectionAppearance => 'المظهر';
+
+  @override
+  String get profileAppearanceSectionSubtitle => 'السمة واللون واللغة';
 
   @override
   String get profileSectionAccount => 'الحساب';
 
   @override
+  String get profileAccountSectionSubtitle => 'خيارات الأمان والخصوصية';
+
+  @override
   String get profileChangePassword => 'تغيير كلمة المرور';
 
   @override
+  String get profileChangePasswordSubtitle =>
+      'تحديث بيانات الأمان الخاصة بحسابك';
+
+  @override
   String get profileDeleteAccount => 'حذف الحساب';
+
+  @override
+  String get profileDeleteAccountSubtitle => 'إزالة حسابك وبياناتك نهائيًا';
 
   @override
   String get profileDeleteAccountDialogTitle => 'حذف الحساب؟';
@@ -326,6 +348,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profileSectionAbout => 'حول التطبيق';
 
   @override
+  String get profileAboutSectionSubtitle => 'الإصدار وتفاصيل التطبيق';
+
+  @override
   String get profileUserIdCopied => 'تم نسخ معرّف المستخدم';
 
   @override
@@ -347,6 +372,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String profileAppVersionBuild(String version, String buildNumber) {
     return 'الإصدار $version (البنية $buildNumber)';
   }
+
+  @override
+  String get profileAppStatus => 'محدّث';
 
   @override
   String get profileSignOutConfirmMessage => 'هل تريد بالتأكيد تسجيل الخروج؟';
@@ -525,10 +553,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navHome => 'الرئيسية';
 
   @override
-  String get navBookmarks => 'الإشارات المرجعية';
+  String get navBookmarks => 'المحفوظات';
 
   @override
-  String get navProfile => 'الملف الشخصي';
+  String get navProfile => 'حسابي';
 
   @override
   String get navSettings => 'الإعدادات';
@@ -551,7 +579,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bookmarkRemoveImageLabel => 'إزالة الصورة';
 
   @override
-  String get navNotifications => 'الإشعارات';
+  String get navNotifications => 'التنبيهات';
 
   @override
   String get notificationsAppBarTitle => 'الإشعارات';
@@ -778,4 +806,91 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get profileAppearanceLanguageLabel => 'اللغة';
+
+  @override
+  String get systemSettingsTitle => 'إعدادات النظام';
+
+  @override
+  String get systemSettingsSubtitle => 'خصّص تجربة التطبيق';
+
+  @override
+  String get systemSettingsOpen => 'فتح إعدادات النظام';
+
+  @override
+  String get systemSettingsAppearance => 'المظهر والألوان';
+
+  @override
+  String get systemSettingsAppearanceHint => 'اختر المظهر واللون المناسبين لك';
+
+  @override
+  String get systemSettingsTypography => 'الخط والقراءة';
+
+  @override
+  String get systemSettingsTypographyHint =>
+      'غيّر الخط وحجم النص في كامل التطبيق';
+
+  @override
+  String get systemSettingsFont => 'نوع الخط';
+
+  @override
+  String get systemSettingsFontSystem => 'خط النظام';
+
+  @override
+  String get systemSettingsFontSystemHint => 'استخدام الخط الافتراضي للجهاز';
+
+  @override
+  String get systemSettingsFontPreview => 'نص عربي و English 123';
+
+  @override
+  String get systemSettingsBrowseFonts => 'اضغط لاختيار نوع الخط';
+
+  @override
+  String get systemSettingsSuggestedFonts => 'مقترحة';
+
+  @override
+  String get systemSettingsFontLibrary => 'اختيار نوع الخط';
+
+  @override
+  String get systemSettingsFontLibraryHint =>
+      'تُحمّل الأسماء تدريجياً، ولن يُحمّل الخط إلا بعد اختياره';
+
+  @override
+  String get systemSettingsFontSearchHint => 'ابحث باسم الخط';
+
+  @override
+  String get systemSettingsFontNoResults => 'لم يتم العثور على خط مطابق';
+
+  @override
+  String get systemSettingsFontLoadError => 'تعذر تحميل قائمة الخطوط';
+
+  @override
+  String get systemSettingsRetry => 'إعادة المحاولة';
+
+  @override
+  String get systemSettingsTextSize => 'حجم النص';
+
+  @override
+  String get systemSettingsTextCompact => 'صغير';
+
+  @override
+  String get systemSettingsTextStandard => 'عادي';
+
+  @override
+  String get systemSettingsTextLarge => 'كبير';
+
+  @override
+  String get systemSettingsLanguageHint => 'تتغير لغة الواجهة واتجاهها مباشرة';
+
+  @override
+  String get systemSettingsLanguageSystemHint => 'اتباع لغة الجهاز تلقائياً';
+
+  @override
+  String get systemSettingsPreviewTitle => 'معاينة مباشرة';
+
+  @override
+  String get systemSettingsPreviewBody =>
+      'ستظهر تغييرات الخط واللون والحجم هنا وفي كامل التطبيق.';
+
+  @override
+  String get systemSettingsReset => 'إعادة الإعدادات الافتراضية';
 }

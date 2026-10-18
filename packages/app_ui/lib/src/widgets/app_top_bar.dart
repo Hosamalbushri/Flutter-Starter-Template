@@ -69,19 +69,21 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   final AppTopBarVariant variant;
 
   static const double _actionExtent = kMinInteractiveDimension;
+  static const double _dashboardHeight = 66;
 
   @override
   Size get preferredSize {
     if (variant == AppTopBarVariant.dashboard) {
-      return Size.fromHeight(56.0 + (bottom?.preferredSize.height ?? 0));
+      return Size.fromHeight(
+        _dashboardHeight + (bottom?.preferredSize.height ?? 0),
+      );
     }
-    final baseHeight = subtitle != null || titleMaxLines == 2 ? 56.0 : 48.0;
+    final baseHeight = subtitle != null || titleMaxLines == 2 ? 64.0 : 60.0;
     return Size.fromHeight(baseHeight + (bottom?.preferredSize.height ?? 0));
   }
 
   @override
   Widget build(BuildContext context) {
-    final semantic = context.semanticColors;
     final colorScheme = context.colorScheme;
     final isRtl = Directionality.of(context) == TextDirection.rtl;
     final transparent = variant == AppTopBarVariant.transparent;
@@ -153,48 +155,120 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
     ];
 
     if (variant == AppTopBarVariant.dashboard) {
+      final semantic = context.semanticColors;
+      final dashboardStart =
+          backgroundColor ??
+          (context.isDark
+              ? colorScheme.surfaceContainerHigh
+              : colorScheme.surface);
+      final dashboardEnd =
+          backgroundColor ??
+          (context.isDark
+              ? colorScheme.surface
+              : colorScheme.surfaceContainerLow);
+
       return AppBar(
         key: key,
         automaticallyImplyLeading: false,
-        backgroundColor:
-            backgroundColor ??
-            (context.isDark
-                ? colorScheme.surface
-                : colorScheme.surfaceContainerLowest),
+        backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: AppElevation.none,
         elevation: AppElevation.none,
         toolbarHeight:
             preferredSize.height - (bottom?.preferredSize.height ?? 0),
-        titleSpacing: AppSpacing.md,
-        title: _DashboardTopBarContent(
-          title: title,
-          subtitle: subtitle,
-          avatar: profileAvatar,
-          actions: effectiveActions,
+        titleSpacing: 12,
+        flexibleSpace: ColoredBox(
+          color: context.isDark
+              ? colorScheme.surfaceContainerLowest
+              : colorScheme.surfaceContainerLow.withValues(alpha: 0.55),
+        ),
+        title: Container(
+          key: const ValueKey('dashboardTopBarBackground'),
+          height: 58,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: AlignmentDirectional.topStart,
+              end: AlignmentDirectional.bottomEnd,
+              colors: [dashboardStart, dashboardEnd],
+            ),
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+            border: Border.all(
+              color: semantic.divider.withValues(
+                alpha: context.isDark ? 0.38 : 0.52,
+              ),
+              width: AppBorderWidth.hairline,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(
+                  alpha: context.isDark ? 0.20 : 0.07,
+                ),
+                blurRadius: 18,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              PositionedDirectional(
+                start: -18,
+                top: -30,
+                child: Container(
+                  width: 82,
+                  height: 82,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colorScheme.onSurface.withValues(alpha: 0.035),
+                  ),
+                ),
+              ),
+              PositionedDirectional(
+                end: 112,
+                bottom: -42,
+                child: Transform.rotate(
+                  angle: -0.45,
+                  child: Container(
+                    width: 92,
+                    height: 58,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(AppRadius.xl),
+                      color: colorScheme.onSurface.withValues(alpha: 0.025),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                ),
+                child: _DashboardTopBarContent(
+                  title: title,
+                  subtitle: subtitle,
+                  avatar: profileAvatar,
+                  actions: effectiveActions,
+                ),
+              ),
+            ],
+          ),
         ),
         bottom: bottom,
-        shape: showDivider
-            ? Border(
-                bottom: BorderSide(
-                  color: semantic.divider.withValues(
-                    alpha: context.isDark ? 0.35 : 0.18,
-                  ),
-                  width: AppBorderWidth.hairline,
-                ),
-              )
-            : null,
       );
     }
 
     return AppBar(
       automaticallyImplyLeading: false,
-      backgroundColor: transparent
-          ? colorScheme.surface.withValues(alpha: 0)
-          : backgroundColor ?? colorScheme.surface,
+      backgroundColor: Colors.transparent,
       surfaceTintColor: colorScheme.surfaceTint.withValues(alpha: 0),
       scrolledUnderElevation: AppElevation.none,
       elevation: transparent ? AppElevation.none : elevation,
+      flexibleSpace: transparent
+          ? null
+          : _TopBarBackground(
+              backgroundColor: backgroundColor,
+              showDivider: showDivider,
+            ),
       toolbarHeight: preferredSize.height - (bottom?.preferredSize.height ?? 0),
       titleSpacing: 0,
       title: LayoutBuilder(
@@ -254,16 +328,46 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
         },
       ),
       bottom: bottom,
-      shape: !transparent && showDivider
-          ? Border(
-              bottom: BorderSide(
-                color: semantic.divider.withValues(
-                  alpha: context.isDark ? 0.35 : 0.18,
+    );
+  }
+}
+
+/// A quiet surface separates global navigation from the page without adding
+/// decorative noise. The faint brand wash is only used by dashboards.
+class _TopBarBackground extends StatelessWidget {
+  const _TopBarBackground({
+    required this.backgroundColor,
+    required this.showDivider,
+  });
+
+  final Color? backgroundColor;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final semantic = context.semanticColors;
+    final baseColor =
+        backgroundColor ??
+        (context.isDark
+            ? colorScheme.surface
+            : colorScheme.surfaceContainerLowest);
+
+    return DecoratedBox(
+      key: const ValueKey('dashboardTopBarBackground'),
+      decoration: BoxDecoration(
+        color: baseColor,
+        border: showDivider
+            ? Border(
+                bottom: BorderSide(
+                  color: semantic.divider.withValues(
+                    alpha: context.isDark ? 0.32 : 0.22,
+                  ),
+                  width: AppBorderWidth.hairline,
                 ),
-                width: AppBorderWidth.hairline,
-              ),
-            )
-          : null,
+              )
+            : null,
+      ),
     );
   }
 }
@@ -289,14 +393,24 @@ class _DashboardTopBarContent extends StatelessWidget {
     return Row(
       children: [
         if (avatar != null) ...[
-          SizedBox.square(
-            dimension: 36,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadius.button),
+          Container(
+            key: const ValueKey('dashboardTopBarAvatarFrame'),
+            width: 40,
+            height: 40,
+            padding: const EdgeInsets.all(1.5),
+            decoration: BoxDecoration(
+              color: context.colorScheme.surfaceContainerHighest,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: context.semanticColors.divider.withValues(alpha: 0.72),
+                width: 1.5,
+              ),
+            ),
+            child: ClipOval(
               child: avatar,
             ),
           ),
-          const SizedBox(width: AppSpacing.sm),
+          const SizedBox(width: AppSpacing.md),
         ],
         Expanded(
           child: Column(
@@ -309,9 +423,9 @@ class _DashboardTopBarContent extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: context.textTheme.labelMedium?.copyWith(
-                  color: context.colorScheme.onSurfaceVariant,
+                  color: context.semanticColors.mutedForeground,
                   fontWeight: FontWeight.w500,
-                  letterSpacing: 0.1,
+                  letterSpacing: 0,
                   height: 1.15,
                 ),
               ),
@@ -321,9 +435,9 @@ class _DashboardTopBarContent extends StatelessWidget {
                   subtitle!,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.titleSmall?.copyWith(
+                  style: context.textTheme.bodyLarge?.copyWith(
                     color: context.colorScheme.onSurface,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     letterSpacing: -0.2,
                     height: 1.15,
                   ),
@@ -338,7 +452,7 @@ class _DashboardTopBarContent extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               for (final (index, action) in actions.indexed) ...[
-                if (index > 0) const SizedBox(width: 6),
+                if (index > 0) const SizedBox(width: 2),
                 _DashboardActionSlot(child: action),
               ],
             ],
@@ -356,32 +470,18 @@ class _DashboardActionSlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = context.isDark;
     final colorScheme = context.colorScheme;
-    final semantic = context.semanticColors;
-
-    final background = isDark
-        ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.55)
-        : colorScheme.surfaceContainerHigh.withValues(alpha: 0.50);
-    final foreground = isDark
-        ? colorScheme.onSurface
-        : colorScheme.onSurfaceVariant;
-    final borderColor = semantic.divider.withValues(
-      alpha: isDark ? 0.25 : 0.15,
-    );
+    final foreground = colorScheme.onSurfaceVariant;
 
     return SizedBox.square(
+      key: const ValueKey('dashboardTopBarAction'),
       dimension: 36,
       child: Material(
-        color: background,
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.button),
-          side: BorderSide(
-            color: borderColor,
-            width: AppBorderWidth.hairline,
-          ),
+        color: colorScheme.onSurface.withValues(
+          alpha: context.isDark ? 0.10 : 0.055,
         ),
+        clipBehavior: Clip.antiAlias,
+        shape: const CircleBorder(),
         child: IconTheme(
           data: IconThemeData(color: foreground, size: AppIconSize.sm),
           child: IconButtonTheme(
@@ -392,9 +492,9 @@ class _DashboardActionSlot extends StatelessWidget {
                 minimumSize: const Size.square(36),
                 maximumSize: const Size.square(36),
                 padding: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.button),
-                ),
+                backgroundColor: Colors.transparent,
+                overlayColor: colorScheme.onSurface.withValues(alpha: 0.10),
+                shape: const CircleBorder(),
               ),
             ),
             child: child,

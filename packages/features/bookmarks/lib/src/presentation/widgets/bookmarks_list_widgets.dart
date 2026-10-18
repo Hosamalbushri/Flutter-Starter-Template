@@ -136,7 +136,6 @@ class _SortMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final showLabel = MediaQuery.sizeOf(context).width >= AppBreakpoints.medium;
 
     return PopupMenuButton<BookmarkSort>(
       padding: EdgeInsets.zero,
@@ -159,43 +158,21 @@ class _SortMenuButton extends StatelessWidget {
         button: true,
         label: context.l10n.bookmarksSortTooltip,
         child: Container(
-          constraints: BoxConstraints(
-            minHeight: 56,
-            minWidth: showLabel ? 116 : 56,
-          ),
-          margin: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.sm,
-            vertical: AppSpacing.xs,
-          ),
+          width: 40,
+          height: 40,
           decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-            border: Border.all(color: colorScheme.outlineVariant),
+            color: colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.65),
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FaIcon(
-                FontAwesomeIcons.filter,
-                size: AppIconSize.md,
-                color: colorScheme.primary,
-              ),
-              if (showLabel) ...[
-                const SizedBox(height: AppSpacing.xxs),
-                Text(
-                  context.l10n.bookmarksSortMenuLabel,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.labelLarge?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0,
-                  ),
-                ),
-              ],
-            ],
+          child: Center(
+            child: FaIcon(
+              FontAwesomeIcons.filter,
+              size: AppIconSize.sm,
+              color: colorScheme.primary,
+            ),
           ),
         ),
       ),

@@ -2,6 +2,7 @@ import 'package:app_ui/app_ui.dart';
 // fst:feature:bookmarks:start
 import 'package:feature_bookmarks/feature_bookmarks.dart';
 // fst:feature:bookmarks:end
+import 'package:feature_collections/feature_collections.dart';
 // fst:feature:notifications:start
 import 'package:feature_notifications/feature_notifications.dart';
 // fst:feature:notifications:end
@@ -106,6 +107,24 @@ class _AppShellState extends State<AppShell> {
         label: l10n.bookmarksAddTooltip,
         tooltip: l10n.bookmarksAddTooltip,
         onPressed: () => context.push(BookmarksRoutes.create),
+        menuLabel: l10n.quickActionsTitle,
+        quickActions: [
+          AppQuickAction(
+            icon: FontAwesomeIcons.link,
+            label: l10n.homeQuickAdd,
+            onPressed: () => context.push(BookmarksRoutes.create),
+          ),
+          AppQuickAction(
+            icon: FontAwesomeIcons.layerGroup,
+            label: l10n.homeCreateCollection,
+            onPressed: () => context.push(CollectionsRoutes.create),
+          ),
+          AppQuickAction(
+            icon: FontAwesomeIcons.bookmark,
+            label: l10n.homeQuickLibrary,
+            onPressed: () => widget.navigationShell.goBranch(1),
+          ),
+        ],
       ),
       // fst:feature:bookmarks:end
       body: widget.navigationShell,

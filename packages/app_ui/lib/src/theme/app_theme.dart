@@ -41,15 +41,17 @@ class AppTheme {
   static ThemeData light({
     FlexScheme scheme = FlexScheme.blue,
     AppColorPalette? palette,
+    String fontFamily = 'system',
   }) {
+    final textTheme = _fontTextTheme(fontFamily, ThemeData.light().textTheme);
     final base = FlexThemeData.light(
       scheme: scheme,
       colors: palette?.lightColors,
       useMaterial3: true,
       surfaceMode: FlexSurfaceMode.highScaffoldLowSurfaces,
       blendLevel: 1,
-      textTheme: GoogleFonts.interTextTheme(),
-      primaryTextTheme: GoogleFonts.interTextTheme(),
+      textTheme: textTheme,
+      primaryTextTheme: textTheme,
       subThemesData: _componentThemes,
       appBarElevation: AppElevation.none,
       appBarStyle: FlexAppBarStyle.surface,
@@ -62,7 +64,9 @@ class AppTheme {
   static ThemeData dark({
     FlexScheme scheme = FlexScheme.blue,
     AppColorPalette? palette,
+    String fontFamily = 'system',
   }) {
+    final textTheme = _fontTextTheme(fontFamily, ThemeData.dark().textTheme);
     final base = FlexThemeData.dark(
       scheme: scheme,
       colors: palette?.darkColors,
@@ -70,8 +74,8 @@ class AppTheme {
       surfaceMode: FlexSurfaceMode.highScaffoldLowSurfaces,
       blendLevel: 4,
       darkIsTrueBlack: true,
-      textTheme: GoogleFonts.interTextTheme(),
-      primaryTextTheme: GoogleFonts.interTextTheme(),
+      textTheme: textTheme,
+      primaryTextTheme: textTheme,
       subThemesData: _componentThemes,
       appBarElevation: AppElevation.none,
       appBarStyle: FlexAppBarStyle.surface,
@@ -98,6 +102,16 @@ class AppTheme {
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.padded,
     );
+  }
+
+  static TextTheme _fontTextTheme(String fontFamily, TextTheme base) {
+    if (fontFamily == 'system') return base;
+    try {
+      return GoogleFonts.getTextTheme(fontFamily, base);
+    } on Exception {
+      // A removed or corrupted persisted family must never prevent startup.
+      return base;
+    }
   }
 }
 
