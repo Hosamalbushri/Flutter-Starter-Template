@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "generator": "fst",
+  "name": "document_engine",
+  "type": "infrastructure",
+  "dependencies": [
+    "architecture"
+  ],
+  "ownedFiles": [
+    "lib/document_engine.dart",
+    "lib/src/document_engine.dart",
+    "pubspec.yaml",
+    "test/document_engine_test.dart"
+  ]
+}

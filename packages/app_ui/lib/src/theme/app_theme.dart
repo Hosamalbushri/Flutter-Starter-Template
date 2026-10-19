@@ -85,9 +85,32 @@ class AppTheme {
 
   static ThemeData _finish(ThemeData base) {
     final semantic = SemanticColors.from(base.colorScheme);
+    final textTheme = AppTypography.textTheme(base.textTheme);
+    final primaryTextTheme = AppTypography.textTheme(base.primaryTextTheme);
+    final buttonTextStyle = WidgetStatePropertyAll(textTheme.labelLarge);
     return base.copyWith(
-      textTheme: AppTypography.textTheme(base.textTheme),
-      primaryTextTheme: AppTypography.textTheme(base.primaryTextTheme),
+      textTheme: textTheme,
+      primaryTextTheme: primaryTextTheme,
+      filledButtonTheme: FilledButtonThemeData(
+        style: (base.filledButtonTheme.style ?? const ButtonStyle()).copyWith(
+          textStyle: buttonTextStyle,
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: (base.elevatedButtonTheme.style ?? const ButtonStyle()).copyWith(
+          textStyle: buttonTextStyle,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: (base.outlinedButtonTheme.style ?? const ButtonStyle()).copyWith(
+          textStyle: buttonTextStyle,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: (base.textButtonTheme.style ?? const ButtonStyle()).copyWith(
+          textStyle: buttonTextStyle,
+        ),
+      ),
       dividerColor: semantic.divider,
       disabledColor: semantic.onDisabled,
       focusColor: semantic.focus.withValues(alpha: 0.18),

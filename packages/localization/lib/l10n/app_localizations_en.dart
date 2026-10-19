@@ -849,9 +849,175 @@ class AppLocalizationsEn extends AppLocalizations {
   String get systemSettingsPreviewTitle => 'Live preview';
 
   @override
-  String get systemSettingsPreviewBody =>
-      'Font, color, and size changes appear here and across the app.';
+  String get systemSettingsReset => 'Restore default settings';
 
   @override
-  String get systemSettingsReset => 'Restore default settings';
+  String get documentCenterTitle => 'Document Center';
+
+  @override
+  String get documentCenterSubtitle =>
+      'Import, export, report composition and printing';
+
+  @override
+  String get documentCenterTabImport => 'Import Data';
+
+  @override
+  String get documentCenterTabExport => 'Export Data';
+
+  @override
+  String get documentCenterTabReports => 'Reports & Printing';
+
+  @override
+  String get documentImportSelectFile => 'Select File';
+
+  @override
+  String get documentImportSelectFileHint =>
+      'Select a CSV, XLSX, or JSON file to import';
+
+  @override
+  String documentImportFileSelected(String fileName) {
+    return 'Selected file: $fileName';
+  }
+
+  @override
+  String documentImportDetectedFormat(String format) {
+    return 'Detected format: $format';
+  }
+
+  @override
+  String get documentImportSourceColumns => 'Source columns';
+
+  @override
+  String get documentImportTargetSchema => 'Target schema';
+
+  @override
+  String get documentImportValidateButton => 'Validate Dataset';
+
+  @override
+  String get documentImportCommitButton => 'Commit Import';
+
+  @override
+  String get documentImportPreviewTitle => 'Validation Preview';
+
+  @override
+  String documentImportValidRows(int count) {
+    return 'Valid rows: $count';
+  }
+
+  @override
+  String documentImportInvalidRows(int count) {
+    return 'Invalid rows: $count';
+  }
+
+  @override
+  String documentImportSuccessMessage(int count) {
+    return 'Successfully imported $count records';
+  }
+
+  @override
+  String documentImportErrorMessage(int count) {
+    return 'Import validation failed with $count errors';
+  }
+
+  @override
+  String get documentExportDatasetLabel => 'Select Dataset';
+
+  @override
+  String get documentExportFormatLabel => 'Export Format';
+
+  @override
+  String get documentExportColumnsLabel => 'Select Columns';
+
+  @override
+  String get documentExportNeutralizeFormulas =>
+      'Protect against spreadsheet formula injection';
+
+  @override
+  String get documentExportButton => 'Export Document';
+
+  @override
+  String documentExportSuccess(int bytes) {
+    return 'Export completed ($bytes bytes)';
+  }
+
+  @override
+  String get documentReportsSelectTemplate => 'Report Template';
+
+  @override
+  String get documentReportsSales => 'Sales Summary Report';
+
+  @override
+  String get documentReportsInventory => 'Inventory Movement Report';
+
+  @override
+  String get documentReportsStatement => 'Supplier Account Statement';
+
+  @override
+  String get documentReportsInvoice => 'Commercial Tax Invoice';
+
+  @override
+  String get documentReportsGeneral => 'General Activity Log';
+
+  @override
+  String get documentReportsGeneratePdf => 'Generate PDF';
+
+  @override
+  String get documentReportsPrintSystem => 'System Print';
+
+  @override
+  String get documentReportsPrintThermal => 'Thermal Print (ESC/POS)';
+
+  @override
+  String get documentReportsThermalSuccess =>
+      'Document sent to thermal printer';
+
+  @override
+  String get documentReportsPreviewTitle => 'Report Preview';
+
+  @override
+  String get collectionsImportAction => 'Import Collections';
+
+  @override
+  String get bookmarksImportAction => 'Import Bookmarks';
+
+  @override
+  String get documentImportDatasetLabel => 'Target Dataset';
+
+  @override
+  String get documentImportDuplicatePolicyLabel => 'Duplicate Handling Policy';
+
+  @override
+  String get documentImportPolicySkip => 'Skip Duplicates';
+
+  @override
+  String get documentImportPolicyUpdate => 'Update Existing';
+
+  @override
+  String get documentImportPolicyCreate => 'Create New Copies';
+
+  @override
+  String documentImportCreatedCount(int count) {
+    return 'Created: $count';
+  }
+
+  @override
+  String documentImportUpdatedCount(int count) {
+    return 'Updated: $count';
+  }
+
+  @override
+  String documentImportSkippedCount(int count) {
+    return 'Skipped: $count';
+  }
+
+  @override
+  String documentImportFailedCount(int count) {
+    return 'Failed: $count';
+  }
+
+  @override
+  String get documentImportSummaryTitle => 'Import Result Summary';
+
+  @override
+  String get documentImportCloseButton => 'Close';
 }

@@ -205,4 +205,42 @@ void main() {
       verify(() => mockSync.sync()).called(1);
     });
   });
+
+  group('import batch synchronization', () {
+    const input = CollectionInput(
+      name: 'Imported',
+      icon: 'folder',
+      color: 0xFF0EA5E9,
+    );
+
+    test('triggers one sync after a successful batch', () async {
+      when(() => mockUuid.v4()).thenReturn('new-uuid');
+      when(() => mockLocal.putNew(any())).thenAnswer(
+        (invocation) async =>
+            invocation.positionalArguments[0] as CollectionEntity,
+      );
+
+      repository.beginImportBatch();
+      await repository.create(input);
+      await repository.create(input);
+
+      verifyNever(() => mockSync.sync());
+      repository.endImportBatch(successful: true);
+      verify(() => mockSync.sync()).called(1);
+    });
+
+    test('does not sync a compensated failed batch', () async {
+      when(() => mockUuid.v4()).thenReturn('new-uuid');
+      when(() => mockLocal.putNew(any())).thenAnswer(
+        (invocation) async =>
+            invocation.positionalArguments[0] as CollectionEntity,
+      );
+
+      repository.beginImportBatch();
+      await repository.create(input);
+      repository.endImportBatch(successful: false);
+
+      verifyNever(() => mockSync.sync());
+    });
+  });
 }

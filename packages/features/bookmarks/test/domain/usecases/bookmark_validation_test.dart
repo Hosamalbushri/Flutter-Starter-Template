@@ -59,6 +59,23 @@ void main() {
       expect(err.failure.message, 'URL is required.');
       verifyZeroInteractions(repo);
     });
+
+    test('rejects non-http URLs without hitting repository', () async {
+      final result = await CreateBookmarkUseCase(repo)(
+        const BookmarkInput(
+          title: 'Unsafe',
+          url: 'javascript:alert(1)',
+          description: '',
+          tags: [],
+        ),
+      );
+
+      expect(result, isA<Err<Bookmark>>());
+      final err = result as Err<Bookmark>;
+      expect(err.failure, isA<ValidationFailure>());
+      expect(err.failure.message, 'URL must be a valid HTTP or HTTPS URL.');
+      verifyZeroInteractions(repo);
+    });
   });
 
   group('UpdateBookmarkUseCase', () {

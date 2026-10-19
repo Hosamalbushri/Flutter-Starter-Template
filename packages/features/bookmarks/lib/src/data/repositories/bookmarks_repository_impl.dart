@@ -15,18 +15,21 @@ import '../local/bookmarks_local_data_source.dart';
 /// commit locally first (and mark sync state), then kick a fire-and-forget
 /// sync. The UI gets immediate confirmation regardless of network state.
 @LazySingleton(as: BookmarksRepository)
-class BookmarksRepositoryImpl implements BookmarksRepository {
+class BookmarksRepositoryImpl
+    implements BookmarksRepository, BookmarksImportBatchRepository {
   BookmarksRepositoryImpl(this._local, this._sync, this._uuid);
 
   final BookmarksLocalDataSource _local;
   final BookmarksSyncController _sync;
   final Uuid _uuid;
+  var _importBatchDepth = 0;
+  var _importBatchDirty = false;
 
   @override
   Future<Result<List<Bookmark>>> list() async {
     final result = await listLocal();
     // Trigger a refresh in the background; reads return immediately.
-    _sync.sync().fire();
+    _requestSync();
     return result;
   }
 
@@ -62,7 +65,7 @@ class BookmarksRepositoryImpl implements BookmarksRepository {
       syncStateCode: SyncState.pendingCreate.code,
     );
     await _local.putNew(entity);
-    _sync.sync().fire();
+    _requestSync();
     return Ok(entity.toDomain());
   }
 
@@ -81,7 +84,7 @@ class BookmarksRepositoryImpl implements BookmarksRepository {
       existing.syncState = SyncState.pendingUpdate;
     }
     await _local.put(existing);
-    _sync.sync().fire();
+    _requestSync();
     return Ok(existing.toDomain());
   }
 
@@ -100,8 +103,34 @@ class BookmarksRepositoryImpl implements BookmarksRepository {
     existing.syncState = SyncState.pendingDelete;
     existing.updatedAt = clock.now().toUtc();
     await _local.put(existing);
-    _sync.sync().fire();
+    _requestSync();
     return const Ok(null);
+  }
+
+  @override
+  void beginImportBatch() {
+    _importBatchDepth++;
+  }
+
+  @override
+  void endImportBatch({required bool successful}) {
+    if (_importBatchDepth == 0) {
+      throw StateError('No bookmarks import batch is active.');
+    }
+    _importBatchDepth--;
+    if (_importBatchDepth != 0) return;
+
+    final shouldSync = successful && _importBatchDirty;
+    _importBatchDirty = false;
+    if (shouldSync) _sync.sync().fire();
+  }
+
+  void _requestSync() {
+    if (_importBatchDepth > 0) {
+      _importBatchDirty = true;
+      return;
+    }
+    _sync.sync().fire();
   }
 
   /// Trim + dedupe tags so storage matches what the server would compute.

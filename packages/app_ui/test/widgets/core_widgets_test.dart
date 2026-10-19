@@ -379,6 +379,26 @@ void main() {
 
   group('AppButton', () {
     group('primary variant', () {
+      testWidgets('inherits the application button font', (tester) async {
+        const expectedFont = 'UnifiedButtonFont';
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(
+              textTheme: const TextTheme(
+                labelLarge: TextStyle(fontFamily: expectedFont),
+              ),
+            ),
+            home: Scaffold(
+              body: AppButton(label: 'حفظ', onPressed: () {}),
+            ),
+          ),
+        );
+
+        final button = tester.widget<FilledButton>(find.byType(FilledButton));
+        final style = button.style?.textStyle?.resolve({});
+        expect(style?.fontFamily, expectedFont);
+      });
+
       testWidgets('renders label', (tester) async {
         await tester.pumpWidget(
           materialApp(AppButton(label: 'Save', onPressed: () {})),

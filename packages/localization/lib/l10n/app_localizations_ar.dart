@@ -888,9 +888,175 @@ class AppLocalizationsAr extends AppLocalizations {
   String get systemSettingsPreviewTitle => 'معاينة مباشرة';
 
   @override
-  String get systemSettingsPreviewBody =>
-      'ستظهر تغييرات الخط واللون والحجم هنا وفي كامل التطبيق.';
+  String get systemSettingsReset => 'إعادة الإعدادات الافتراضية';
 
   @override
-  String get systemSettingsReset => 'إعادة الإعدادات الافتراضية';
+  String get documentCenterTitle => 'مركز المستندات';
+
+  @override
+  String get documentCenterSubtitle =>
+      'استيراد وتصدير وإنشاء التقارير والطباعة';
+
+  @override
+  String get documentCenterTabImport => 'استيراد البيانات';
+
+  @override
+  String get documentCenterTabExport => 'تصدير البيانات';
+
+  @override
+  String get documentCenterTabReports => 'التقارير والطباعة';
+
+  @override
+  String get documentImportSelectFile => 'اختيار ملف';
+
+  @override
+  String get documentImportSelectFileHint =>
+      'اختر ملف CSV أو XLSX أو JSON للاستيراد';
+
+  @override
+  String documentImportFileSelected(String fileName) {
+    return 'الملف المختار: $fileName';
+  }
+
+  @override
+  String documentImportDetectedFormat(String format) {
+    return 'الصيغة المكتشفة: $format';
+  }
+
+  @override
+  String get documentImportSourceColumns => 'أعمدة المصدر';
+
+  @override
+  String get documentImportTargetSchema => 'المخطط المستهدف';
+
+  @override
+  String get documentImportValidateButton => 'التحقق من البيانات';
+
+  @override
+  String get documentImportCommitButton => 'تأكيد الاستيراد';
+
+  @override
+  String get documentImportPreviewTitle => 'معاينة التحقق';
+
+  @override
+  String documentImportValidRows(int count) {
+    return 'الصفوف الصالحة: $count';
+  }
+
+  @override
+  String documentImportInvalidRows(int count) {
+    return 'الصفوف غير الصالحة: $count';
+  }
+
+  @override
+  String documentImportSuccessMessage(int count) {
+    return 'تم استيراد $count سجل بنجاح';
+  }
+
+  @override
+  String documentImportErrorMessage(int count) {
+    return 'فشل التحقق من الاستيراد بـ $count أخطاء';
+  }
+
+  @override
+  String get documentExportDatasetLabel => 'اختيار مجموعة البيانات';
+
+  @override
+  String get documentExportFormatLabel => 'صيغة التصدير';
+
+  @override
+  String get documentExportColumnsLabel => 'تحديد الأعمدة';
+
+  @override
+  String get documentExportNeutralizeFormulas =>
+      'الحماية من حقن معادلات جداول البيانات';
+
+  @override
+  String get documentExportButton => 'تصدير المستند';
+
+  @override
+  String documentExportSuccess(int bytes) {
+    return 'اكتمل التصدير ($bytes بايت)';
+  }
+
+  @override
+  String get documentReportsSelectTemplate => 'قالب التقرير';
+
+  @override
+  String get documentReportsSales => 'تقرير ملخص المبيعات';
+
+  @override
+  String get documentReportsInventory => 'تقرير حركة المخزون';
+
+  @override
+  String get documentReportsStatement => 'كشف حساب المورد';
+
+  @override
+  String get documentReportsInvoice => 'فاتورة ضريبية تجارية';
+
+  @override
+  String get documentReportsGeneral => 'سجل الأنشطة العام';
+
+  @override
+  String get documentReportsGeneratePdf => 'إنشاء PDF';
+
+  @override
+  String get documentReportsPrintSystem => 'طباعة النظام';
+
+  @override
+  String get documentReportsPrintThermal => 'طباعة حرارية (ESC/POS)';
+
+  @override
+  String get documentReportsThermalSuccess =>
+      'تم إرسال المستند إلى الطابعة الحرارية';
+
+  @override
+  String get documentReportsPreviewTitle => 'معاينة التقرير';
+
+  @override
+  String get collectionsImportAction => 'استيراد المجموعات';
+
+  @override
+  String get bookmarksImportAction => 'استيراد الإشارات المرجعية';
+
+  @override
+  String get documentImportDatasetLabel => 'مجموعة البيانات المستهدفة';
+
+  @override
+  String get documentImportDuplicatePolicyLabel => 'سياسة التعامل مع التكرار';
+
+  @override
+  String get documentImportPolicySkip => 'تخطي المكرر';
+
+  @override
+  String get documentImportPolicyUpdate => 'تحديث الموجود';
+
+  @override
+  String get documentImportPolicyCreate => 'إنشاء نسخ جديدة';
+
+  @override
+  String documentImportCreatedCount(int count) {
+    return 'تم الإنشاء: $count';
+  }
+
+  @override
+  String documentImportUpdatedCount(int count) {
+    return 'تم التحديث: $count';
+  }
+
+  @override
+  String documentImportSkippedCount(int count) {
+    return 'تم التخطي: $count';
+  }
+
+  @override
+  String documentImportFailedCount(int count) {
+    return 'فشل: $count';
+  }
+
+  @override
+  String get documentImportSummaryTitle => 'ملخص نتيجة الاستيراد';
+
+  @override
+  String get documentImportCloseButton => 'إغلاق';
 }

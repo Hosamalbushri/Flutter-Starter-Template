@@ -14,3 +14,10 @@ abstract interface class CollectionsRepository {
   Future<Result<Collection>> update(String id, CollectionInput input);
   Future<Result<void>> delete(String id);
 }
+
+/// Optional repository capability used by imports to defer synchronization
+/// until the whole local batch succeeds or has been compensated.
+abstract interface class CollectionsImportBatchRepository {
+  void beginImportBatch();
+  void endImportBatch({required bool successful});
+}

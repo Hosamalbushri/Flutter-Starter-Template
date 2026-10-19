@@ -24,6 +24,8 @@ import 'package:feature_bookmarks/src/domain/services/bookmark_stats_service.dar
     as _i808;
 import 'package:feature_bookmarks/src/domain/services/bookmark_summaries_service.dart'
     as _i976;
+import 'package:feature_bookmarks/src/domain/services/bookmarks_import_delegate.dart'
+    as _i1031;
 import 'package:feature_bookmarks/src/domain/services/bookmarks_sync_controller.dart'
     as _i699;
 import 'package:feature_bookmarks/src/domain/usecases/create_bookmark.dart'
@@ -32,6 +34,8 @@ import 'package:feature_bookmarks/src/domain/usecases/delete_bookmark.dart'
     as _i135;
 import 'package:feature_bookmarks/src/domain/usecases/get_bookmark.dart'
     as _i118;
+import 'package:feature_bookmarks/src/domain/usecases/import_bookmarks.dart'
+    as _i0;
 import 'package:feature_bookmarks/src/domain/usecases/list_bookmarks.dart'
     as _i416;
 import 'package:feature_bookmarks/src/domain/usecases/list_local_bookmarks.dart'
@@ -44,6 +48,7 @@ import 'package:feature_bookmarks/src/presentation/bloc/bookmark_form/bookmark_f
     as _i278;
 import 'package:feature_bookmarks/src/presentation/bloc/bookmarks_list/bookmarks_list_bloc.dart'
     as _i330;
+import 'package:feature_collections/feature_collections.dart' as _i544;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:network/network.dart' as _i372;
 import 'package:rev_sync/rev_sync.dart' as _i520;
@@ -76,6 +81,12 @@ class FeatureBookmarksPackageModule extends _i526.MicroPackageModule {
         gh<_i524.BookmarksLocalDataSource>(),
         gh<_i699.BookmarksSyncController>(),
         gh<_i706.Uuid>(),
+      ),
+    );
+    gh.lazySingleton<_i1031.BookmarksImportDelegate>(
+      () => _i1031.BookmarksImportDelegate(
+        gh<_i263.BookmarksRepository>(),
+        gh<_i544.CollectionsMembershipService>(),
       ),
     );
     gh.factory<_i806.CreateBookmarkUseCase>(
@@ -119,6 +130,9 @@ class FeatureBookmarksPackageModule extends _i526.MicroPackageModule {
     );
     gh.lazySingleton<_i856.BookmarkSummariesReader>(
       () => _i976.BookmarkSummariesService(gh<_i416.ListBookmarksUseCase>()),
+    );
+    gh.factory<_i0.ImportBookmarksUseCase>(
+      () => _i0.ImportBookmarksUseCase(gh<_i1031.BookmarksImportDelegate>()),
     );
     gh.factory<_i278.BookmarkFormBloc>(
       () => _i278.BookmarkFormBloc(

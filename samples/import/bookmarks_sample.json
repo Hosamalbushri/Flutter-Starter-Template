@@ -1,0 +1,38 @@
+[
+  {
+    "title": "Dart",
+    "url": "https://dart.dev",
+    "description": "الموقع الرسمي للغة Dart",
+    "tags": "dart;برمجة",
+    "imageUrls": "",
+    "videoUrl": "",
+    "collection": "Development"
+  },
+  {
+    "title": "Flutter",
+    "url": "https://flutter.dev",
+    "description": "الموقع الرسمي لإطار Flutter",
+    "tags": "flutter;mobile",
+    "imageUrls": "",
+    "videoUrl": "",
+    "collection": "Development"
+  },
+  {
+    "title": "OpenAI",
+    "url": "https://openai.com",
+    "description": "مصدر عن الذكاء الاصطناعي",
+    "tags": "ai;research",
+    "imageUrls": "",
+    "videoUrl": "",
+    "collection": "Research"
+  },
+  {
+    "title": "ويكيبيديا العربية",
+    "url": "https://ar.wikipedia.org",
+    "description": "موسوعة عربية حرة",
+    "tags": "عربي;معرفة",
+    "imageUrls": "",
+    "videoUrl": "",
+    "collection": "مراجع"
+  }
+]

@@ -428,6 +428,130 @@
   "systemSettingsLanguageHint": "The interface language and direction update immediately",
   "systemSettingsLanguageSystemHint": "Automatically follow the device language",
   "systemSettingsPreviewTitle": "Live preview",
-  "systemSettingsPreviewBody": "Font, color, and size changes appear here and across the app.",
-  "systemSettingsReset": "Restore default settings"
+  "systemSettingsReset": "Restore default settings",
+  "documentCenterTitle": "Document Center",
+  "documentCenterSubtitle": "Import, export, report composition and printing",
+  "documentCenterTabImport": "Import Data",
+  "documentCenterTabExport": "Export Data",
+  "documentCenterTabReports": "Reports & Printing",
+  "documentImportSelectFile": "Select File",
+  "documentImportSelectFileHint": "Select a CSV, XLSX, or JSON file to import",
+  "documentImportFileSelected": "Selected file: {fileName}",
+  "@documentImportFileSelected": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "documentImportDetectedFormat": "Detected format: {format}",
+  "@documentImportDetectedFormat": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "documentImportSourceColumns": "Source columns",
+  "documentImportTargetSchema": "Target schema",
+  "documentImportValidateButton": "Validate Dataset",
+  "documentImportCommitButton": "Commit Import",
+  "documentImportPreviewTitle": "Validation Preview",
+  "documentImportValidRows": "Valid rows: {count}",
+  "@documentImportValidRows": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "documentImportInvalidRows": "Invalid rows: {count}",
+  "@documentImportInvalidRows": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "documentImportSuccessMessage": "Successfully imported {count} records",
+  "@documentImportSuccessMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "documentImportErrorMessage": "Import validation failed with {count} errors",
+  "@documentImportErrorMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "documentExportDatasetLabel": "Select Dataset",
+  "documentExportFormatLabel": "Export Format",
+  "documentExportColumnsLabel": "Select Columns",
+  "documentExportNeutralizeFormulas": "Protect against spreadsheet formula injection",
+  "documentExportButton": "Export Document",
+  "documentExportSuccess": "Export completed ({bytes} bytes)",
+  "@documentExportSuccess": {
+    "placeholders": {
+      "bytes": {
+        "type": "int"
+      }
+    }
+  },
+  "documentReportsSelectTemplate": "Report Template",
+  "documentReportsSales": "Sales Summary Report",
+  "documentReportsInventory": "Inventory Movement Report",
+  "documentReportsStatement": "Supplier Account Statement",
+  "documentReportsInvoice": "Commercial Tax Invoice",
+  "documentReportsGeneral": "General Activity Log",
+  "documentReportsGeneratePdf": "Generate PDF",
+  "documentReportsPrintSystem": "System Print",
+  "documentReportsPrintThermal": "Thermal Print (ESC/POS)",
+  "documentReportsThermalSuccess": "Document sent to thermal printer",
+  "documentReportsPreviewTitle": "Report Preview",
+  "collectionsImportAction": "Import Collections",
+  "bookmarksImportAction": "Import Bookmarks",
+  "documentImportDatasetLabel": "Target Dataset",
+  "documentImportDuplicatePolicyLabel": "Duplicate Handling Policy",
+  "documentImportPolicySkip": "Skip Duplicates",
+  "documentImportPolicyUpdate": "Update Existing",
+  "documentImportPolicyCreate": "Create New Copies",
+  "documentImportCreatedCount": "Created: {count}",
+  "@documentImportCreatedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "documentImportUpdatedCount": "Updated: {count}",
+  "@documentImportUpdatedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "documentImportSkippedCount": "Skipped: {count}",
+  "@documentImportSkippedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "documentImportFailedCount": "Failed: {count}",
+  "@documentImportFailedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "documentImportSummaryTitle": "Import Result Summary",
+  "documentImportCloseButton": "Close"
 }

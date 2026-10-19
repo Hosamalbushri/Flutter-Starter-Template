@@ -20,6 +20,11 @@ void registerReaderFallbacks(GetIt getIt) {
   if (!getIt.isRegistered<CollectionsReader>()) {
     getIt.registerLazySingleton<CollectionsReader>(NoOpCollectionsReader.new);
   }
+  if (!getIt.isRegistered<BookmarkSummariesReader>()) {
+    getIt.registerLazySingleton<BookmarkSummariesReader>(
+      NoOpBookmarkSummariesReader.new,
+    );
+  }
 }
 
 /// A [BookmarkStatsReader] that reports no bookmarks.
@@ -39,4 +44,14 @@ class NoOpCollectionsReader extends CollectionsReader {
   Future<Result<List<CollectionSummary>>> call([
     NoParams param = noParams,
   ]) async => const Ok(<CollectionSummary>[]);
+}
+
+/// A [BookmarkSummariesReader] that reports no bookmarks.
+class NoOpBookmarkSummariesReader extends BookmarkSummariesReader {
+  const NoOpBookmarkSummariesReader();
+
+  @override
+  Future<Result<List<BookmarkSummary>>> call([
+    NoParams param = noParams,
+  ]) async => const Ok(<BookmarkSummary>[]);
 }

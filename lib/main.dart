@@ -15,6 +15,12 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
+    // Some dependency factories (such as Firebase Performance) are resolved
+    // while feature import delegates are registered. Firebase Core must exist
+    // before dependency registration reaches those factories.
+    if (kFirebaseEnabled) {
+      await FirebaseService.initializeCore();
+    }
     await configureDependencies();
 
     // Drop any Keychain data that survived a previous install (iOS keeps it

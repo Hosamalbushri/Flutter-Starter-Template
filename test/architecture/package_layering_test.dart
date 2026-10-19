@@ -102,6 +102,7 @@ const Map<String, PackageCategory> _nonFeatureCategories = {
   'app_platform': PackageCategory.platformIntegration,
   'sync_connectivity_plus': PackageCategory.platformIntegration,
   'test_utils': PackageCategory.devTestUtilities,
+  'document_engine': PackageCategory.infrastructureService,
   // fst:package-categories — `fst create-package` inserts categories above
 };
 
@@ -155,7 +156,9 @@ const _layers = <String, int>{
   'feature_bookmarks': 5, // -> feature_collections
   // fst:feature:bookmarks:end
   'feature_profile': 5, // -> feature_auth
+  'document_engine': 1,
   // fst:package-layers — `fst create-package` inserts package layers above
+  'feature_document_center': 4,
   // fst:feature-layers — `fst add-feature` inserts generated features above
 };
 

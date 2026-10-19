@@ -1640,17 +1640,299 @@ abstract class AppLocalizations {
   /// **'Live preview'**
   String get systemSettingsPreviewTitle;
 
-  /// No description provided for @systemSettingsPreviewBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Font, color, and size changes appear here and across the app.'**
-  String get systemSettingsPreviewBody;
-
   /// No description provided for @systemSettingsReset.
   ///
   /// In en, this message translates to:
   /// **'Restore default settings'**
   String get systemSettingsReset;
+
+  /// No description provided for @documentCenterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Document Center'**
+  String get documentCenterTitle;
+
+  /// No description provided for @documentCenterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import, export, report composition and printing'**
+  String get documentCenterSubtitle;
+
+  /// No description provided for @documentCenterTabImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Data'**
+  String get documentCenterTabImport;
+
+  /// No description provided for @documentCenterTabExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Data'**
+  String get documentCenterTabExport;
+
+  /// No description provided for @documentCenterTabReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports & Printing'**
+  String get documentCenterTabReports;
+
+  /// No description provided for @documentImportSelectFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Select File'**
+  String get documentImportSelectFile;
+
+  /// No description provided for @documentImportSelectFileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a CSV, XLSX, or JSON file to import'**
+  String get documentImportSelectFileHint;
+
+  /// No description provided for @documentImportFileSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected file: {fileName}'**
+  String documentImportFileSelected(String fileName);
+
+  /// No description provided for @documentImportDetectedFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected format: {format}'**
+  String documentImportDetectedFormat(String format);
+
+  /// No description provided for @documentImportSourceColumns.
+  ///
+  /// In en, this message translates to:
+  /// **'Source columns'**
+  String get documentImportSourceColumns;
+
+  /// No description provided for @documentImportTargetSchema.
+  ///
+  /// In en, this message translates to:
+  /// **'Target schema'**
+  String get documentImportTargetSchema;
+
+  /// No description provided for @documentImportValidateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate Dataset'**
+  String get documentImportValidateButton;
+
+  /// No description provided for @documentImportCommitButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Commit Import'**
+  String get documentImportCommitButton;
+
+  /// No description provided for @documentImportPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Validation Preview'**
+  String get documentImportPreviewTitle;
+
+  /// No description provided for @documentImportValidRows.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid rows: {count}'**
+  String documentImportValidRows(int count);
+
+  /// No description provided for @documentImportInvalidRows.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid rows: {count}'**
+  String documentImportInvalidRows(int count);
+
+  /// No description provided for @documentImportSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully imported {count} records'**
+  String documentImportSuccessMessage(int count);
+
+  /// No description provided for @documentImportErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Import validation failed with {count} errors'**
+  String documentImportErrorMessage(int count);
+
+  /// No description provided for @documentExportDatasetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Dataset'**
+  String get documentExportDatasetLabel;
+
+  /// No description provided for @documentExportFormatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Format'**
+  String get documentExportFormatLabel;
+
+  /// No description provided for @documentExportColumnsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Columns'**
+  String get documentExportColumnsLabel;
+
+  /// No description provided for @documentExportNeutralizeFormulas.
+  ///
+  /// In en, this message translates to:
+  /// **'Protect against spreadsheet formula injection'**
+  String get documentExportNeutralizeFormulas;
+
+  /// No description provided for @documentExportButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Document'**
+  String get documentExportButton;
+
+  /// No description provided for @documentExportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Export completed ({bytes} bytes)'**
+  String documentExportSuccess(int bytes);
+
+  /// No description provided for @documentReportsSelectTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Template'**
+  String get documentReportsSelectTemplate;
+
+  /// No description provided for @documentReportsSales.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales Summary Report'**
+  String get documentReportsSales;
+
+  /// No description provided for @documentReportsInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory Movement Report'**
+  String get documentReportsInventory;
+
+  /// No description provided for @documentReportsStatement.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplier Account Statement'**
+  String get documentReportsStatement;
+
+  /// No description provided for @documentReportsInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Commercial Tax Invoice'**
+  String get documentReportsInvoice;
+
+  /// No description provided for @documentReportsGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General Activity Log'**
+  String get documentReportsGeneral;
+
+  /// No description provided for @documentReportsGeneratePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate PDF'**
+  String get documentReportsGeneratePdf;
+
+  /// No description provided for @documentReportsPrintSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System Print'**
+  String get documentReportsPrintSystem;
+
+  /// No description provided for @documentReportsPrintThermal.
+  ///
+  /// In en, this message translates to:
+  /// **'Thermal Print (ESC/POS)'**
+  String get documentReportsPrintThermal;
+
+  /// No description provided for @documentReportsThermalSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Document sent to thermal printer'**
+  String get documentReportsThermalSuccess;
+
+  /// No description provided for @documentReportsPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Preview'**
+  String get documentReportsPreviewTitle;
+
+  /// No description provided for @collectionsImportAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Collections'**
+  String get collectionsImportAction;
+
+  /// No description provided for @bookmarksImportAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Bookmarks'**
+  String get bookmarksImportAction;
+
+  /// No description provided for @documentImportDatasetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Dataset'**
+  String get documentImportDatasetLabel;
+
+  /// No description provided for @documentImportDuplicatePolicyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate Handling Policy'**
+  String get documentImportDuplicatePolicyLabel;
+
+  /// No description provided for @documentImportPolicySkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip Duplicates'**
+  String get documentImportPolicySkip;
+
+  /// No description provided for @documentImportPolicyUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Existing'**
+  String get documentImportPolicyUpdate;
+
+  /// No description provided for @documentImportPolicyCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Copies'**
+  String get documentImportPolicyCreate;
+
+  /// No description provided for @documentImportCreatedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Created: {count}'**
+  String documentImportCreatedCount(int count);
+
+  /// No description provided for @documentImportUpdatedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated: {count}'**
+  String documentImportUpdatedCount(int count);
+
+  /// No description provided for @documentImportSkippedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped: {count}'**
+  String documentImportSkippedCount(int count);
+
+  /// No description provided for @documentImportFailedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed: {count}'**
+  String documentImportFailedCount(int count);
+
+  /// No description provided for @documentImportSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Result Summary'**
+  String get documentImportSummaryTitle;
+
+  /// No description provided for @documentImportCloseButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get documentImportCloseButton;
 }
 
 class _AppLocalizationsDelegate

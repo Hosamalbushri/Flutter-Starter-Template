@@ -12,6 +12,7 @@ import '../../domain/services/bookmarks_sync_controller.dart';
 import '../bloc/bookmarks_list/bookmarks_list_bloc.dart';
 import '../bloc/bookmarks_list/bookmarks_list_state.dart';
 import '../bookmarks_routes.dart';
+import 'bookmarks_import_sheet.dart';
 import 'bookmarks_list_master.dart';
 
 class BookmarksListView extends StatefulWidget {
@@ -80,6 +81,14 @@ class _BookmarksListViewState extends State<BookmarksListView> {
       title: context.l10n.bookmarksAppBarTitle,
       padding: EdgeInsets.zero,
       actions: [
+        IconButton(
+          icon: const Icon(Icons.file_upload_outlined),
+          tooltip: context.l10n.bookmarksImportAction,
+          onPressed: () => BookmarksImportSheet.show(
+            context,
+            onImportCompleted: _reload,
+          ),
+        ),
         BlocBuilder<BookmarksListBloc, BookmarksListState>(
           buildWhen: (a, b) => a.syncStatus != b.syncStatus,
           builder: (context, state) =>
