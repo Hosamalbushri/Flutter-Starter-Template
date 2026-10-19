@@ -107,6 +107,18 @@ void main() {
         expect(cubit.state.isExporting, isFalse);
       });
 
+      test('executeExport generates PDF through the report renderer', () async {
+        cubit.setExportDataset('sales');
+        cubit.setExportFormat('pdf');
+
+        final bytes = await cubit.executeExport();
+
+        expect(bytes, isNotNull);
+        expect(utf8.decode(bytes!.sublist(0, 5)), '%PDF-');
+        expect(cubit.state.exportErrorMessage, isNull);
+        expect(cubit.state.generatedExportBytes, orderedEquals(bytes));
+      });
+
       test('changing export options clears stale generated output', () async {
         await cubit.executeExport();
         expect(cubit.state.generatedExportBytes, isNotNull);

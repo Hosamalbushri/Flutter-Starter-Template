@@ -9,6 +9,7 @@ import '../report/evaluated_report.dart';
 import '../report/report_definition.dart';
 import '../report/report_engine.dart';
 import '../report/report_renderer.dart';
+import 'bundled_pdf_fonts.dart';
 import 'pdf_options.dart';
 
 /// Professional multi-page PDF document renderer supporting headers, footers,
@@ -60,8 +61,8 @@ class PdfReportRenderer implements ReportRenderer {
       author: definition.metadata.author,
       subject: definition.subtitle,
       theme: pw.ThemeData.withFont(
-        base: options.baseFont,
-        bold: options.boldFont,
+        base: options.baseFont ?? BundledPdfFonts.regular,
+        bold: options.boldFont ?? BundledPdfFonts.bold,
       ),
     );
 
@@ -74,8 +75,7 @@ class PdfReportRenderer implements ReportRenderer {
       pw.MultiPage(
         pageFormat: pageFormat,
         textDirection: textDirection,
-        header: (context) =>
-            _buildPageHeader(context, definition, textDirection),
+        header: (context) => _buildPageHeader(context, definition),
         footer: (context) =>
             _buildPageFooter(context, definition, textDirection),
         build: (context) => [
@@ -113,7 +113,6 @@ class PdfReportRenderer implements ReportRenderer {
   pw.Widget _buildPageHeader(
     pw.Context context,
     ReportDefinition definition,
-    pw.TextDirection textDirection,
   ) {
     if (context.pageNumber > 1 && definition.header == null) {
       return pw.SizedBox(height: 12);
@@ -122,9 +121,7 @@ class PdfReportRenderer implements ReportRenderer {
     return pw.Container(
       margin: const pw.EdgeInsets.only(bottom: 16),
       child: pw.Column(
-        crossAxisAlignment: textDirection == pw.TextDirection.rtl
-            ? pw.CrossAxisAlignment.end
-            : pw.CrossAxisAlignment.start,
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
             definition.title,
@@ -184,19 +181,40 @@ class PdfReportRenderer implements ReportRenderer {
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
           if (options.includeTimestamp)
-            pw.Text(
-              'Generated: ${DateTime.now().toUtc().toIso8601String().substring(0, 16)} UTC',
-              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
-            )
+            _buildGeneratedAt(definition)
           else
             pw.SizedBox(),
           if (options.includePageNumbers)
             pw.Text(
-              'Page ${context.pageNumber} of ${context.pagesCount}',
+              definition.isRtl
+                  ? 'الصفحة ${context.pageNumber} من ${context.pagesCount}'
+                  : 'Page ${context.pageNumber} of ${context.pagesCount}',
               style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
             ),
         ],
       ),
+    );
+  }
+
+  pw.Widget _buildGeneratedAt(ReportDefinition definition) {
+    final generatedAt =
+        '${DateTime.now().toUtc().toIso8601String().substring(0, 16).replaceFirst('T', ' ')} UTC';
+    const style = pw.TextStyle(fontSize: 8, color: PdfColors.grey600);
+
+    if (!definition.isRtl) {
+      return pw.Text('Generated: $generatedAt', style: style);
+    }
+
+    return pw.Row(
+      mainAxisSize: pw.MainAxisSize.min,
+      children: [
+        pw.Text('تاريخ الإنشاء:', style: style),
+        pw.SizedBox(width: 3),
+        pw.Directionality(
+          textDirection: pw.TextDirection.ltr,
+          child: pw.Text(generatedAt, style: style),
+        ),
+      ],
     );
   }
 
@@ -206,9 +224,12 @@ class PdfReportRenderer implements ReportRenderer {
     pw.TextDirection textDirection,
   ) {
     final tableRows = <pw.TableRow>[];
+    final displayColumns = definition.isRtl
+        ? definition.columns.reversed
+        : definition.columns;
 
     // 1. Column Headers
-    final headerCells = definition.columns.map((col) {
+    final headerCells = displayColumns.map((col) {
       return pw.Container(
         padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 6),
         alignment: _resolveAlignment(col.alignment, textDirection),
@@ -260,7 +281,7 @@ class PdfReportRenderer implements ReportRenderer {
 
       // Individual data rows
       for (final row in group.rows) {
-        final rowCells = definition.columns.map((col) {
+        final rowCells = displayColumns.map((col) {
           final val = row[col.id];
           return pw.Container(
             padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 4),
@@ -277,11 +298,13 @@ class PdfReportRenderer implements ReportRenderer {
 
       // Group Subtotal row
       if (group.subtotals.isNotEmpty) {
-        final subtotalCells = definition.columns.map((col) {
+        final subtotalCells = displayColumns.map((col) {
           final hasSubtotal = group.subtotals.containsKey(col.id);
           final text = hasSubtotal
               ? group.subtotals[col.id]!.displayValue
-              : (col == definition.columns.first ? 'Subtotal' : '');
+              : (col == definition.columns.first
+                    ? (definition.isRtl ? 'الإجمالي الفرعي' : 'Subtotal')
+                    : '');
 
           return pw.Container(
             padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 4),
@@ -310,11 +333,13 @@ class PdfReportRenderer implements ReportRenderer {
 
     // 3. Grand Totals Row
     if (evaluated.grandTotals.isNotEmpty) {
-      final grandTotalCells = definition.columns.map((col) {
+      final grandTotalCells = displayColumns.map((col) {
         final hasTotal = evaluated.grandTotals.containsKey(col.id);
         final text = hasTotal
             ? evaluated.grandTotals[col.id]!.displayValue
-            : (col == definition.columns.first ? 'Grand Total' : '');
+            : (col == definition.columns.first
+                  ? (definition.isRtl ? 'الإجمالي الكلي' : 'Grand Total')
+                  : '');
 
         return pw.Container(
           padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 6),

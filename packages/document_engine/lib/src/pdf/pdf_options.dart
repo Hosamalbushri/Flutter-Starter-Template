@@ -47,9 +47,13 @@ class PdfReportOptions {
   final bool includeTimestamp;
 
   /// Custom regular Unicode/Arabic font.
+  ///
+  /// When omitted, the bundled offline DejaVu Sans font is used.
   final pw.Font? baseFont;
 
   /// Custom bold Unicode/Arabic font.
+  ///
+  /// When omitted, the bundled offline DejaVu Sans Bold font is used.
   final pw.Font? boldFont;
 
   /// Primary accent color for title and dividers.

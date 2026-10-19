@@ -152,6 +152,7 @@ class _BookmarksImportSheetState extends State<BookmarksImportSheet> {
   }
 
   Future<void> _commitImport() async {
+    if (_isLoading || _report != null) return;
     final bytes = _fileBytes;
     final format = _detectedFormat;
     if (bytes == null || format == null) return;

@@ -5,13 +5,17 @@ import 'sha256.dart';
 
 /// Computes deterministic fingerprints and tracks cache state for workspace setup.
 final class FingerprintStore {
-  FingerprintStore({required this.rootDir});
+  FingerprintStore({required this.rootDir, String? cacheRootDir})
+    : cacheRootDir = cacheRootDir ?? rootDir;
 
   final String rootDir;
+  final String cacheRootDir;
 
-  String get cacheDir => '$rootDir/.dart_tool/fst_setup_cache';
+  String get cacheDir => '$cacheRootDir/.dart_tool/fst_setup_cache';
   String get manifestPath => '$cacheDir/manifest.json';
   String get lockPath => '$cacheDir/setup.lock';
+
+  static const _staleLockAge = Duration(hours: 1);
 
   /// Acquires an exclusive file lock to protect concurrent setup runs.
   RandomAccessFile? acquireLock({
@@ -25,15 +29,15 @@ final class FingerprintStore {
     final stopwatch = Stopwatch()..start();
 
     while (stopwatch.elapsed <= timeout) {
-      RandomAccessFile? raf;
       try {
-        raf = lockFile.openSync(mode: FileMode.write);
-        raf.lockSync(FileLock.exclusive);
+        lockFile.createSync(exclusive: true);
+        final raf = lockFile.openSync(mode: FileMode.append);
+        raf
+          ..writeStringSync('$pid\n')
+          ..flushSync();
         return raf;
       } on FileSystemException {
-        try {
-          raf?.closeSync();
-        } on Object catch (_) {}
+        _deleteStaleLock(lockFile);
         sleep(const Duration(milliseconds: 100));
       }
     }
@@ -43,9 +47,23 @@ final class FingerprintStore {
   void releaseLock(RandomAccessFile? raf) {
     if (raf == null) return;
     try {
-      raf.unlockSync();
       raf.closeSync();
     } on Object catch (_) {}
+    try {
+      File(lockPath).deleteSync();
+    } on FileSystemException catch (_) {}
+  }
+
+  void _deleteStaleLock(File lockFile) {
+    try {
+      final age = DateTime.now().difference(lockFile.lastModifiedSync());
+      if (age > _staleLockAge) {
+        lockFile.deleteSync();
+      }
+    } on FileSystemException catch (_) {
+      // The owner may have released the lock between the failed create and
+      // this check. The next retry will acquire it.
+    }
   }
 
   /// Atomically writes manifest data by writing to a temporary file then renaming.

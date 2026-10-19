@@ -316,6 +316,39 @@ DuckDuckGo,https://duckduckgo.com,Privacy search
       expect(google.title, equals('Google')); // unchanged
     });
 
+    test('normalizes only URL scheme and host for duplicate matching', () async {
+      await bookmarksRepo.create(
+        const BookmarkInput(
+          title: 'Existing',
+          url: 'https://Example.COM/CaseSensitive',
+          description: '',
+          tags: [],
+        ),
+      );
+
+      const csv = '''
+title,url
+Same resource,HTTPS://EXAMPLE.com/CaseSensitive
+Different path,https://example.com/casesensitive
+''';
+      final result = await useCase(
+        ImportBookmarksParams(
+          bytes: utf8.encode(csv),
+          format: 'csv',
+          duplicatePolicy: DuplicatePolicy.skip,
+        ),
+      );
+
+      final report = (result as Ok<ImportResultReport>).value;
+      expect(report.duplicateCount, 1);
+      expect(report.importedCount, 1);
+      expect(bookmarksRepo.items, hasLength(2));
+      expect(
+        bookmarksRepo.items.values.map((bookmark) => bookmark.url),
+        contains('https://example.com/casesensitive'),
+      );
+    });
+
     test(
       'updates bookmark metadata and merges tags on duplicatePolicy update',
       () async {
@@ -455,6 +488,43 @@ Safe,https://example.com
       expect(report.importedCount, equals(1));
       expect(bookmarksRepo.items.values.single.url, 'https://example.com');
     });
+
+    test('rejects URLs containing embedded credentials', () async {
+      const csv = '''
+title,url
+Secret,https://user:password@example.com/private
+''';
+
+      final result = await useCase(
+        ImportBookmarksParams(bytes: utf8.encode(csv), format: 'csv'),
+      );
+
+      final report = (result as Ok<ImportResultReport>).value;
+      expect(report.invalidCount, 1);
+      expect(report.importedCount, 0);
+      expect(bookmarksRepo.items, isEmpty);
+    });
+
+    test(
+      'rejects imported local attachment paths before persistence',
+      () async {
+        const csv = '''
+title,url,imageUrls,videoUrl
+Unsafe,https://example.com,/data/user/0/app/private.jpg,/sdcard/private.mp4
+''';
+
+        final result = await useCase(
+          ImportBookmarksParams(bytes: utf8.encode(csv), format: 'csv'),
+        );
+
+        expect(result, isA<Ok<ImportResultReport>>());
+        final report = (result as Ok<ImportResultReport>).value;
+        expect(report.importedCount, 0);
+        expect(report.invalidCount, 1);
+        expect(report.errors, isNotEmpty);
+        expect(bookmarksRepo.items, isEmpty);
+      },
+    );
 
     test('aborts when existing bookmarks cannot be read', () async {
       bookmarksRepo.shouldFailListLocal = true;

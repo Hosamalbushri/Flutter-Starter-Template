@@ -11,6 +11,7 @@ import 'package:localization/localization.dart';
 class FakeBookmarksRepo implements BookmarksRepository {
   final Map<String, Bookmark> items = {};
   int idCounter = 1;
+  int createCalls = 0;
 
   @override
   Future<Result<List<Bookmark>>> list() async => Ok(items.values.toList());
@@ -27,6 +28,7 @@ class FakeBookmarksRepo implements BookmarksRepository {
 
   @override
   Future<Result<Bookmark>> create(BookmarkInput input) async {
+    createCalls++;
     final now = DateTime.utc(2026, 1, 1);
     final id = 'bm-${idCounter++}';
     final bookmark = Bookmark(
@@ -160,6 +162,31 @@ Dart Dev,https://dart.dev,cli
         repository.items.values.any((b) => b.title == 'Flutter Dev'),
         isTrue,
       );
+    });
+
+    testWidgets('ignores a repeated commit tap while import is running', (
+      tester,
+    ) async {
+      final bytes = utf8.encode('title,url\nOne,https://example.com/one');
+      var completedCalls = 0;
+
+      await tester.pumpWidget(
+        createSubject(
+          bytes: bytes,
+          fileName: 'bookmarks.csv',
+          onCompleted: () => completedCalls++,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final commitButton = find.text('Commit Import');
+      await tester.tap(commitButton);
+      await tester.tap(commitButton);
+      await tester.pumpAndSettle();
+
+      expect(repository.createCalls, 1);
+      expect(repository.items, hasLength(1));
+      expect(completedCalls, 1);
     });
 
     testWidgets(

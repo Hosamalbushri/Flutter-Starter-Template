@@ -366,7 +366,7 @@ class _FloatingBottomBar extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppRadius.xl),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(
+                        color: context.colorScheme.shadow.withValues(
                           alpha: isDark ? 0.22 : 0.07,
                         ),
                         blurRadius: 18,
@@ -407,7 +407,7 @@ class _FloatingBottomBar extends StatelessWidget {
                 bottom: bottomPadding + _floatingBarBottomInset,
                 height: floatingSurfaceHeight,
                 child: Material(
-                  color: Colors.transparent,
+                  color: context.colorScheme.surface.withValues(alpha: 0),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       final availableWidth = constraints.maxWidth;
@@ -656,7 +656,7 @@ class _CenterActionButtonState extends State<_CenterActionButton>
                     borderRadius: BorderRadius.circular(13),
                   ),
                   clipBehavior: Clip.antiAlias,
-                  color: Colors.transparent,
+                  color: context.colorScheme.surface.withValues(alpha: 0),
                   child: InkWell(
                     onHighlightChanged: _setPressed,
                     onTap: () {
@@ -744,7 +744,7 @@ class _QuickActionsOverlay extends StatelessWidget {
               behavior: HitTestBehavior.opaque,
               onTap: onDismiss,
               child: ColoredBox(
-                color: Colors.black.withValues(
+                color: semantic.scrim.withValues(
                   alpha: context.isDark ? 0.20 : 0.06,
                 ),
               ),
@@ -769,7 +769,7 @@ class _QuickActionsOverlay extends StatelessWidget {
                 key: const ValueKey('quickActionsMenu'),
                 color: context.colorScheme.surface,
                 elevation: AppElevation.lg,
-                shadowColor: Colors.black.withValues(alpha: 0.18),
+                shadowColor: context.colorScheme.shadow.withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(AppRadius.xl),
                 clipBehavior: Clip.antiAlias,
                 child: Container(

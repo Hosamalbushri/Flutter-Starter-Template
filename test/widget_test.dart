@@ -179,9 +179,10 @@ void main() {
     }
 
     expect(
-      find.descendant(of: find.byType(AppBar), matching: find.text('Home')),
+      find.byKey(const ValueKey('home-dashboard-identity')),
       findsOneWidget,
     );
+    expect(find.byKey(const ValueKey('home-search-field')), findsOneWidget);
     expect(homeBloc, isNotNull);
     expect(authBloc.state, isA<AuthAuthenticated>());
     expect(

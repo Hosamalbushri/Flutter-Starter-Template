@@ -24,23 +24,27 @@ void main() {
       'android/app/build.gradle.kts',
     ).readAsStringSync();
     final firebaseSource = File('lib/app/firebase.dart').readAsStringSync();
-    final firebaseEnabled = firebaseSource.contains(
-      'const bool kFirebaseEnabled = true;',
-    );
 
     expect(source, contains('val googleServicesFile'));
     expect(source, contains('if (googleServicesFile.exists())'));
     const conditionalPlugin =
         'apply(plugin = "com.google.gms.google-services")';
-    if (firebaseEnabled) {
-      expect(source, contains(conditionalPlugin));
-    } else {
-      expect(source, isNot(contains(conditionalPlugin)));
-    }
+    expect(source, contains(conditionalPlugin));
+    expect(firebaseSource, contains('bool.fromEnvironment('));
+    expect(firebaseSource, contains("'FIREBASE_ENABLED'"));
+    expect(firebaseSource, contains('defaultValue: false'));
     expect(
       RegExp(r'id\("com\.google\.gms\.google-services"\)').hasMatch(source),
       isFalse,
       reason: 'The plugins block would make google-services.json mandatory.',
     );
+  });
+
+  test('production release never falls back to the debug signing key', () {
+    final source = File('android/app/build.gradle.kts').readAsStringSync();
+
+    expect(source, isNot(contains('signingConfigs.getByName("debug")')));
+    expect(source, contains('requestedProdRelease'));
+    expect(source, contains('throw GradleException('));
   });
 }

@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:document_engine/document_engine.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 
 import 'document_center_state.dart';
@@ -11,16 +10,9 @@ import 'document_center_state.dart';
 /// Manages state and workflows for Document Center (import, export, reports, printing).
 @injectable
 class DocumentCenterCubit extends Cubit<DocumentCenterState> {
-  DocumentCenterCubit({DocumentFormatRegistry? registry})
-    : registry =
-          registry ??
-          (GetIt.instance.isRegistered<DocumentFormatRegistry>()
-              ? GetIt.instance<DocumentFormatRegistry>()
-              : DocumentFormatRegistry.standard()),
+  DocumentCenterCubit([DocumentFormatRegistry? registry])
+    : registry = registry ?? DocumentFormatRegistry.standard(),
       super(const DocumentCenterState());
-
-  DocumentCenterCubit.withRegistry(this.registry)
-    : super(const DocumentCenterState());
 
   final DocumentFormatRegistry registry;
   final InMemoryThermalTransport thermalTransport = InMemoryThermalTransport();
@@ -180,6 +172,7 @@ class DocumentCenterCubit extends Cubit<DocumentCenterState> {
 
   /// Commits the validated import dataset transactionally.
   Future<void> commitCurrentImport() async {
+    if (state.isImporting) return;
     final plan = state.importPlan;
     if (plan == null || !plan.canCommit) return;
 
@@ -285,17 +278,22 @@ class DocumentCenterCubit extends Cubit<DocumentCenterState> {
       ),
     );
     try {
-      final dataset = _resolveDataset(state.selectedExportDataset);
-      final adapter = registry.getExportAdapter(state.selectedExportFormat);
-
-      final exportDef = ExportDefinition(
-        protectFormulas: state.neutralizeFormulas,
-      );
-
-      final bytes = await adapter.export(
-        dataset,
-        exportDef,
-      );
+      final format = state.selectedExportFormat;
+      final List<int> bytes;
+      if (format == 'pdf') {
+        final (definition, dataset) = _resolveReport(
+          state.selectedExportDataset,
+        );
+        final renderer = registry.getReportRenderer(format);
+        bytes = await renderer.render(definition, dataset);
+      } else {
+        final dataset = _resolveDataset(state.selectedExportDataset);
+        final adapter = registry.getExportAdapter(format);
+        final exportDef = ExportDefinition(
+          protectFormulas: state.neutralizeFormulas,
+        );
+        bytes = await adapter.export(dataset, exportDef);
+      }
 
       emit(
         state.copyWith(

@@ -54,6 +54,21 @@ void main() {
       expect(utf8.decode(bytes.sublist(0, 5)), '%PDF-');
     });
 
+    test('embeds Unicode fonts when rendering an Arabic RTL report', () async {
+      final (definition, dataset) =
+          ReferenceReportFixtures.createSupplierStatementReport();
+
+      expect(definition.textDirection, DocumentTextDirection.rtl);
+
+      final bytes = await renderer.render(definition, dataset);
+      final pdfSource = latin1.decode(bytes, allowInvalid: true);
+
+      expect(utf8.decode(bytes.sublist(0, 5)), '%PDF-');
+      expect(pdfSource, contains('/ToUnicode'));
+      expect(pdfSource, contains('DejaVuSans'));
+      expect(bytes.length, greaterThan(10000));
+    });
+
     test('renders multi-page dataset across page boundaries', () async {
       final (baseDef, _) = ReferenceReportFixtures.createSalesReport();
       final manyRows = <DocumentRow>[];

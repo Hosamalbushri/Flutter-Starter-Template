@@ -1,4 +1,5 @@
 import 'export/export_definition.dart';
+import 'failure/document_failure.dart';
 import 'import/import_definition.dart';
 import 'import/import_persistence_adapter.dart';
 import 'import/import_plan.dart';
@@ -149,6 +150,12 @@ class StandardDocumentEngineService implements DocumentEngineService {
           chunk,
           cancellationToken: cancellationToken,
         );
+        if (saved != chunk.length) {
+          throw DocumentPersistenceFailure(
+            'Persistence adapter reported saving $saved of '
+            '${chunk.length} rows.',
+          );
+        }
         committedCount += saved;
 
         onProgress?.call(

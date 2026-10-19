@@ -8,6 +8,8 @@ import 'package:config/config.dart';
 // fst:auth:start
 import 'package:feature_auth/feature_auth.dart';
 // fst:auth:end
+import 'package:flutter_starter_template/app/di/injection.dart'
+    show configureFirebaseRuntimeBindings;
 import 'package:flutter_starter_template/app/firebase.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -37,6 +39,8 @@ void main() {
       // fst:auth:start
       await FeatureAuthPackageModule().init(helper);
       // fst:auth:end
+
+      configureFirebaseRuntimeBindings(locator);
 
       if (kFirebaseEnabled) {
         // In a Firebase-enabled project, the generated modules bind the

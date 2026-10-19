@@ -29,6 +29,7 @@ import 'package:sync_connectivity_plus/sync_connectivity_plus.dart';
 // fst:backend:end
 import 'package:theme/theme.dart';
 
+import '../firebase.dart';
 import 'injection.config.dart';
 import 'reader_fallbacks.dart';
 
@@ -77,10 +78,32 @@ final GetIt getIt = GetIt.instance;
 )
 Future<void> configureDependencies() async {
   await getIt.init();
+  configureFirebaseRuntimeBindings(getIt);
   // Fill in Null-Object readers for any feature dropped at scaffold time, so
   // `home` keeps working when bookmarks/collections were excluded.
   registerReaderFallbacks(getIt);
   _configureDocumentEngine(getIt);
+}
+
+/// Replaces Firebase-backed tracking adapters with inert implementations when
+/// Firebase is not explicitly enabled for the current build.
+void configureFirebaseRuntimeBindings(GetIt sl) {
+  if (kFirebaseEnabled) return;
+
+  if (sl.isRegistered<AnalyticsService>()) {
+    sl.unregister<AnalyticsService>();
+  }
+  if (sl.isRegistered<CrashReporter>()) {
+    sl.unregister<CrashReporter>();
+  }
+  if (sl.isRegistered<PerformanceTracker>()) {
+    sl.unregister<PerformanceTracker>();
+  }
+
+  sl
+    ..registerLazySingleton<AnalyticsService>(NoOpAnalyticsService.new)
+    ..registerLazySingleton<CrashReporter>(NoOpCrashReporter.new)
+    ..registerLazySingleton<PerformanceTracker>(NoOpPerformanceTracker.new);
 }
 
 void _configureDocumentEngine(GetIt sl) {

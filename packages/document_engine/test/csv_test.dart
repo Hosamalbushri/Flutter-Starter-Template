@@ -57,6 +57,17 @@ void main() {
       );
     });
 
+    test('does not allow committing a header-only document', () async {
+      final plan = await adapter.preparePlan(
+        utf8.encode('id,name,price,stock,active'),
+        ImportDefinition(targetDefinition: schema),
+      );
+
+      expect(plan.totalInspected, 0);
+      expect(plan.validRows, isEmpty);
+      expect(plan.canCommit, isFalse);
+    });
+
     test('rejects duplicate headers instead of silently overwriting data', () {
       final bytes = utf8.encode('id,name,name\r\n1,first,second');
 

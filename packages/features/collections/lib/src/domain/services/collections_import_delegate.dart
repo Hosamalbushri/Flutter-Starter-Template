@@ -238,21 +238,21 @@ class CollectionsImportDelegate implements DocumentImportDelegate {
 
   String _extractIcon(DocumentRow row) {
     final raw = _extractString(row, 'icon').trim();
-    return raw.isNotEmpty ? raw : 'folder';
+    return raw.isNotEmpty ? raw : Collection.defaultIcon;
   }
 
   int _extractColor(DocumentRow row) {
     final val = row.getValue('color');
     if (val is IntDocumentValue) return val.value;
     final raw = _extractString(row, 'color').trim();
-    if (raw.isEmpty) return 0xFF2196F3; // default blue
+    if (raw.isEmpty) return Collection.defaultColor;
 
     if (raw.startsWith('#')) {
       final hex = raw.substring(1);
       final parsed = int.tryParse(hex.length == 6 ? 'FF$hex' : hex, radix: 16);
       if (parsed != null) return parsed;
     }
-    return int.tryParse(raw) ?? 0xFF2196F3;
+    return int.tryParse(raw) ?? Collection.defaultColor;
   }
 
   List<String> _extractBookmarkIds(DocumentRow row) {

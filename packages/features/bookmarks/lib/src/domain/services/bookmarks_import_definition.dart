@@ -30,10 +30,12 @@ DocumentDefinition createBookmarksDocumentDefinition() {
       DocumentColumn.text(
         id: 'imageUrls',
         label: 'Image URLs',
+        validator: _validateImportedImageUrls,
       ),
       DocumentColumn.text(
         id: 'videoUrl',
         label: 'Video URL',
+        validator: _validateImportedVideoUrl,
       ),
       DocumentColumn.text(
         id: 'collection',
@@ -41,6 +43,35 @@ DocumentDefinition createBookmarksDocumentDefinition() {
       ),
     ],
   );
+}
+
+String? _validateImportedImageUrls(DocumentValue value) {
+  final raw = value.displayValue.trim();
+  if (raw.isEmpty) return null;
+
+  final urls = raw
+      .split(RegExp('[,;]'))
+      .map((item) => item.trim())
+      .where((item) => item.isNotEmpty);
+  for (final url in urls) {
+    if (!_isSafeRemoteMediaUrl(url)) {
+      return 'Imported image attachments must be valid HTTP or HTTPS URLs.';
+    }
+  }
+  return null;
+}
+
+String? _validateImportedVideoUrl(DocumentValue value) {
+  final raw = value.displayValue.trim();
+  if (raw.isEmpty || _isSafeRemoteMediaUrl(raw)) return null;
+  return 'Imported video attachments must be valid HTTP or HTTPS URLs.';
+}
+
+bool _isSafeRemoteMediaUrl(String raw) {
+  final uri = Uri.tryParse(raw);
+  if (uri == null || uri.userInfo.isNotEmpty || uri.host.isEmpty) return false;
+  final scheme = uri.scheme.toLowerCase();
+  return scheme == 'http' || scheme == 'https';
 }
 
 /// Pre-configured [ImportDefinition] for Bookmarks.

@@ -138,6 +138,34 @@ void main() {
       expect(failingPersistence.wasRolledBack, isTrue);
     });
 
+    test('rolls back when persistence reports a partial chunk write', () async {
+      final service = StandardDocumentEngineService();
+      final persistence = _PartialWritePersistenceAdapter();
+      final plan = ImportPlan(
+        totalInspected: 2,
+        validRows: [
+          DocumentRow.fromRaw(index: 0, rawCells: const {'col': 'first'}),
+          DocumentRow.fromRaw(index: 1, rawCells: const {'col': 'second'}),
+        ],
+        invalidRows: const [],
+        warnings: const [],
+        canCommit: true,
+      );
+
+      await expectLater(
+        service.executeImport(plan, persistence),
+        throwsA(
+          isA<DocumentPersistenceFailure>().having(
+            (failure) => failure.message,
+            'message',
+            contains('saving 1 of 2 rows'),
+          ),
+        ),
+      );
+      expect(persistence.wasCommitted, isFalse);
+      expect(persistence.wasRolledBack, isTrue);
+    });
+
     test(
       'rejects a non-positive chunk size before opening a transaction',
       () async {
@@ -184,4 +212,24 @@ class _FailingPersistenceAdapter implements ImportPersistenceAdapter {
   Future<void> rollbackTransaction() async {
     wasRolledBack = true;
   }
+}
+
+class _PartialWritePersistenceAdapter implements ImportPersistenceAdapter {
+  bool wasCommitted = false;
+  bool wasRolledBack = false;
+
+  @override
+  Future<void> beginTransaction() async {}
+
+  @override
+  Future<int> saveChunk(
+    List<DocumentRow> rows, {
+    CancellationToken? cancellationToken,
+  }) async => rows.length - 1;
+
+  @override
+  Future<void> commitTransaction() async => wasCommitted = true;
+
+  @override
+  Future<void> rollbackTransaction() async => wasRolledBack = true;
 }

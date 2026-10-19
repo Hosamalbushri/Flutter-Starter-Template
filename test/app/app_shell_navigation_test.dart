@@ -123,11 +123,15 @@ void main() {
       expect(find.text('home-details'), findsOneWidget);
 
       // fst:feature:bookmarks:start
-      await tester.tap(find.byTooltip('Bookmarks'));
+      await tester.tap(
+        find.byKey(const ValueKey('bottomNavigationDestination-1')),
+      );
       await tester.pumpAndSettle();
       expect(find.text('bookmarks-root'), findsOneWidget);
 
-      await tester.tap(find.byTooltip('Home'));
+      await tester.tap(
+        find.byKey(const ValueKey('bottomNavigationDestination-0')),
+      );
       await tester.pumpAndSettle();
       expect(find.text('home-details'), findsOneWidget);
       // fst:feature:bookmarks:end

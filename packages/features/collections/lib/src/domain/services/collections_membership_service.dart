@@ -78,8 +78,8 @@ class CollectionsMembershipService {
     final createResult = await _repository.create(
       CollectionInput(
         name: trimmed,
-        icon: 'folder',
-        color: 0xFF2196F3,
+        icon: Collection.defaultIcon,
+        color: Collection.defaultColor,
       ),
     );
     return switch (createResult) {
@@ -99,8 +99,8 @@ class CollectionsMembershipService {
     String bookmarkId,
   ) async {
     final colResult = await _repository.get(collectionId);
-    if (colResult case Err()) return colResult;
-    final col = (colResult as Ok<Collection>).value;
+    if (colResult is! Ok<Collection>) return colResult;
+    final col = colResult.value;
 
     if (col.bookmarkIds.contains(bookmarkId)) {
       return Ok(col);

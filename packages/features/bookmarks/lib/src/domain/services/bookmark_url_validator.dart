@@ -8,9 +8,25 @@ String? validateBookmarkUrl(String rawUrl) {
   final scheme = uri?.scheme.toLowerCase();
   if (uri == null ||
       (scheme != 'http' && scheme != 'https') ||
-      uri.host.isEmpty) {
+      uri.host.isEmpty ||
+      uri.userInfo.isNotEmpty) {
     return 'URL must be a valid HTTP or HTTPS URL.';
   }
 
   return null;
+}
+
+/// Produces a duplicate-comparison key without changing case-sensitive URL
+/// components such as paths, queries, and fragments.
+String canonicalizeBookmarkUrl(String rawUrl) {
+  final value = rawUrl.trim();
+  final uri = Uri.tryParse(value);
+  if (uri == null || uri.host.isEmpty) return value;
+
+  return uri
+      .replace(
+        scheme: uri.scheme.toLowerCase(),
+        host: uri.host.toLowerCase(),
+      )
+      .toString();
 }

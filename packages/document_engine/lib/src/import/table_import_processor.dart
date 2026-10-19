@@ -182,9 +182,9 @@ class TableImportProcessor {
       allWarnings.addAll(rowWarnings);
     }
 
-    final canCommit = definition.allowPartial
-        ? validRows.isNotEmpty
-        : invalidRows.isEmpty;
+    final canCommit =
+        validRows.isNotEmpty &&
+        (definition.allowPartial || invalidRows.isEmpty);
 
     return ImportPlan(
       totalInspected: totalToProcess,

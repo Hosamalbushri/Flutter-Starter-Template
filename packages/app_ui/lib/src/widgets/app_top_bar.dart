@@ -170,8 +170,8 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
       return AppBar(
         key: key,
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: colorScheme.surface.withValues(alpha: 0),
+        surfaceTintColor: colorScheme.surfaceTint.withValues(alpha: 0),
         scrolledUnderElevation: AppElevation.none,
         elevation: AppElevation.none,
         toolbarHeight:
@@ -201,7 +201,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(
+                color: colorScheme.shadow.withValues(
                   alpha: context.isDark ? 0.20 : 0.07,
                 ),
                 blurRadius: 18,
@@ -259,7 +259,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
 
     return AppBar(
       automaticallyImplyLeading: false,
-      backgroundColor: Colors.transparent,
+      backgroundColor: colorScheme.surface.withValues(alpha: 0),
       surfaceTintColor: colorScheme.surfaceTint.withValues(alpha: 0),
       scrolledUnderElevation: AppElevation.none,
       elevation: transparent ? AppElevation.none : elevation,
@@ -492,7 +492,7 @@ class _DashboardActionSlot extends StatelessWidget {
                 minimumSize: const Size.square(36),
                 maximumSize: const Size.square(36),
                 padding: EdgeInsets.zero,
-                backgroundColor: Colors.transparent,
+                backgroundColor: colorScheme.surface.withValues(alpha: 0),
                 overlayColor: colorScheme.onSurface.withValues(alpha: 0.10),
                 shape: const CircleBorder(),
               ),

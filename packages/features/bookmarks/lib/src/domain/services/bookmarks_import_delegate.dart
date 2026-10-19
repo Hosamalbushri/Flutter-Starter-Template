@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart';
 
 import '../entities/bookmark.dart';
 import '../repositories/bookmarks_repository.dart';
+import 'bookmark_url_validator.dart';
 import 'bookmarks_import_definition.dart';
 
 /// Importer delegate that converts validated [DocumentRow]s into Bookmarks,
@@ -43,7 +44,7 @@ class BookmarksImportDelegate implements DocumentImportDelegate {
     };
 
     final existingByUrl = <String, Bookmark>{
-      for (final b in existingList) b.url.trim().toLowerCase(): b,
+      for (final b in existingList) canonicalizeBookmarkUrl(b.url): b,
     };
     final existingById = <String, Bookmark>{
       for (final b in existingList) b.id: b,
@@ -115,7 +116,19 @@ class BookmarksImportDelegate implements DocumentImportDelegate {
         final videoUrl = _extractString(row, 'videoUrl').trim();
         final collectionRef = _extractString(row, 'collection').trim();
 
-        final normalizedUrl = rawUrl.toLowerCase();
+        final unsafeMedia = <String>[
+          ...imageUrls.where((url) => !_isSafeRemoteMediaUrl(url)),
+          if (videoUrl.isNotEmpty && !_isSafeRemoteMediaUrl(videoUrl)) videoUrl,
+        ];
+        if (unsafeMedia.isNotEmpty) {
+          failedCount++;
+          errors.add(
+            'Row ${i + 1}: Imported media must use valid HTTP or HTTPS URLs.',
+          );
+          continue;
+        }
+
+        final normalizedUrl = canonicalizeBookmarkUrl(rawUrl);
         final match = existingByUrl[normalizedUrl];
 
         String? targetBookmarkId;
@@ -348,6 +361,15 @@ class BookmarksImportDelegate implements DocumentImportDelegate {
         .map((s) => s.trim())
         .where((s) => s.isNotEmpty)
         .toList();
+  }
+
+  bool _isSafeRemoteMediaUrl(String raw) {
+    final uri = Uri.tryParse(raw);
+    if (uri == null || uri.userInfo.isNotEmpty || uri.host.isEmpty) {
+      return false;
+    }
+    final scheme = uri.scheme.toLowerCase();
+    return scheme == 'http' || scheme == 'https';
   }
 
   Future<void> _rollbackImport({
