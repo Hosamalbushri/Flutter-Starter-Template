@@ -25,7 +25,7 @@ class _ChangePasswordTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isRtl = Directionality.of(context) == TextDirection.rtl;
-    return _ProfileSettingsTile(
+    return ProfileSettingsTile(
       icon: FontAwesomeIcons.key,
       title: context.l10n.profileChangePassword,
       subtitle: context.l10n.profileChangePasswordSubtitle,
@@ -51,7 +51,7 @@ class _DeleteAccountTile extends StatelessWidget {
     return BlocBuilder<DeleteAccountCubit, DeleteAccountState>(
       builder: (context, state) {
         final isSubmitting = state is DeleteAccountSubmitting;
-        return _ProfileSettingsTile(
+        return ProfileSettingsTile(
           icon: FontAwesomeIcons.trash,
           title: context.l10n.profileDeleteAccount,
           subtitle: context.l10n.profileDeleteAccountSubtitle,

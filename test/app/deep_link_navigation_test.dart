@@ -3,6 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_starter_template/app/router.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localization/localization.dart';
+
+Widget _testApp(GoRouter router) => MaterialApp.router(
+  routerConfig: router,
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+);
 
 Future<void> sendPlatformRoute(WidgetTester tester, String location) async {
   final message = const JSONMethodCodec().encodeMethodCall(
@@ -46,7 +53,7 @@ void main() {
       result.deepLink.splashCompleted = true;
       result.router.go('/warm');
 
-      await tester.pumpWidget(MaterialApp.router(routerConfig: result.router));
+      await tester.pumpWidget(_testApp(result.router));
       await tester.pumpAndSettle();
       expect(find.text('warm root'), findsOneWidget);
 
@@ -87,7 +94,7 @@ void main() {
     result.deepLink.splashCompleted = true;
     result.router.go('/warm');
 
-    await tester.pumpWidget(MaterialApp.router(routerConfig: result.router));
+    await tester.pumpWidget(_testApp(result.router));
     await tester.pumpAndSettle();
     await sendPlatformRoute(tester, 'https://yourdomain.com/not-a-route');
 

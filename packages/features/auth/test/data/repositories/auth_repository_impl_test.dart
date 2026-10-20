@@ -30,6 +30,7 @@ void main() {
   late MockAuthRemoteDataSource mockRemote;
   late MockAuthLocalDataSource mockLocal;
   late MockTokenRefresher mockRefresher;
+  late SessionTerminationNotifier sessionTermination;
   late AuthRepositoryImpl repository;
 
   const testUser = AuthUser(id: 'user-1', username: 'alice');
@@ -51,11 +52,18 @@ void main() {
     mockRemote = MockAuthRemoteDataSource();
     mockLocal = MockAuthLocalDataSource();
     mockRefresher = MockTokenRefresher();
-    repository = AuthRepositoryImpl(mockRemote, mockLocal, mockRefresher);
+    sessionTermination = SessionTerminationNotifier();
+    repository = AuthRepositoryImpl(
+      mockRemote,
+      mockLocal,
+      mockRefresher,
+      sessionTermination,
+    );
   });
 
   group('signIn', () {
     test('returns Ok with user and persists session on success', () async {
+      sessionTermination.notifyTerminated();
       when(
         () => mockRemote.signIn(any()),
       ).thenAnswer((_) async => testSignInResponse);
@@ -76,6 +84,7 @@ void main() {
       final ok = result as Ok<AuthUser>;
       expect(ok.value.id, 'user-1');
       expect(ok.value.username, 'alice');
+      expect(sessionTermination.isTerminated, isFalse);
 
       verify(
         () => mockLocal.setSession(

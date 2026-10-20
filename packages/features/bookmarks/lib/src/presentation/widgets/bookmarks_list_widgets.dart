@@ -106,7 +106,10 @@ class _BookmarksListViewState extends State<BookmarksListView> {
               : 0,
         ),
         child: FloatingActionButton(
-          heroTag: 'bookmarks-add-bookmark-fab',
+          // This action has no shared-element counterpart on the form route.
+          // Keeping a fixed Hero tag makes retained shell subtrees collide
+          // when more than one bookmarks branch is briefly mounted.
+          heroTag: null,
           onPressed: _openNew,
           tooltip: context.l10n.bookmarksAddTooltip,
           child: const FaIcon(FontAwesomeIcons.plus),

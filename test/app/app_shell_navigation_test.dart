@@ -39,6 +39,7 @@ void main() {
   testWidgets(
     'branch stacks survive switching and compact-to-rail resizing',
     (tester) async {
+      var exitCalls = 0;
       tester.view
         ..physicalSize = const Size(390, 844)
         ..devicePixelRatio = 1;
@@ -47,8 +48,10 @@ void main() {
       final router = GoRouter(
         routes: [
           StatefulShellRoute.indexedStack(
-            builder: (context, state, navigationShell) =>
-                AppShell(navigationShell: navigationShell),
+            builder: (context, state, navigationShell) => AppShell(
+              navigationShell: navigationShell,
+              exitApplication: () async => exitCalls++,
+            ),
             branches: [
               StatefulShellBranch(
                 routes: [
@@ -144,6 +147,32 @@ void main() {
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
       expect(find.text('home-root'), findsOneWidget);
+
+      tester.view.physicalSize = const Size(390, 844);
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey('bottomNavigationDestination-1')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('bookmarks-root'), findsOneWidget);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.text('home-root'), findsOneWidget);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.text('Exit app?'), findsOneWidget);
+      expect(exitCalls, 0);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(exitCalls, 0);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Exit'));
+      await tester.pumpAndSettle();
+      expect(exitCalls, 1);
     },
   );
 }

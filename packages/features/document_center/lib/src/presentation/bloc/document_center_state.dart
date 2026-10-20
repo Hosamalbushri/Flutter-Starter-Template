@@ -1,6 +1,16 @@
 import 'package:document_engine/document_engine.dart';
 import 'package:flutter/foundation.dart';
 
+enum DocumentCenterNotice { pdfFailure, thermalSuccess, thermalFailure }
+
+enum DocumentCenterFailure {
+  fileRead,
+  importValidation,
+  importCommit,
+  export,
+  save,
+}
+
 /// Immutable state for the Document Center feature.
 @immutable
 class DocumentCenterState {
@@ -17,7 +27,7 @@ class DocumentCenterState {
     this.importResultReport,
     this.isImporting = false,
     this.importProgress,
-    this.importErrorMessage,
+    this.importFailure,
     this.selectedExportDataset = 'sales',
     this.selectedExportFormat = 'csv',
     this.neutralizeFormulas = true,
@@ -25,11 +35,12 @@ class DocumentCenterState {
     this.lastExportedBytes,
     this.generatedExportBytes,
     this.savedExportUri,
-    this.exportErrorMessage,
+    this.exportFailure,
     this.selectedReportKey = 'sales',
     this.isGeneratingReport = false,
     this.generatedPdfBytes,
-    this.reportNoticeMessage,
+    this.reportNotice,
+    this.reportNoticeBytes,
   });
 
   /// Whether the screen has finished its initial load.
@@ -49,7 +60,7 @@ class DocumentCenterState {
   final ImportResultReport? importResultReport;
   final bool isImporting;
   final DocumentProgress? importProgress;
-  final String? importErrorMessage;
+  final DocumentCenterFailure? importFailure;
 
   // --- Export State ---
   final String selectedExportDataset;
@@ -59,13 +70,14 @@ class DocumentCenterState {
   final int? lastExportedBytes;
   final Uint8List? generatedExportBytes;
   final Uri? savedExportUri;
-  final String? exportErrorMessage;
+  final DocumentCenterFailure? exportFailure;
 
   // --- Reports & Print State ---
   final String selectedReportKey;
   final bool isGeneratingReport;
   final Uint8List? generatedPdfBytes;
-  final String? reportNoticeMessage;
+  final DocumentCenterNotice? reportNotice;
+  final int? reportNoticeBytes;
 
   DocumentCenterState copyWith({
     bool? isReady,
@@ -80,7 +92,7 @@ class DocumentCenterState {
     ImportResultReport? importResultReport,
     bool? isImporting,
     DocumentProgress? importProgress,
-    String? importErrorMessage,
+    DocumentCenterFailure? importFailure,
     String? selectedExportDataset,
     String? selectedExportFormat,
     bool? neutralizeFormulas,
@@ -88,11 +100,12 @@ class DocumentCenterState {
     int? lastExportedBytes,
     Uint8List? generatedExportBytes,
     Uri? savedExportUri,
-    String? exportErrorMessage,
+    DocumentCenterFailure? exportFailure,
     String? selectedReportKey,
     bool? isGeneratingReport,
     Uint8List? generatedPdfBytes,
-    String? reportNoticeMessage,
+    DocumentCenterNotice? reportNotice,
+    int? reportNoticeBytes,
     bool clearFile = false,
     bool clearNotice = false,
     bool clearImportError = false,
@@ -130,9 +143,9 @@ class DocumentCenterState {
       importProgress: clearImportProgress
           ? null
           : (importProgress ?? this.importProgress),
-      importErrorMessage: clearImportError
+      importFailure: clearImportError
           ? null
-          : (importErrorMessage ?? this.importErrorMessage),
+          : (importFailure ?? this.importFailure),
       selectedExportDataset:
           selectedExportDataset ?? this.selectedExportDataset,
       selectedExportFormat: selectedExportFormat ?? this.selectedExportFormat,
@@ -147,15 +160,16 @@ class DocumentCenterState {
       savedExportUri: clearExportResult
           ? null
           : (savedExportUri ?? this.savedExportUri),
-      exportErrorMessage: clearExportError
+      exportFailure: clearExportError
           ? null
-          : (exportErrorMessage ?? this.exportErrorMessage),
+          : (exportFailure ?? this.exportFailure),
       selectedReportKey: selectedReportKey ?? this.selectedReportKey,
       isGeneratingReport: isGeneratingReport ?? this.isGeneratingReport,
       generatedPdfBytes: generatedPdfBytes ?? this.generatedPdfBytes,
-      reportNoticeMessage: clearNotice
+      reportNotice: clearNotice ? null : (reportNotice ?? this.reportNotice),
+      reportNoticeBytes: clearNotice
           ? null
-          : (reportNoticeMessage ?? this.reportNoticeMessage),
+          : (reportNoticeBytes ?? this.reportNoticeBytes),
     );
   }
 
@@ -174,7 +188,7 @@ class DocumentCenterState {
           other.importResultReport == importResultReport &&
           other.isImporting == isImporting &&
           other.importProgress == importProgress &&
-          other.importErrorMessage == importErrorMessage &&
+          other.importFailure == importFailure &&
           other.selectedExportDataset == selectedExportDataset &&
           other.selectedExportFormat == selectedExportFormat &&
           other.neutralizeFormulas == neutralizeFormulas &&
@@ -182,10 +196,11 @@ class DocumentCenterState {
           other.lastExportedBytes == lastExportedBytes &&
           other.generatedExportBytes == generatedExportBytes &&
           other.savedExportUri == savedExportUri &&
-          other.exportErrorMessage == exportErrorMessage &&
+          other.exportFailure == exportFailure &&
           other.selectedReportKey == selectedReportKey &&
           other.isGeneratingReport == isGeneratingReport &&
-          other.reportNoticeMessage == reportNoticeMessage);
+          other.reportNotice == reportNotice &&
+          other.reportNoticeBytes == reportNoticeBytes);
 
   @override
   int get hashCode => Object.hashAll([
@@ -200,7 +215,7 @@ class DocumentCenterState {
     importResultReport,
     isImporting,
     importProgress,
-    importErrorMessage,
+    importFailure,
     selectedExportDataset,
     selectedExportFormat,
     neutralizeFormulas,
@@ -208,9 +223,10 @@ class DocumentCenterState {
     lastExportedBytes,
     generatedExportBytes,
     savedExportUri,
-    exportErrorMessage,
+    exportFailure,
     selectedReportKey,
     isGeneratingReport,
-    reportNoticeMessage,
+    reportNotice,
+    reportNoticeBytes,
   ]);
 }

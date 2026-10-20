@@ -1,8 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:localization/localization.dart';
 
 void main() {
+  test('Document Center counts use the active locale number format', () async {
+    final ar = await AppLocalizations.delegate.load(const Locale('ar'));
+    final en = await AppLocalizations.delegate.load(const Locale('en'));
+    const count = 12000;
+
+    expect(
+      ar.documentImportValidRows(count),
+      contains(intl.NumberFormat.decimalPattern('ar').format(count)),
+    );
+    expect(
+      en.documentImportValidRows(count),
+      contains(intl.NumberFormat.decimalPattern('en').format(count)),
+    );
+  });
+
   test(
     'Arabic bookmark plurals cover zero, one, two, few, many, and other',
     () async {

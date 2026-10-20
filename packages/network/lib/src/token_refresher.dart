@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:storage/storage.dart';
 
+import 'session_termination_notifier.dart';
+
 /// Outcome of a token-refresh attempt.
 ///
 /// Distinguishes a *transient* failure (offline / timeout / server hiccup —
@@ -17,10 +19,15 @@ enum RefreshOutcome { refreshed, networkError, invalidSession }
 /// interceptor.
 @lazySingleton
 class TokenRefresher {
-  TokenRefresher(this._tokens, @Named('plain') this._dio);
+  TokenRefresher(
+    this._tokens,
+    @Named('plain') this._dio,
+    this._sessionTermination,
+  );
 
   final AuthTokenStore _tokens;
   final Dio _dio;
+  final SessionTerminationNotifier _sessionTermination;
   Future<RefreshOutcome>? _inflight;
 
   Future<RefreshOutcome> refresh() =>
@@ -28,7 +35,10 @@ class TokenRefresher {
 
   Future<RefreshOutcome> _run() async {
     final token = _tokens.refreshToken;
-    if (token == null) return RefreshOutcome.invalidSession;
+    if (token == null) {
+      _sessionTermination.notifyTerminated();
+      return RefreshOutcome.invalidSession;
+    }
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         '/api/auth/refresh',
@@ -48,14 +58,17 @@ class TokenRefresher {
         refresh = r;
       } on Object {
         await _tokens.clearTokens();
+        _sessionTermination.notifyTerminated();
         return RefreshOutcome.invalidSession;
       }
       await _tokens.updateTokens(accessToken: access, refreshToken: refresh);
+      _sessionTermination.reset();
       return RefreshOutcome.refreshed;
     } on DioException catch (e) {
       final status = e.response?.statusCode;
       if (status == 401 || status == 403) {
         await _tokens.clearTokens();
+        _sessionTermination.notifyTerminated();
         return RefreshOutcome.invalidSession;
       }
       return RefreshOutcome.networkError;

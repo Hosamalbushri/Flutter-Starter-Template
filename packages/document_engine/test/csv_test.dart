@@ -223,6 +223,28 @@ void main() {
         );
       },
     );
+
+    test('does not convert programming errors into parse failures', () async {
+      final programmingErrorSchema = DocumentDefinition(
+        id: 'programming-error',
+        title: 'Programming Error',
+        columns: [
+          DocumentColumn.text(
+            id: 'name',
+            label: 'name',
+            validator: (_) => throw StateError('validator defect'),
+          ),
+        ],
+      );
+
+      expect(
+        () => adapter.preparePlan(
+          utf8.encode('name\nvalue'),
+          ImportDefinition(targetDefinition: programmingErrorSchema),
+        ),
+        throwsStateError,
+      );
+    });
   });
 
   group('CsvExportAdapter', () {

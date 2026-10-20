@@ -8,6 +8,8 @@ import 'package:feature_collections/src/domain/usecases/import_collections.dart'
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_contracts/shared_contracts.dart';
 
+import '../../atomic.dart';
+
 class FakeBookmarkSummariesReader extends BookmarkSummariesReader {
   FakeBookmarkSummariesReader(this.ids);
 
@@ -121,6 +123,14 @@ void main() {
         'b-new',
         'b-web',
       }),
+      TestAtomicWriteCoordinator(
+        takeSnapshot: () => Map<String, Collection>.of(repository.items),
+        restoreSnapshot: (snapshot) {
+          repository.items
+            ..clear()
+            ..addAll(snapshot! as Map<String, Collection>);
+        },
+      ),
     );
     useCase = ImportCollectionsUseCase(delegate);
   });

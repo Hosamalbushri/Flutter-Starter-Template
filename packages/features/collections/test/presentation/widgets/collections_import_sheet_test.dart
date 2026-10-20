@@ -9,6 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:localization/localization.dart';
 import 'package:shared_contracts/shared_contracts.dart';
 
+import '../../atomic.dart';
+
 class EmptyBookmarkSummariesReader extends BookmarkSummariesReader {
   @override
   Future<Result<List<BookmarkSummary>>> call([
@@ -87,6 +89,7 @@ void main() {
     delegate = CollectionsImportDelegate(
       repository,
       EmptyBookmarkSummariesReader(),
+      TestAtomicWriteCoordinator(),
     );
     useCase = ImportCollectionsUseCase(delegate);
 

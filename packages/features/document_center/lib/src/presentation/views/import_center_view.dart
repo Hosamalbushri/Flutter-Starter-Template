@@ -66,7 +66,7 @@ class ImportCenterView extends StatelessWidget {
                           );
                         }),
                         ChoiceChip(
-                          label: const Text('Sales (Demo)'),
+                          label: Text(l10n.documentImportDemoSales),
                           selected:
                               state.selectedImportDataset == 'sales_target',
                           onSelected: (_) =>
@@ -157,7 +157,9 @@ class ImportCenterView extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Text(state.importProgress?.message ?? ''),
+                      child: Text(
+                        _localizedProgress(l10n, state.importProgress),
+                      ),
                     ),
                     TextButton(
                       onPressed: cubit.cancelImport,
@@ -169,7 +171,7 @@ class ImportCenterView extends StatelessWidget {
               ],
 
               // Validation Error
-              if (state.importErrorMessage != null) ...[
+              if (state.importFailure != null) ...[
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
@@ -177,7 +179,7 @@ class ImportCenterView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   child: Text(
-                    state.importErrorMessage!,
+                    _localizedFailure(l10n, state.importFailure!),
                     style: TextStyle(
                       color: context.colorScheme.onErrorContainer,
                     ),
@@ -191,20 +193,25 @@ class ImportCenterView extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
-                    color: Colors.green.shade100,
+                    color: context.semanticColors.success.withValues(
+                      alpha: 0.12,
+                    ),
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.check_circle, color: Colors.green),
+                      Icon(
+                        Icons.check_circle,
+                        color: context.semanticColors.success,
+                      ),
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Text(
                           l10n.documentImportSuccessMessage(
                             state.committedCount!,
                           ),
-                          style: const TextStyle(
-                            color: Colors.green,
+                          style: TextStyle(
+                            color: context.semanticColors.success,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -236,8 +243,8 @@ class ImportCenterView extends StatelessWidget {
                             l10n.documentImportCreatedCount(
                               state.importResultReport!.createdCount,
                             ),
-                            style: const TextStyle(
-                              color: Colors.green,
+                            style: TextStyle(
+                              color: context.semanticColors.success,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -245,8 +252,8 @@ class ImportCenterView extends StatelessWidget {
                             l10n.documentImportUpdatedCount(
                               state.importResultReport!.updatedCount,
                             ),
-                            style: const TextStyle(
-                              color: Colors.blue,
+                            style: TextStyle(
+                              color: context.semanticColors.info,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -296,7 +303,8 @@ class ImportCenterView extends StatelessWidget {
                             child: Container(
                               padding: const EdgeInsets.all(AppSpacing.sm),
                               decoration: BoxDecoration(
-                                color: Colors.green.withValues(alpha: 0.1),
+                                color: context.semanticColors.success
+                                    .withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(
                                   AppRadius.sm,
                                 ),
@@ -305,8 +313,8 @@ class ImportCenterView extends StatelessWidget {
                                 l10n.documentImportValidRows(
                                   state.importPlan!.validCount,
                                 ),
-                                style: const TextStyle(
-                                  color: Colors.green,
+                                style: TextStyle(
+                                  color: context.semanticColors.success,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -366,3 +374,32 @@ class ImportCenterView extends StatelessWidget {
     );
   }
 }
+
+String _localizedProgress(
+  AppLocalizations l10n,
+  DocumentProgress? progress,
+) {
+  if (progress == null) return '';
+  return switch (progress.phase) {
+    DocumentPhase.reading => l10n.documentProgressReading,
+    DocumentPhase.parsing => l10n.documentProgressParsing,
+    DocumentPhase.validating => l10n.documentProgressValidating(
+      progress.current,
+      progress.total ?? progress.current,
+    ),
+    DocumentPhase.committing => l10n.documentProgressCommitting,
+    _ => l10n.documentProgressParsing,
+  };
+}
+
+String _localizedFailure(
+  AppLocalizations l10n,
+  DocumentCenterFailure failure,
+) => switch (failure) {
+  DocumentCenterFailure.fileRead => l10n.documentFileReadFailure,
+  DocumentCenterFailure.importValidation =>
+    l10n.documentImportValidationFailure,
+  DocumentCenterFailure.importCommit => l10n.documentImportCommitFailure,
+  DocumentCenterFailure.export => l10n.documentExportFailure,
+  DocumentCenterFailure.save => l10n.documentSaveFailure,
+};

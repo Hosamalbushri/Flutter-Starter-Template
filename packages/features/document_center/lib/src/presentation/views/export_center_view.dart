@@ -134,18 +134,23 @@ class ExportCenterView extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
-                    color: Colors.green.shade100,
+                    color: context.semanticColors.success.withValues(
+                      alpha: 0.12,
+                    ),
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.download_done, color: Colors.green),
+                      Icon(
+                        Icons.download_done,
+                        color: context.semanticColors.success,
+                      ),
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Text(
                           l10n.documentExportSuccess(state.lastExportedBytes!),
-                          style: const TextStyle(
-                            color: Colors.green,
+                          style: TextStyle(
+                            color: context.semanticColors.success,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -163,7 +168,7 @@ class ExportCenterView extends StatelessWidget {
               ],
 
               // Export Error Banner
-              if (state.exportErrorMessage != null) ...[
+              if (state.exportFailure != null) ...[
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
@@ -171,7 +176,7 @@ class ExportCenterView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   child: Text(
-                    state.exportErrorMessage!,
+                    _localizedExportFailure(l10n, state.exportFailure!),
                     style: TextStyle(
                       color: context.colorScheme.onErrorContainer,
                     ),
@@ -185,3 +190,11 @@ class ExportCenterView extends StatelessWidget {
     );
   }
 }
+
+String _localizedExportFailure(
+  AppLocalizations l10n,
+  DocumentCenterFailure failure,
+) => switch (failure) {
+  DocumentCenterFailure.save => l10n.documentSaveFailure,
+  _ => l10n.documentExportFailure,
+};

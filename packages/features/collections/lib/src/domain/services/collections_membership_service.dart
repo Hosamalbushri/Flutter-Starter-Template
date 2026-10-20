@@ -118,6 +118,62 @@ class CollectionsMembershipService {
     );
   }
 
+  /// Removes [bookmarkId] from every visible collection.
+  ///
+  /// Repository writes join the caller's database transaction when one is
+  /// active, keeping bookmark deletion and all membership updates atomic.
+  Future<Result<void>> removeBookmarkEverywhere(String bookmarkId) async {
+    final listResult = await _repository.listLocal();
+    if (listResult case Err(:final failure)) return Err(failure);
+
+    final collections = (listResult as Ok<List<Collection>>).value;
+    for (final collection in collections) {
+      if (!collection.bookmarkIds.contains(bookmarkId)) continue;
+      final updateResult = await _repository.update(
+        collection.id,
+        CollectionInput(
+          name: collection.name,
+          icon: collection.icon,
+          color: collection.color,
+          bookmarkIds: collection.bookmarkIds
+              .where((id) => id != bookmarkId)
+              .toList(growable: false),
+        ),
+      );
+      if (updateResult case Err(:final failure)) return Err(failure);
+    }
+    return const Ok(null);
+  }
+
+  /// Removes legacy membership IDs that no longer resolve to a visible
+  /// bookmark. This is a non-destructive, idempotent upgrade repair: valid
+  /// memberships and collection metadata are preserved.
+  Future<Result<void>> repairDanglingBookmarks(
+    Set<String> validBookmarkIds,
+  ) async {
+    final listResult = await _repository.listLocal();
+    if (listResult case Err(:final failure)) return Err(failure);
+
+    final collections = (listResult as Ok<List<Collection>>).value;
+    for (final collection in collections) {
+      final repairedIds = collection.bookmarkIds
+          .where(validBookmarkIds.contains)
+          .toList(growable: false);
+      if (repairedIds.length == collection.bookmarkIds.length) continue;
+      final updateResult = await _repository.update(
+        collection.id,
+        CollectionInput(
+          name: collection.name,
+          icon: collection.icon,
+          color: collection.color,
+          bookmarkIds: repairedIds,
+        ),
+      );
+      if (updateResult case Err(:final failure)) return Err(failure);
+    }
+    return const Ok(null);
+  }
+
   /// Restores collection domain data captured before an import mutation.
   Future<Result<Collection>> restoreForImport(Collection original) =>
       _repository.update(

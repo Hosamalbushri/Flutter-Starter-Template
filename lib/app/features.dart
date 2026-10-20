@@ -4,13 +4,11 @@ import 'package:feature_bookmarks/feature_bookmarks.dart';
 // fst:feature:collections:start
 import 'package:feature_collections/feature_collections.dart';
 // fst:feature:collections:end
-// fst:feature:notifications:start
 import 'package:feature_document_center/feature_document_center.dart';
+// fst:feature:notifications:start
 import 'package:feature_notifications/feature_notifications.dart';
 // fst:feature:notifications:end
-// fst:feature:_infra:start
 import 'package:go_router/go_router.dart';
-// fst:feature:_infra:end
 
 // fst:feature:_infra:start
 import 'di/injection.dart';

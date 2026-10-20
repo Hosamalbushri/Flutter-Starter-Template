@@ -115,7 +115,7 @@ void main() {
 
         expect(bytes, isNotNull);
         expect(utf8.decode(bytes!.sublist(0, 5)), '%PDF-');
-        expect(cubit.state.exportErrorMessage, isNull);
+        expect(cubit.state.exportFailure, isNull);
         expect(cubit.state.generatedExportBytes, orderedEquals(bytes));
       });
 
@@ -145,7 +145,11 @@ void main() {
           await cubit.printThermalReceipt();
 
           expect(cubit.thermalTransport.sentJobs, isNotEmpty);
-          expect(cubit.state.reportNoticeMessage, contains('thermal printer'));
+          expect(
+            cubit.state.reportNotice,
+            DocumentCenterNotice.thermalSuccess,
+          );
+          expect(cubit.state.reportNoticeBytes, isPositive);
         },
       );
     });

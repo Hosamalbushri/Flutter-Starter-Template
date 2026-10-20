@@ -1,6 +1,7 @@
 import 'package:architecture/architecture.dart';
 import 'package:clock/clock.dart';
 import 'package:database/database.dart';
+import 'package:feature_collections/feature_collections.dart';
 import 'package:injectable/injectable.dart';
 import 'package:rev_sync/rev_sync.dart';
 import 'package:uuid/uuid.dart';
@@ -17,11 +18,19 @@ import '../local/bookmarks_local_data_source.dart';
 @LazySingleton(as: BookmarksRepository)
 class BookmarksRepositoryImpl
     implements BookmarksRepository, BookmarksImportBatchRepository {
-  BookmarksRepositoryImpl(this._local, this._sync, this._uuid);
+  BookmarksRepositoryImpl(
+    this._local,
+    this._sync,
+    this._uuid,
+    this._atomic,
+    this._collections,
+  );
 
   final BookmarksLocalDataSource _local;
   final BookmarksSyncController _sync;
   final Uuid _uuid;
+  final AtomicWriteCoordinator _atomic;
+  final CollectionsMembershipService _collections;
   var _importBatchDepth = 0;
   var _importBatchDirty = false;
 
@@ -35,8 +44,16 @@ class BookmarksRepositoryImpl
 
   @override
   Future<Result<List<Bookmark>>> listLocal() async {
-    final rows = await _local.listVisible();
-    return Ok(rows.map((e) => e.toDomain()).toList(growable: false));
+    return _atomic.run(() async {
+      final rows = await _local.listVisible();
+      final repair = await _collections.repairDanglingBookmarks(
+        rows.map((row) => row.uuid).toSet(),
+      );
+      if (repair case Err(:final failure)) {
+        return Err(failure);
+      }
+      return Ok(rows.map((e) => e.toDomain()).toList(growable: false));
+    });
   }
 
   @override
@@ -50,61 +67,64 @@ class BookmarksRepositoryImpl
 
   @override
   Future<Result<Bookmark>> create(BookmarkInput input) async {
-    final normalized = _normalize(input);
-    final now = clock.now().toUtc();
-    final entity = BookmarkEntity(
-      uuid: _uuid.v4(),
-      title: normalized.title,
-      url: normalized.url,
-      description: normalized.description,
-      tags: List.of(normalized.tags),
-      imageUrls: List.of(normalized.imageUrls),
-      videoUrl: normalized.videoUrl,
-      createdAt: now,
-      updatedAt: now,
-      syncStateCode: SyncState.pendingCreate.code,
-    );
-    await _local.putNew(entity);
-    _requestSync();
-    return Ok(entity.toDomain());
+    return _atomic.run(() async {
+      final normalized = _normalize(input);
+      final now = clock.now().toUtc();
+      final entity = BookmarkEntity(
+        uuid: _uuid.v4(),
+        title: normalized.title,
+        url: normalized.url,
+        description: normalized.description,
+        tags: List.of(normalized.tags),
+        imageUrls: List.of(normalized.imageUrls),
+        videoUrl: normalized.videoUrl,
+        createdAt: now,
+        updatedAt: now,
+        syncStateCode: SyncState.pendingCreate.code,
+      );
+      await _local.putNew(entity);
+      _requestSync();
+      return Ok(entity.toDomain());
+    });
   }
 
   @override
   Future<Result<Bookmark>> update(String id, BookmarkInput input) async {
-    final existing = await _local.getByUuid(id);
-    if (existing == null || existing.syncState == SyncState.pendingDelete) {
-      return const Err(NotFoundFailure('Bookmark not found.'));
-    }
-    final normalized = _normalize(input);
-    existing.applyInput(normalized, now: clock.now().toUtc());
-    // pendingCreate stays pendingCreate (still needs the initial POST). Every
-    // other state — synced, an existing pendingUpdate, or a conflicted/failed
-    // row the user is re-editing — becomes a pendingUpdate to (re)push.
-    if (existing.syncState != SyncState.pendingCreate) {
-      existing.syncState = SyncState.pendingUpdate;
-    }
-    await _local.put(existing);
-    _requestSync();
-    return Ok(existing.toDomain());
+    return _atomic.run(() async {
+      final existing = await _local.getByUuid(id);
+      if (existing == null || existing.syncState == SyncState.pendingDelete) {
+        return const Err(NotFoundFailure('Bookmark not found.'));
+      }
+      final normalized = _normalize(input);
+      existing.applyInput(normalized, now: clock.now().toUtc());
+      if (existing.syncState != SyncState.pendingCreate) {
+        existing.syncState = SyncState.pendingUpdate;
+      }
+      await _local.put(existing);
+      _requestSync();
+      return Ok(existing.toDomain());
+    });
   }
 
   @override
   Future<Result<void>> delete(String id) async {
-    final existing = await _local.getByUuid(id);
-    if (existing == null || existing.syncState == SyncState.pendingDelete) {
-      return const Err(NotFoundFailure('Bookmark not found.'));
-    }
-    // A pendingCreate that's never been synced can be dropped outright —
-    // the server has never seen it, so there's nothing to tell it.
-    if (existing.syncState == SyncState.pendingCreate) {
-      await _local.hardDelete(existing);
+    return _atomic.run(() async {
+      final existing = await _local.getByUuid(id);
+      if (existing == null || existing.syncState == SyncState.pendingDelete) {
+        return const Err(NotFoundFailure('Bookmark not found.'));
+      }
+      final cleanup = await _collections.removeBookmarkEverywhere(id);
+      if (cleanup case Err(:final failure)) return Err(failure);
+      if (existing.syncState == SyncState.pendingCreate) {
+        await _local.hardDelete(existing);
+        return const Ok(null);
+      }
+      existing.syncState = SyncState.pendingDelete;
+      existing.updatedAt = clock.now().toUtc();
+      await _local.put(existing);
+      _requestSync();
       return const Ok(null);
-    }
-    existing.syncState = SyncState.pendingDelete;
-    existing.updatedAt = clock.now().toUtc();
-    await _local.put(existing);
-    _requestSync();
-    return const Ok(null);
+    });
   }
 
   @override
@@ -126,6 +146,10 @@ class BookmarksRepositoryImpl
   }
 
   void _requestSync() {
+    if (_atomic.isActive) {
+      _atomic.afterCommit(_requestSync);
+      return;
+    }
     if (_importBatchDepth > 0) {
       _importBatchDirty = true;
       return;

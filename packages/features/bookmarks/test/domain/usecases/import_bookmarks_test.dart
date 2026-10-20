@@ -7,6 +7,8 @@ import 'package:feature_bookmarks/src/domain/usecases/import_bookmarks.dart';
 import 'package:feature_collections/feature_collections.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../atomic.dart';
+
 class FakeBookmarksRepository implements BookmarksRepository {
   final Map<String, Bookmark> items = {};
   int idCounter = 1;
@@ -93,6 +95,11 @@ class FakeCollectionsMembershipService implements CollectionsMembershipService {
   void endImportBatch({required bool successful}) {}
 
   @override
+  Future<Result<void>> repairDanglingBookmarks(
+    Set<String> validBookmarkIds,
+  ) async => const Ok(null);
+
+  @override
   Future<Result<List<Collection>>> listCollections() async =>
       Ok(items.values.toList());
 
@@ -175,6 +182,26 @@ class FakeCollectionsMembershipService implements CollectionsMembershipService {
     items.remove(collectionId);
     return const Ok(null);
   }
+
+  @override
+  Future<Result<void>> removeBookmarkEverywhere(String bookmarkId) async {
+    for (final entry in items.entries.toList()) {
+      final collection = entry.value;
+      if (!collection.bookmarkIds.contains(bookmarkId)) continue;
+      items[entry.key] = Collection(
+        id: collection.id,
+        name: collection.name,
+        icon: collection.icon,
+        color: collection.color,
+        bookmarkIds: collection.bookmarkIds
+            .where((id) => id != bookmarkId)
+            .toList(),
+        createdAt: collection.createdAt,
+        updatedAt: collection.updatedAt,
+      );
+    }
+    return const Ok(null);
+  }
 }
 
 void main() {
@@ -186,7 +213,31 @@ void main() {
   setUp(() {
     bookmarksRepo = FakeBookmarksRepository();
     collectionsService = FakeCollectionsMembershipService();
-    delegate = BookmarksImportDelegate(bookmarksRepo, collectionsService);
+    final atomic = TestAtomicWriteCoordinator(
+      takeSnapshot: () => (
+        bookmarks: Map<String, Bookmark>.of(bookmarksRepo.items),
+        collections: Map<String, Collection>.of(collectionsService.items),
+      ),
+      restoreSnapshot: (snapshot) {
+        final saved =
+            snapshot!
+                as ({
+                  Map<String, Bookmark> bookmarks,
+                  Map<String, Collection> collections,
+                });
+        bookmarksRepo.items
+          ..clear()
+          ..addAll(saved.bookmarks);
+        collectionsService.items
+          ..clear()
+          ..addAll(saved.collections);
+      },
+    );
+    delegate = BookmarksImportDelegate(
+      bookmarksRepo,
+      atomic,
+      collectionsService,
+    );
     useCase = ImportBookmarksUseCase(delegate);
   });
 
@@ -316,38 +367,41 @@ DuckDuckGo,https://duckduckgo.com,Privacy search
       expect(google.title, equals('Google')); // unchanged
     });
 
-    test('normalizes only URL scheme and host for duplicate matching', () async {
-      await bookmarksRepo.create(
-        const BookmarkInput(
-          title: 'Existing',
-          url: 'https://Example.COM/CaseSensitive',
-          description: '',
-          tags: [],
-        ),
-      );
+    test(
+      'normalizes only URL scheme and host for duplicate matching',
+      () async {
+        await bookmarksRepo.create(
+          const BookmarkInput(
+            title: 'Existing',
+            url: 'https://Example.COM/CaseSensitive',
+            description: '',
+            tags: [],
+          ),
+        );
 
-      const csv = '''
+        const csv = '''
 title,url
 Same resource,HTTPS://EXAMPLE.com/CaseSensitive
 Different path,https://example.com/casesensitive
 ''';
-      final result = await useCase(
-        ImportBookmarksParams(
-          bytes: utf8.encode(csv),
-          format: 'csv',
-          duplicatePolicy: DuplicatePolicy.skip,
-        ),
-      );
+        final result = await useCase(
+          ImportBookmarksParams(
+            bytes: utf8.encode(csv),
+            format: 'csv',
+            duplicatePolicy: DuplicatePolicy.skip,
+          ),
+        );
 
-      final report = (result as Ok<ImportResultReport>).value;
-      expect(report.duplicateCount, 1);
-      expect(report.importedCount, 1);
-      expect(bookmarksRepo.items, hasLength(2));
-      expect(
-        bookmarksRepo.items.values.map((bookmark) => bookmark.url),
-        contains('https://example.com/casesensitive'),
-      );
-    });
+        final report = (result as Ok<ImportResultReport>).value;
+        expect(report.duplicateCount, 1);
+        expect(report.importedCount, 1);
+        expect(bookmarksRepo.items, hasLength(2));
+        expect(
+          bookmarksRepo.items.values.map((bookmark) => bookmark.url),
+          contains('https://example.com/casesensitive'),
+        );
+      },
+    );
 
     test(
       'updates bookmark metadata and merges tags on duplicatePolicy update',

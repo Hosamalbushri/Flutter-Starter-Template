@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:isolate';
 
 import 'package:csv/csv.dart';
 
@@ -17,6 +18,8 @@ class CsvImportAdapter implements ImportAdapter {
     this.options = const CsvImportOptions(),
     this.processor = const TableImportProcessor(),
   });
+
+  static const int isolateThresholdBytes = 64 * 1024;
 
   /// Options controlling delimiter detection and parsing behavior.
   final CsvImportOptions options;
@@ -38,6 +41,15 @@ class CsvImportAdapter implements ImportAdapter {
     cancellationToken?.throwIfCancelled();
     _validateDefaultFileSize(bytes.length);
 
+    if (bytes.length >= isolateThresholdBytes) {
+      final headers = await Isolate.run(() => _inspectHeadersSync(bytes));
+      cancellationToken?.throwIfCancelled();
+      return headers;
+    }
+    return _inspectHeadersSync(bytes);
+  }
+
+  List<String> _inspectHeadersSync(List<int> bytes) {
     final text = _decodeUtf8(bytes);
     final rows = _parseCsv(text);
 
@@ -74,6 +86,31 @@ class CsvImportAdapter implements ImportAdapter {
       ),
     );
 
+    final canMoveWholePlan = definition.targetDefinition.columns.every(
+      (column) => column.validator == null,
+    );
+    if (bytes.length >= isolateThresholdBytes && canMoveWholePlan) {
+      final plan = await Isolate.run(
+        () => _preparePlanSync(bytes, definition),
+      );
+      cancellationToken?.throwIfCancelled();
+      return plan;
+    }
+
+    return _preparePlanSync(
+      bytes,
+      definition,
+      cancellationToken: cancellationToken,
+      onProgress: onProgress,
+    );
+  }
+
+  ImportPlan _preparePlanSync(
+    List<int> bytes,
+    ImportDefinition definition, {
+    CancellationToken? cancellationToken,
+    DocumentProgressCallback? onProgress,
+  }) {
     final text = _decodeUtf8(bytes);
     cancellationToken?.throwIfCancelled();
 
@@ -101,6 +138,7 @@ class CsvImportAdapter implements ImportAdapter {
     final dataRows = rows.length > skipRows
         ? rows.sublist(skipRows)
         : <List<dynamic>>[];
+    _validateRowCount(dataRows.length, definition.maxRows);
 
     final rawRowMaps = <Map<String, Object?>>[];
     for (var i = 0; i < dataRows.length; i++) {
@@ -135,6 +173,14 @@ class CsvImportAdapter implements ImportAdapter {
       throw DocumentValidationFailure(
         'Document is too large ($byteLength bytes); maximum is '
         '${ImportDefinition.defaultMaxFileBytes} bytes.',
+      );
+    }
+  }
+
+  void _validateRowCount(int rowCount, int? limit) {
+    if (limit != null && rowCount > limit) {
+      throw DocumentValidationFailure(
+        'Document contains $rowCount rows; maximum is $limit rows.',
       );
     }
   }

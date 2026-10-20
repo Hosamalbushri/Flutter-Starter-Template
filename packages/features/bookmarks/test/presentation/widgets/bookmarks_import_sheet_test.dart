@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:localization/localization.dart';
 
+import '../../atomic.dart';
+
 class FakeBookmarksRepo implements BookmarksRepository {
   final Map<String, Bookmark> items = {};
   int idCounter = 1;
@@ -79,7 +81,10 @@ void main() {
 
   setUp(() {
     repository = FakeBookmarksRepo();
-    delegate = BookmarksImportDelegate(repository);
+    delegate = BookmarksImportDelegate(
+      repository,
+      TestAtomicWriteCoordinator(),
+    );
     useCase = ImportBookmarksUseCase(delegate);
 
     getIt.registerLazySingleton<BookmarksImportDelegate>(() => delegate);

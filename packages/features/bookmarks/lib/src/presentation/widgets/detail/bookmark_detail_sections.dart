@@ -12,7 +12,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../domain/entities/bookmark.dart';
 import '../../bloc/bookmark_detail/bookmark_detail_bloc.dart';
 import '../app_video_player.dart';
-import 'bookmark_detail_colors.dart';
 
 /// "Source" card: shows the bookmark URL and a button to open it.
 class SourceSection extends StatelessWidget {
@@ -36,7 +35,7 @@ class SourceSection extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: context.textTheme.bodySmall?.copyWith(
-              color: BookmarkDetailColors.mutedText(context),
+              color: context.semanticColors.mutedForeground,
               letterSpacing: 0,
             ),
           ),
@@ -76,10 +75,10 @@ class TagsSection extends StatelessWidget {
               for (final tag in tags)
                 DecoratedBox(
                   decoration: BoxDecoration(
-                    color: BookmarkDetailColors.surfaceLow(context),
+                    color: context.colorScheme.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(AppRadius.xl),
                     border: Border.all(
-                      color: BookmarkDetailColors.surfaceHigh(context),
+                      color: context.colorScheme.outlineVariant,
                     ),
                   ),
                   child: Padding(
@@ -90,7 +89,7 @@ class TagsSection extends StatelessWidget {
                     child: Text(
                       tag,
                       style: context.textTheme.labelMedium?.copyWith(
-                        color: BookmarkDetailColors.secondary(context),
+                        color: context.colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0,
                       ),
@@ -113,7 +112,8 @@ class DetailsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat.yMMMd();
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final dateFormat = DateFormat.yMMMd(locale);
     final rows = <DetailRow>[
       DetailRow(
         label: context.l10n.bookmarkDateCreatedLabel,
@@ -147,7 +147,7 @@ class DetailsSection extends StatelessWidget {
                     ? null
                     : Border(
                         bottom: BorderSide(
-                          color: BookmarkDetailColors.surfaceHigh(context),
+                          color: context.colorScheme.outlineVariant,
                         ),
                       ),
               ),
@@ -158,7 +158,7 @@ class DetailsSection extends StatelessWidget {
                     child: Text(
                       rows[i].label,
                       style: context.textTheme.bodySmall?.copyWith(
-                        color: BookmarkDetailColors.mutedText(context),
+                        color: context.semanticColors.mutedForeground,
                         letterSpacing: 0,
                       ),
                     ),
@@ -171,7 +171,7 @@ class DetailsSection extends StatelessWidget {
                       child: FaIcon(
                         rows[i].valueIcon,
                         size: AppIconSize.xs,
-                        color: BookmarkDetailColors.mutedText(context),
+                        color: context.semanticColors.mutedForeground,
                       ),
                     ),
                   if (rows[i].value.isNotEmpty)
@@ -181,7 +181,7 @@ class DetailsSection extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: context.textTheme.labelMedium?.copyWith(
-                          color: BookmarkDetailColors.text(context),
+                          color: context.colorScheme.onSurface,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0,
                         ),
@@ -262,16 +262,8 @@ class OpenInBrowserBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: BookmarkDetailColors.background(
-          context,
-        ).withValues(alpha: 0.94),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x080A192F),
-            blurRadius: 30,
-            offset: Offset(0, -10),
-          ),
-        ],
+        color: context.colorScheme.surface.withValues(alpha: 0.94),
+        boxShadow: AppElevation.cardShadow,
       ),
       child: SafeArea(
         top: false,
@@ -305,15 +297,9 @@ class DetailCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: BookmarkDetailColors.surface(context),
+        color: context.colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D0A192F),
-            blurRadius: 20,
-            offset: Offset(0, 4),
-          ),
-        ],
+        boxShadow: AppElevation.cardShadow,
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
@@ -337,7 +323,7 @@ class SectionHeader extends StatelessWidget {
         FaIcon(
           icon,
           size: AppIconSize.sm,
-          color: BookmarkDetailColors.primary(context),
+          color: context.colorScheme.primary,
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
@@ -346,7 +332,7 @@ class SectionHeader extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: context.textTheme.labelLarge?.copyWith(
-              color: BookmarkDetailColors.text(context),
+              color: context.colorScheme.onSurface,
               fontWeight: FontWeight.w700,
               letterSpacing: 0,
             ),
@@ -372,9 +358,9 @@ class SubtleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = BookmarkDetailColors.primary(context);
+    final primary = context.colorScheme.primary;
     return Material(
-      color: BookmarkDetailColors.surfaceLow(context),
+      color: context.colorScheme.surfaceContainerLow,
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -400,7 +386,7 @@ class SubtleButton extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              FaIcon(icon, size: 14, color: primary),
+              FaIcon(icon, size: AppIconSize.xs, color: primary),
             ],
           ),
         ),
@@ -489,4 +475,3 @@ class _VideoSectionState extends State<VideoSection> {
     );
   }
 }
-

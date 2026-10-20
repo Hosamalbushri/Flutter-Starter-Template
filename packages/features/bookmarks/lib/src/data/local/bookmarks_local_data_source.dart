@@ -1,4 +1,6 @@
+import 'package:architecture/architecture.dart';
 import 'package:database/database.dart';
+import 'package:feature_collections/feature_collections.dart';
 import 'package:injectable/injectable.dart' hide Order;
 import 'package:rev_sync/rev_sync.dart';
 
@@ -23,10 +25,15 @@ abstract interface class BookmarksLocalDataSource
 
 @LazySingleton(as: BookmarksLocalDataSource)
 class ObjectBoxBookmarksDataSource implements BookmarksLocalDataSource {
-  ObjectBoxBookmarksDataSource(Store store)
+  ObjectBoxBookmarksDataSource(Store store, this._atomic, this._collections)
     : _box = store.box<BookmarkEntity>();
 
   final Box<BookmarkEntity> _box;
+  final AtomicWriteCoordinator _atomic;
+  final CollectionsMembershipService _collections;
+  final Map<String, BookmarkEntity> _stagedPuts = {};
+  final Set<String> _stagedDeletes = {};
+  bool _cleanupRegistered = false;
 
   @override
   Future<List<BookmarkEntity>> listVisible() async {
@@ -37,7 +44,7 @@ class ObjectBoxBookmarksDataSource implements BookmarksLocalDataSource {
         .order(BookmarkEntity_.createdAt, flags: Order.descending)
         .build();
     try {
-      return query.find();
+      return _mergeStaged(query.find(), visibleOnly: true);
     } finally {
       query.close();
     }
@@ -50,7 +57,7 @@ class ObjectBoxBookmarksDataSource implements BookmarksLocalDataSource {
         .order(BookmarkEntity_.createdAt, flags: Order.descending)
         .build();
     try {
-      return query.find();
+      return _mergeStaged(query.find(), visibleOnly: false);
     } finally {
       query.close();
     }
@@ -60,6 +67,11 @@ class ObjectBoxBookmarksDataSource implements BookmarksLocalDataSource {
   Future<BookmarkEntity?> getByUuid(String uuid) async {
     final query = _box.query(BookmarkEntity_.uuid.equals(uuid)).build();
     try {
+      if (_atomic.isActive) {
+        if (_stagedDeletes.contains(uuid)) return null;
+        final staged = _stagedPuts[uuid];
+        if (staged != null) return staged;
+      }
       return query.findFirst();
     } finally {
       query.close();
@@ -89,17 +101,77 @@ class ObjectBoxBookmarksDataSource implements BookmarksLocalDataSource {
 
   @override
   Future<BookmarkEntity> putNew(BookmarkEntity entity) async {
-    _box.put(entity);
+    if (!_atomic.isActive) {
+      return _atomic.run(() => putNew(entity));
+    }
+    _stagePut(entity);
     return entity;
   }
 
   @override
   Future<void> put(BookmarkEntity entity) async {
-    _box.put(entity);
+    if (!_atomic.isActive) {
+      await _atomic.run(() => put(entity));
+      return;
+    }
+    _stagePut(entity);
   }
 
   @override
   Future<void> hardDelete(BookmarkEntity entity) async {
-    _box.remove(entity.id);
+    await _atomic.run(() async {
+      final cleanup = await _collections.removeBookmarkEverywhere(entity.uuid);
+      if (cleanup case Err(:final failure)) {
+        throw StateError(
+          'Could not remove bookmark collection references: ${failure.message}',
+        );
+      }
+      _prepareStaging();
+      _stagedPuts.remove(entity.uuid);
+      _stagedDeletes.add(entity.uuid);
+      _atomic.stage(
+        sync: () => _box.remove(entity.id),
+        async: () async => _box.remove(entity.id),
+      );
+    });
+  }
+
+  void _stagePut(BookmarkEntity entity) {
+    _prepareStaging();
+    _stagedDeletes.remove(entity.uuid);
+    _stagedPuts[entity.uuid] = entity;
+    _atomic.stage(
+      sync: () => _box.put(entity),
+      async: () async => _box.put(entity),
+    );
+  }
+
+  void _prepareStaging() {
+    if (_cleanupRegistered) return;
+    _cleanupRegistered = true;
+    _atomic.afterCompletion(() {
+      _stagedPuts.clear();
+      _stagedDeletes.clear();
+      _cleanupRegistered = false;
+    });
+  }
+
+  List<BookmarkEntity> _mergeStaged(
+    List<BookmarkEntity> persisted, {
+    required bool visibleOnly,
+  }) {
+    if (!_atomic.isActive) return persisted;
+    final byUuid = <String, BookmarkEntity>{
+      for (final entity in persisted) entity.uuid: entity,
+      ..._stagedPuts,
+    }..removeWhere((uuid, _) => _stagedDeletes.contains(uuid));
+    final result = byUuid.values
+        .where(
+          (entity) =>
+              !visibleOnly || entity.syncState != SyncState.pendingDelete,
+        )
+        .toList();
+    result.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return result;
   }
 }

@@ -1933,6 +1933,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get documentImportCloseButton;
+
+  /// No description provided for @routeNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Page Not Found'**
+  String get routeNotFoundTitle;
+
+  /// No description provided for @routeNotFoundMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No page matches {location}.'**
+  String routeNotFoundMessage(String location);
+
+  /// No description provided for @routeNotFoundHomeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Home'**
+  String get routeNotFoundHomeAction;
+
+  /// No description provided for @exitAppTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit app?'**
+  String get exitAppTitle;
+
+  /// No description provided for @exitAppMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Press Exit to close the app.'**
+  String get exitAppMessage;
+
+  /// No description provided for @exitAppConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get exitAppConfirm;
+
+  /// No description provided for @documentImportDemoSales.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales (Demo)'**
+  String get documentImportDemoSales;
+
+  /// No description provided for @documentProgressReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading document…'**
+  String get documentProgressReading;
+
+  /// No description provided for @documentProgressParsing.
+  ///
+  /// In en, this message translates to:
+  /// **'Parsing document…'**
+  String get documentProgressParsing;
+
+  /// No description provided for @documentProgressValidating.
+  ///
+  /// In en, this message translates to:
+  /// **'Validating {current} of {total}…'**
+  String documentProgressValidating(int current, int total);
+
+  /// No description provided for @documentProgressCommitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving imported records…'**
+  String get documentProgressCommitting;
+
+  /// No description provided for @documentReportPdfFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'The PDF could not be generated.'**
+  String get documentReportPdfFailure;
+
+  /// No description provided for @documentThermalSuccessBytes.
+  ///
+  /// In en, this message translates to:
+  /// **'Document sent to the thermal printer ({bytes} bytes)'**
+  String documentThermalSuccessBytes(int bytes);
+
+  /// No description provided for @documentThermalFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'The document could not be sent to the thermal printer.'**
+  String get documentThermalFailure;
+
+  /// No description provided for @documentFileReadFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected file could not be read.'**
+  String get documentFileReadFailure;
+
+  /// No description provided for @documentImportValidationFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'The document is damaged, unsupported, or does not match the selected dataset.'**
+  String get documentImportValidationFailure;
+
+  /// No description provided for @documentImportCommitFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'The validated rows could not be saved. No partial import was kept.'**
+  String get documentImportCommitFailure;
+
+  /// No description provided for @documentExportFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'The document could not be exported.'**
+  String get documentExportFailure;
+
+  /// No description provided for @documentSaveFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'The exported file could not be saved.'**
+  String get documentSaveFailure;
 }
 
 class _AppLocalizationsDelegate

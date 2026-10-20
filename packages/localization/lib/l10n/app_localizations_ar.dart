@@ -940,22 +940,38 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String documentImportValidRows(int count) {
-    return 'الصفوف الصالحة: $count';
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'الصفوف الصالحة: $countString';
   }
 
   @override
   String documentImportInvalidRows(int count) {
-    return 'الصفوف غير الصالحة: $count';
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'الصفوف غير الصالحة: $countString';
   }
 
   @override
   String documentImportSuccessMessage(int count) {
-    return 'تم استيراد $count سجل بنجاح';
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'تم استيراد $countString سجل بنجاح';
   }
 
   @override
   String documentImportErrorMessage(int count) {
-    return 'فشل التحقق من الاستيراد بـ $count أخطاء';
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'فشل التحقق من الاستيراد بـ $countString أخطاء';
   }
 
   @override
@@ -976,7 +992,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String documentExportSuccess(int bytes) {
-    return 'اكتمل التصدير ($bytes بايت)';
+    final intl.NumberFormat bytesNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String bytesString = bytesNumberFormat.format(bytes);
+
+    return 'اكتمل التصدير ($bytesString بايت)';
   }
 
   @override
@@ -1036,22 +1056,38 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String documentImportCreatedCount(int count) {
-    return 'تم الإنشاء: $count';
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'تم الإنشاء: $countString';
   }
 
   @override
   String documentImportUpdatedCount(int count) {
-    return 'تم التحديث: $count';
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'تم التحديث: $countString';
   }
 
   @override
   String documentImportSkippedCount(int count) {
-    return 'تم التخطي: $count';
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'تم التخطي: $countString';
   }
 
   @override
   String documentImportFailedCount(int count) {
-    return 'فشل: $count';
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'فشل: $countString';
   }
 
   @override
@@ -1059,4 +1095,81 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get documentImportCloseButton => 'إغلاق';
+
+  @override
+  String get routeNotFoundTitle => 'الصفحة غير موجودة';
+
+  @override
+  String routeNotFoundMessage(String location) {
+    return 'لا توجد صفحة تطابق $location.';
+  }
+
+  @override
+  String get routeNotFoundHomeAction => 'الانتقال إلى الرئيسية';
+
+  @override
+  String get exitAppTitle => 'هل تريد الخروج؟';
+
+  @override
+  String get exitAppMessage => 'اضغط خروج لإغلاق التطبيق.';
+
+  @override
+  String get exitAppConfirm => 'خروج';
+
+  @override
+  String get documentImportDemoSales => 'المبيعات (تجريبي)';
+
+  @override
+  String get documentProgressReading => 'جارٍ قراءة المستند…';
+
+  @override
+  String get documentProgressParsing => 'جارٍ تحليل المستند…';
+
+  @override
+  String documentProgressValidating(int current, int total) {
+    final intl.NumberFormat currentNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String currentString = currentNumberFormat.format(current);
+    final intl.NumberFormat totalNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String totalString = totalNumberFormat.format(total);
+
+    return 'جارٍ التحقق من $currentString من $totalString…';
+  }
+
+  @override
+  String get documentProgressCommitting => 'جارٍ حفظ السجلات المستوردة…';
+
+  @override
+  String get documentReportPdfFailure => 'تعذر إنشاء ملف PDF.';
+
+  @override
+  String documentThermalSuccessBytes(int bytes) {
+    final intl.NumberFormat bytesNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String bytesString = bytesNumberFormat.format(bytes);
+
+    return 'أُرسل المستند إلى الطابعة الحرارية ($bytesString بايت)';
+  }
+
+  @override
+  String get documentThermalFailure =>
+      'تعذر إرسال المستند إلى الطابعة الحرارية.';
+
+  @override
+  String get documentFileReadFailure => 'تعذرت قراءة الملف المحدد.';
+
+  @override
+  String get documentImportValidationFailure =>
+      'الملف تالف أو غير مدعوم أو لا يطابق مجموعة البيانات المحددة.';
+
+  @override
+  String get documentImportCommitFailure =>
+      'تعذر حفظ الصفوف المتحقق منها، ولم يُحتفظ باستيراد جزئي.';
+
+  @override
+  String get documentExportFailure => 'تعذر تصدير المستند.';
+
+  @override
+  String get documentSaveFailure => 'تعذر حفظ الملف المُصدّر.';
 }

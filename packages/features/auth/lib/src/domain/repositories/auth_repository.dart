@@ -19,6 +19,10 @@ abstract interface class AuthRepository {
 
   Future<Result<void>> signOut();
 
+  /// Clears sensitive local session state after refresh-token rejection.
+  /// Unlike [signOut], this never calls the backend logout endpoint.
+  Future<Result<void>> expireSession();
+
   /// Permanently deletes the current account on the server and clears the
   /// local session. Unlike [signOut], the local session is only cleared when
   /// the server confirms the deletion, so a failure leaves the user signed in.

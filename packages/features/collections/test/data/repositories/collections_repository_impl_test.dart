@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rev_sync/rev_sync.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../atomic.dart';
 import '../../support.dart';
 
 class MockCollectionsLocalDataSource extends Mock
@@ -58,7 +59,12 @@ void main() {
     mockSync = MockCollectionsSyncController();
     mockUuid = MockUuid();
     when(() => mockSync.sync()).thenAnswer((_) async {});
-    repository = CollectionsRepositoryImpl(mockLocal, mockSync, mockUuid);
+    repository = CollectionsRepositoryImpl(
+      mockLocal,
+      mockSync,
+      mockUuid,
+      TestAtomicWriteCoordinator(),
+    );
   });
 
   group('list', () {

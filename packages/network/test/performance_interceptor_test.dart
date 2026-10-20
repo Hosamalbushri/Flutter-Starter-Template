@@ -204,7 +204,11 @@ void main() {
           final env = _TestEnvConfig(flavor);
           final module = _TestNetworkModule();
           final plainDio = module.providePlainDio(env);
-          final refresher = TokenRefresher(tokenStore, plainDio);
+          final refresher = TokenRefresher(
+            tokenStore,
+            plainDio,
+            SessionTerminationNotifier(),
+          );
 
           final dio = module.provideDio(
             tokenStore,
@@ -227,7 +231,11 @@ void main() {
         const env = _TestEnvConfig('dev');
         final module = _TestNetworkModule();
         final plainDio = module.providePlainDio(env);
-        final refresher = TokenRefresher(tokenStore, plainDio);
+        final refresher = TokenRefresher(
+          tokenStore,
+          plainDio,
+          SessionTerminationNotifier(),
+        );
 
         final dio = module.provideDio(
           tokenStore,
@@ -259,7 +267,11 @@ void main() {
           final env = _TestEnvConfig(flavor);
           final module = _TestNetworkModule();
           final plainDio = module.providePlainDio(env);
-          final refresher = TokenRefresher(tokenStore, plainDio);
+          final refresher = TokenRefresher(
+            tokenStore,
+            plainDio,
+            SessionTerminationNotifier(),
+          );
 
           final dio = module.provideDio(
             tokenStore,

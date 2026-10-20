@@ -901,22 +901,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String documentImportValidRows(int count) {
-    return 'Valid rows: $count';
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Valid rows: $countString';
   }
 
   @override
   String documentImportInvalidRows(int count) {
-    return 'Invalid rows: $count';
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Invalid rows: $countString';
   }
 
   @override
   String documentImportSuccessMessage(int count) {
-    return 'Successfully imported $count records';
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Successfully imported $countString records';
   }
 
   @override
   String documentImportErrorMessage(int count) {
-    return 'Import validation failed with $count errors';
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Import validation failed with $countString errors';
   }
 
   @override
@@ -937,7 +953,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String documentExportSuccess(int bytes) {
-    return 'Export completed ($bytes bytes)';
+    final intl.NumberFormat bytesNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String bytesString = bytesNumberFormat.format(bytes);
+
+    return 'Export completed ($bytesString bytes)';
   }
 
   @override
@@ -997,22 +1017,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String documentImportCreatedCount(int count) {
-    return 'Created: $count';
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Created: $countString';
   }
 
   @override
   String documentImportUpdatedCount(int count) {
-    return 'Updated: $count';
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Updated: $countString';
   }
 
   @override
   String documentImportSkippedCount(int count) {
-    return 'Skipped: $count';
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Skipped: $countString';
   }
 
   @override
   String documentImportFailedCount(int count) {
-    return 'Failed: $count';
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Failed: $countString';
   }
 
   @override
@@ -1020,4 +1056,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get documentImportCloseButton => 'Close';
+
+  @override
+  String get routeNotFoundTitle => 'Page Not Found';
+
+  @override
+  String routeNotFoundMessage(String location) {
+    return 'No page matches $location.';
+  }
+
+  @override
+  String get routeNotFoundHomeAction => 'Go to Home';
+
+  @override
+  String get exitAppTitle => 'Exit app?';
+
+  @override
+  String get exitAppMessage => 'Press Exit to close the app.';
+
+  @override
+  String get exitAppConfirm => 'Exit';
+
+  @override
+  String get documentImportDemoSales => 'Sales (Demo)';
+
+  @override
+  String get documentProgressReading => 'Reading document…';
+
+  @override
+  String get documentProgressParsing => 'Parsing document…';
+
+  @override
+  String documentProgressValidating(int current, int total) {
+    final intl.NumberFormat currentNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String currentString = currentNumberFormat.format(current);
+    final intl.NumberFormat totalNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String totalString = totalNumberFormat.format(total);
+
+    return 'Validating $currentString of $totalString…';
+  }
+
+  @override
+  String get documentProgressCommitting => 'Saving imported records…';
+
+  @override
+  String get documentReportPdfFailure => 'The PDF could not be generated.';
+
+  @override
+  String documentThermalSuccessBytes(int bytes) {
+    final intl.NumberFormat bytesNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String bytesString = bytesNumberFormat.format(bytes);
+
+    return 'Document sent to the thermal printer ($bytesString bytes)';
+  }
+
+  @override
+  String get documentThermalFailure =>
+      'The document could not be sent to the thermal printer.';
+
+  @override
+  String get documentFileReadFailure => 'The selected file could not be read.';
+
+  @override
+  String get documentImportValidationFailure =>
+      'The document is damaged, unsupported, or does not match the selected dataset.';
+
+  @override
+  String get documentImportCommitFailure =>
+      'The validated rows could not be saved. No partial import was kept.';
+
+  @override
+  String get documentExportFailure => 'The document could not be exported.';
+
+  @override
+  String get documentSaveFailure => 'The exported file could not be saved.';
 }

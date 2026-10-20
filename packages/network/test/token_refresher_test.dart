@@ -13,6 +13,7 @@ void main() {
   late _MockTokenStore tokens;
   late _MockDio dio;
   late TokenRefresher refresher;
+  late SessionTerminationNotifier sessionTermination;
 
   Response<Map<String, dynamic>> okResponse(Map<String, dynamic>? body) =>
       Response<Map<String, dynamic>>(
@@ -35,7 +36,8 @@ void main() {
   setUp(() {
     tokens = _MockTokenStore();
     dio = _MockDio();
-    refresher = TokenRefresher(tokens, dio);
+    sessionTermination = SessionTerminationNotifier();
+    refresher = TokenRefresher(tokens, dio, sessionTermination);
     when(() => tokens.clearTokens()).thenAnswer((_) async {});
     when(
       () => tokens.updateTokens(
@@ -109,7 +111,21 @@ void main() {
 
     expect(await refresher.refresh(), RefreshOutcome.invalidSession);
     verify(() => tokens.clearTokens()).called(1);
+    expect(sessionTermination.isTerminated, isTrue);
   });
+
+  test(
+    'emits one termination for repeated invalid-session notifications',
+    () async {
+      var notifications = 0;
+      sessionTermination.terminations.listen((_) => notifications++);
+      sessionTermination
+        ..notifyTerminated()
+        ..notifyTerminated();
+
+      expect(notifications, 1);
+    },
+  );
 
   test('clears tokens (invalidSession) on a null body', () async {
     when(() => tokens.refreshToken).thenReturn('old');

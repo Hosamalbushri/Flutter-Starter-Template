@@ -100,7 +100,7 @@ class ReportCenterView extends StatelessWidget {
                       ],
                     ),
 
-                    if (state.reportNoticeMessage != null) ...[
+                    if (state.reportNotice != null) ...[
                       const SizedBox(height: AppSpacing.md),
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.sm),
@@ -109,7 +109,7 @@ class ReportCenterView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(AppRadius.sm),
                         ),
                         child: Text(
-                          state.reportNoticeMessage!,
+                          _localizedNotice(context, state),
                           style: TextStyle(
                             color: context.colorScheme.onPrimaryContainer,
                             fontSize: 13,
@@ -141,3 +141,14 @@ class ReportCenterView extends StatelessWidget {
     );
   }
 }
+
+String _localizedNotice(
+  BuildContext context,
+  DocumentCenterState state,
+) => switch (state.reportNotice) {
+  DocumentCenterNotice.pdfFailure => context.l10n.documentReportPdfFailure,
+  DocumentCenterNotice.thermalSuccess =>
+    context.l10n.documentThermalSuccessBytes(state.reportNoticeBytes ?? 0),
+  DocumentCenterNotice.thermalFailure => context.l10n.documentThermalFailure,
+  null => '',
+};

@@ -305,5 +305,42 @@
   "documentImportSkippedCount": "تم التخطي: {count}",
   "documentImportFailedCount": "فشل: {count}",
   "documentImportSummaryTitle": "ملخص نتيجة الاستيراد",
-  "documentImportCloseButton": "إغلاق"
+  "documentImportCloseButton": "إغلاق",
+  "routeNotFoundTitle": "الصفحة غير موجودة",
+  "routeNotFoundMessage": "لا توجد صفحة تطابق {location}.",
+  "@routeNotFoundMessage": {
+    "placeholders": {
+      "location": {
+        "type": "String"
+      }
+    }
+  },
+  "routeNotFoundHomeAction": "الانتقال إلى الرئيسية",
+  "exitAppTitle": "هل تريد الخروج؟",
+  "exitAppMessage": "اضغط خروج لإغلاق التطبيق.",
+  "exitAppConfirm": "خروج",
+  "documentImportDemoSales": "المبيعات (تجريبي)",
+  "documentProgressReading": "جارٍ قراءة المستند…",
+  "documentProgressParsing": "جارٍ تحليل المستند…",
+  "documentProgressValidating": "جارٍ التحقق من {current} من {total}…",
+  "@documentProgressValidating": {
+    "placeholders": {
+      "current": {"type": "int", "format": "decimalPattern"},
+      "total": {"type": "int", "format": "decimalPattern"}
+    }
+  },
+  "documentProgressCommitting": "جارٍ حفظ السجلات المستوردة…",
+  "documentReportPdfFailure": "تعذر إنشاء ملف PDF.",
+  "documentThermalSuccessBytes": "أُرسل المستند إلى الطابعة الحرارية ({bytes} بايت)",
+  "@documentThermalSuccessBytes": {
+    "placeholders": {
+      "bytes": {"type": "int", "format": "decimalPattern"}
+    }
+  },
+  "documentThermalFailure": "تعذر إرسال المستند إلى الطابعة الحرارية.",
+  "documentFileReadFailure": "تعذرت قراءة الملف المحدد.",
+  "documentImportValidationFailure": "الملف تالف أو غير مدعوم أو لا يطابق مجموعة البيانات المحددة.",
+  "documentImportCommitFailure": "تعذر حفظ الصفوف المتحقق منها، ولم يُحتفظ باستيراد جزئي.",
+  "documentExportFailure": "تعذر تصدير المستند.",
+  "documentSaveFailure": "تعذر حفظ الملف المُصدّر."
 }

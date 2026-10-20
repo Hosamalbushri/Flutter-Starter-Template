@@ -284,6 +284,7 @@ class _ProfileAccordionSection extends StatelessWidget {
   }
 }
 
+// fst:auth:start
 /// Hairline separator between rows within an expanded section.
 class _SettingsDivider extends StatelessWidget {
   const _SettingsDivider();
@@ -299,9 +300,11 @@ class _SettingsDivider extends StatelessWidget {
     );
   }
 }
+// fst:auth:end
 
-class _ProfileSettingsTile extends StatelessWidget {
-  const _ProfileSettingsTile({
+class ProfileSettingsTile extends StatelessWidget {
+  const ProfileSettingsTile({
+    super.key,
     required this.icon,
     required this.title,
     this.subtitle,

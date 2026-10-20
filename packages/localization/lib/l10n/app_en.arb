@@ -461,7 +461,8 @@
   "@documentImportValidRows": {
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "int",
+        "format": "decimalPattern"
       }
     }
   },
@@ -469,7 +470,8 @@
   "@documentImportInvalidRows": {
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "int",
+        "format": "decimalPattern"
       }
     }
   },
@@ -477,7 +479,8 @@
   "@documentImportSuccessMessage": {
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "int",
+        "format": "decimalPattern"
       }
     }
   },
@@ -485,7 +488,8 @@
   "@documentImportErrorMessage": {
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "int",
+        "format": "decimalPattern"
       }
     }
   },
@@ -498,7 +502,8 @@
   "@documentExportSuccess": {
     "placeholders": {
       "bytes": {
-        "type": "int"
+        "type": "int",
+        "format": "decimalPattern"
       }
     }
   },
@@ -524,7 +529,8 @@
   "@documentImportCreatedCount": {
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "int",
+        "format": "decimalPattern"
       }
     }
   },
@@ -532,7 +538,8 @@
   "@documentImportUpdatedCount": {
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "int",
+        "format": "decimalPattern"
       }
     }
   },
@@ -540,7 +547,8 @@
   "@documentImportSkippedCount": {
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "int",
+        "format": "decimalPattern"
       }
     }
   },
@@ -548,10 +556,48 @@
   "@documentImportFailedCount": {
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "int",
+        "format": "decimalPattern"
       }
     }
   },
   "documentImportSummaryTitle": "Import Result Summary",
-  "documentImportCloseButton": "Close"
+  "documentImportCloseButton": "Close",
+  "routeNotFoundTitle": "Page Not Found",
+  "routeNotFoundMessage": "No page matches {location}.",
+  "@routeNotFoundMessage": {
+    "placeholders": {
+      "location": {
+        "type": "String"
+      }
+    }
+  },
+  "routeNotFoundHomeAction": "Go to Home",
+  "exitAppTitle": "Exit app?",
+  "exitAppMessage": "Press Exit to close the app.",
+  "exitAppConfirm": "Exit",
+  "documentImportDemoSales": "Sales (Demo)",
+  "documentProgressReading": "Reading document…",
+  "documentProgressParsing": "Parsing document…",
+  "documentProgressValidating": "Validating {current} of {total}…",
+  "@documentProgressValidating": {
+    "placeholders": {
+      "current": {"type": "int", "format": "decimalPattern"},
+      "total": {"type": "int", "format": "decimalPattern"}
+    }
+  },
+  "documentProgressCommitting": "Saving imported records…",
+  "documentReportPdfFailure": "The PDF could not be generated.",
+  "documentThermalSuccessBytes": "Document sent to the thermal printer ({bytes} bytes)",
+  "@documentThermalSuccessBytes": {
+    "placeholders": {
+      "bytes": {"type": "int", "format": "decimalPattern"}
+    }
+  },
+  "documentThermalFailure": "The document could not be sent to the thermal printer.",
+  "documentFileReadFailure": "The selected file could not be read.",
+  "documentImportValidationFailure": "The document is damaged, unsupported, or does not match the selected dataset.",
+  "documentImportCommitFailure": "The validated rows could not be saved. No partial import was kept.",
+  "documentExportFailure": "The document could not be exported.",
+  "documentSaveFailure": "The exported file could not be saved."
 }

@@ -13,6 +13,9 @@ import 'package:feature_notifications/feature_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+// fst:network:start
+import 'package:network/network.dart';
+// fst:network:end
 import 'package:shared_contracts/shared_contracts.dart';
 // fst:auth:start
 import 'package:shared_ui/shared_ui.dart';
@@ -78,7 +81,9 @@ class _AppState extends State<App> {
     // fst:auth:end
     _themeBloc = widget.themeBloc ?? getIt<ThemeBloc>();
     // fst:auth:start
-    _session = widget.session ?? AuthSession(_authBloc);
+    _session =
+        widget.session ??
+        AuthSession(_authBloc, getIt<SessionTerminationNotifier>());
     _ownsSession = widget.session == null;
     // fst:auth:end
     final features = widget.features ?? enabledFeatures;

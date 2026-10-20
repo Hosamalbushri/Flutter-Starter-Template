@@ -14,7 +14,6 @@ import '../bloc/bookmark_detail/bookmark_detail_bloc.dart';
 import '../bloc/bookmark_detail/bookmark_detail_state.dart';
 import '../bookmarks_routes.dart';
 import 'bookmark_failure_messages.dart';
-import 'detail/bookmark_detail_colors.dart';
 import 'detail/bookmark_detail_sections.dart';
 
 /// Provides a [BookmarkDetailBloc] for [id] and renders the detail embedded in
@@ -85,7 +84,7 @@ class BookmarkDetailView extends StatelessWidget {
       child: AppScaffold(
         title: context.l10n.bookmarkAppBarTitle,
         padding: EdgeInsets.zero,
-        backgroundColor: BookmarkDetailColors.background(context),
+        backgroundColor: context.colorScheme.surface,
         actions: [
           BlocBuilder<BookmarkDetailBloc, BookmarkDetailState>(
             builder: (context, state) {
@@ -223,7 +222,7 @@ class _DetailBody extends StatelessWidget {
               Text(
                 bookmark.title,
                 style: context.textTheme.headlineSmall?.copyWith(
-                  color: BookmarkDetailColors.text(context),
+                  color: context.colorScheme.onSurface,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0,
                 ),
@@ -233,7 +232,7 @@ class _DetailBody extends StatelessWidget {
                 Text(
                   bookmark.description,
                   style: context.textTheme.bodyLarge?.copyWith(
-                    color: BookmarkDetailColors.mutedText(context),
+                    color: context.semanticColors.mutedForeground,
                     letterSpacing: 0,
                   ),
                 ).animateFadeIn(delay: 100.ms),

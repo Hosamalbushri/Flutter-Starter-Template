@@ -7,4 +7,5 @@ export 'src/network_module.dart';
 export 'src/performance_interceptor.dart';
 export 'src/performance_tracker.dart';
 export 'src/retry_interceptor.dart';
+export 'src/session_termination_notifier.dart';
 export 'src/token_refresher.dart';

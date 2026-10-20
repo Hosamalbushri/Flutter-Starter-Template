@@ -11,6 +11,7 @@ void main() {
   late MockRegister mockRegister;
   late MockSignOut mockSignOut;
   late MockRestoreSession mockRestoreSession;
+  late MockExpireSession mockExpireSession;
   late MockAnalyticsService mockAnalytics;
   late AuthBloc bloc;
 
@@ -19,6 +20,7 @@ void main() {
     mockRegister = MockRegister();
     mockSignOut = MockSignOut();
     mockRestoreSession = MockRestoreSession();
+    mockExpireSession = MockExpireSession();
     mockAnalytics = MockAnalyticsService();
     stubAnalyticsService(mockAnalytics);
     bloc = AuthBloc(
@@ -26,6 +28,7 @@ void main() {
       register: mockRegister,
       signOut: mockSignOut,
       restoreSession: mockRestoreSession,
+      expireSession: mockExpireSession,
       analytics: mockAnalytics,
     );
   });
@@ -97,12 +100,16 @@ void main() {
 
     blocTest<AuthBloc, AuthState>(
       'clears session without invoking sign out use case',
-      build: () => bloc,
+      build: () {
+        when(() => mockExpireSession()).thenAnswer((_) async => const Ok(null));
+        return bloc;
+      },
       seed: () => const AuthState.authenticated(testUser),
       act: (bloc) => bloc.add(const AuthSessionCleared()),
       expect: () => [const AuthState.initial()],
       verify: (_) {
         verifyNever(() => mockSignOut());
+        verify(() => mockExpireSession()).called(1);
       },
     );
 

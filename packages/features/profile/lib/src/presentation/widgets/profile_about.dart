@@ -20,7 +20,7 @@ class _AppInfoTile extends StatelessWidget {
     return BlocBuilder<ProfileBloc, ProfileState>(
       builder: (context, state) {
         final info = state.packageInfo;
-        return _ProfileSettingsTile(
+        return ProfileSettingsTile(
           icon: FontAwesomeIcons.mobileScreenButton,
           title: info?.appName ?? '—',
           subtitle: info == null

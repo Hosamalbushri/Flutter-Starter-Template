@@ -10,7 +10,7 @@ class ImportDefinition {
     required this.targetDefinition,
     this.columnMappings = const {},
     this.skipHeaderRows = 1,
-    this.maxRows,
+    this.maxRows = defaultMaxRows,
     this.maxFileBytes = defaultMaxFileBytes,
     this.allowPartial = false,
     this.strictTypes = false,
@@ -25,6 +25,10 @@ class ImportDefinition {
   /// Conservative default that prevents adapters from decoding arbitrarily
   /// large in-memory inputs.
   static const int defaultMaxFileBytes = 10 * 1024 * 1024;
+
+  /// Default ceiling preventing a compact input from expanding into an
+  /// unbounded number of row maps and validation objects.
+  static const int defaultMaxRows = 100000;
 
   /// Target schema that rows will be mapped and validated against.
   final DocumentDefinition targetDefinition;

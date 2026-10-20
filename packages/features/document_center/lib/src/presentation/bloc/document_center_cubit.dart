@@ -94,8 +94,8 @@ class DocumentCenterCubit extends Cubit<DocumentCenterState> {
       final bytes = await file.readAsBytes();
 
       selectFileManually(fileName: file.name, bytes: bytes);
-    } on Exception catch (e) {
-      emit(state.copyWith(importErrorMessage: e.toString()));
+    } on Exception {
+      emit(state.copyWith(importFailure: DocumentCenterFailure.fileRead));
     }
   }
 
@@ -157,12 +157,22 @@ class DocumentCenterCubit extends Cubit<DocumentCenterState> {
         ),
       );
       _activeImportToken = null;
-    } on Exception catch (e) {
+    } on DocumentCancellationFailure {
       if (!identical(_activeImportToken, token)) return;
       emit(
         state.copyWith(
           isImporting: false,
-          importErrorMessage: e.toString(),
+          clearImportProgress: true,
+          clearImportError: true,
+        ),
+      );
+      _activeImportToken = null;
+    } on DocumentFailure {
+      if (!identical(_activeImportToken, token)) return;
+      emit(
+        state.copyWith(
+          isImporting: false,
+          importFailure: DocumentCenterFailure.importValidation,
           clearImportProgress: true,
         ),
       );
@@ -187,7 +197,6 @@ class DocumentCenterCubit extends Cubit<DocumentCenterState> {
           phase: DocumentPhase.committing,
           current: 0,
           total: plan.validCount,
-          message: 'Saving imported records...',
         ),
       ),
     );
@@ -226,13 +235,13 @@ class DocumentCenterCubit extends Cubit<DocumentCenterState> {
         ),
       );
       _activeImportToken = null;
-    } on Exception catch (e) {
+    } on Exception {
       await persistenceAdapter.rollbackTransaction();
       if (!identical(_activeImportToken, token)) return;
       emit(
         state.copyWith(
           isImporting: false,
-          importErrorMessage: e.toString(),
+          importFailure: DocumentCenterFailure.importCommit,
           clearImportProgress: true,
         ),
       );
@@ -303,11 +312,11 @@ class DocumentCenterCubit extends Cubit<DocumentCenterState> {
         ),
       );
       return Uint8List.fromList(bytes);
-    } on Exception catch (e) {
+    } on DocumentFailure {
       emit(
         state.copyWith(
           isExporting: false,
-          exportErrorMessage: e.toString(),
+          exportFailure: DocumentCenterFailure.export,
         ),
       );
       return null;
@@ -329,11 +338,11 @@ class DocumentCenterCubit extends Cubit<DocumentCenterState> {
       );
       emit(state.copyWith(isExporting: false, savedExportUri: uri));
       return uri;
-    } on Exception catch (e) {
+    } on Exception {
       emit(
         state.copyWith(
           isExporting: false,
-          exportErrorMessage: e.toString(),
+          exportFailure: DocumentCenterFailure.save,
         ),
       );
       return null;
@@ -363,11 +372,11 @@ class DocumentCenterCubit extends Cubit<DocumentCenterState> {
           generatedPdfBytes: Uint8List.fromList(bytes),
         ),
       );
-    } on Exception catch (e) {
+    } on Exception {
       emit(
         state.copyWith(
           isGeneratingReport: false,
-          reportNoticeMessage: 'Failed to generate PDF: $e',
+          reportNotice: DocumentCenterNotice.pdfFailure,
         ),
       );
     }
@@ -390,14 +399,14 @@ class DocumentCenterCubit extends Cubit<DocumentCenterState> {
 
       emit(
         state.copyWith(
-          reportNoticeMessage:
-              'Document sent to thermal printer (${bytes.length} bytes)',
+          reportNotice: DocumentCenterNotice.thermalSuccess,
+          reportNoticeBytes: bytes.length,
         ),
       );
-    } on Exception catch (e) {
+    } on Exception {
       emit(
         state.copyWith(
-          reportNoticeMessage: 'Thermal print error: $e',
+          reportNotice: DocumentCenterNotice.thermalFailure,
         ),
       );
     }

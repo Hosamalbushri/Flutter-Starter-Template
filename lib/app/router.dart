@@ -12,8 +12,9 @@ import 'package:feature_notifications/feature_notifications.dart';
 import 'package:feature_profile/feature_profile.dart';
 import 'package:feature_splash/feature_splash.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localization/localization.dart';
 import 'package:shared_contracts/shared_contracts.dart';
 
 import 'widgets/app_shell.dart';
@@ -235,6 +236,10 @@ const String debugUiShowcasePath = '/dev/ui-showcase';
     ],
     observers: observers,
     refreshListenable: session,
+    errorBuilder: (context, state) => _UnknownRouteScreen(
+      requestedLocation: state.uri.toString(),
+      homeLocation: homeLocation,
+    ),
     redirect: (context, state) => resolveSplashRedirect(
       status: session?.status,
       location: state.matchedLocation,
@@ -248,6 +253,32 @@ const String debugUiShowcasePath = '/dev/ui-showcase';
   );
 
   return (router: router, deepLink: deepLink);
+}
+
+class _UnknownRouteScreen extends StatelessWidget {
+  const _UnknownRouteScreen({
+    required this.requestedLocation,
+    required this.homeLocation,
+  });
+
+  final String requestedLocation;
+  final String homeLocation;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Scaffold(
+      key: const ValueKey('unknown-route-screen'),
+      body: SafeArea(
+        child: AppErrorView(
+          title: l10n.routeNotFoundTitle,
+          message: l10n.routeNotFoundMessage(requestedLocation),
+          retryLabel: l10n.routeNotFoundHomeAction,
+          onRetry: () => context.go(homeLocation),
+        ),
+      ),
+    );
+  }
 }
 
 /// Resolves the auth/splash redirect for a single navigation.

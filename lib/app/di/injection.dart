@@ -96,24 +96,32 @@ void configureFirebaseRuntimeBindings(GetIt sl) {
   if (sl.isRegistered<CrashReporter>()) {
     sl.unregister<CrashReporter>();
   }
+  // fst:network:start
   if (sl.isRegistered<PerformanceTracker>()) {
     sl.unregister<PerformanceTracker>();
   }
+  // fst:network:end
 
   sl
     ..registerLazySingleton<AnalyticsService>(NoOpAnalyticsService.new)
-    ..registerLazySingleton<CrashReporter>(NoOpCrashReporter.new)
-    ..registerLazySingleton<PerformanceTracker>(NoOpPerformanceTracker.new);
+    ..registerLazySingleton<CrashReporter>(NoOpCrashReporter.new);
+  // fst:network:start
+  sl.registerLazySingleton<PerformanceTracker>(NoOpPerformanceTracker.new);
+  // fst:network:end
 }
 
 void _configureDocumentEngine(GetIt sl) {
   final registry = DocumentFormatRegistry.standard();
+  // fst:feature:collections:start
   if (sl.isRegistered<CollectionsImportDelegate>()) {
     registry.registerImportDelegate(sl<CollectionsImportDelegate>());
   }
+  // fst:feature:collections:end
+  // fst:feature:bookmarks:start
   if (sl.isRegistered<BookmarksImportDelegate>()) {
     registry.registerImportDelegate(sl<BookmarksImportDelegate>());
   }
+  // fst:feature:bookmarks:end
   if (!sl.isRegistered<DocumentFormatRegistry>()) {
     sl.registerSingleton<DocumentFormatRegistry>(registry);
   }
