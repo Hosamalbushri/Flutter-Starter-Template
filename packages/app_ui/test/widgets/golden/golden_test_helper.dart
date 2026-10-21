@@ -30,11 +30,13 @@ class TolerantGoldenComparator extends LocalFileComparator {
 }
 
 /// Configures [goldenFileComparator] with [tolerance] if running with
-/// [LocalFileComparator].
-void setUpTolerantGoldenComparator(Uri testUri, {double tolerance = 0.04}) {
+/// [LocalFileComparator]. Preserves the resolved basedir regardless of whether
+/// tests are invoked from the repo root or from the packages/app_ui directory.
+void setUpTolerantGoldenComparator([double tolerance = 0.04]) {
   if (goldenFileComparator is LocalFileComparator) {
+    final current = goldenFileComparator as LocalFileComparator;
     goldenFileComparator = TolerantGoldenComparator(
-      testUri,
+      current.basedir.resolve('test.dart'),
       tolerance: tolerance,
     );
   }

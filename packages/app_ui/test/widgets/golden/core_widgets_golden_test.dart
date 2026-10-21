@@ -65,11 +65,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() async {
-    setUpTolerantGoldenComparator(
-      Uri.parse(
-        'packages/app_ui/test/widgets/golden/core_widgets_golden_test.dart',
-      ),
-    );
+    setUpTolerantGoldenComparator();
     final bytes = await loadGoldenFontBytes();
     await (FontLoader(
       'GoldenText',

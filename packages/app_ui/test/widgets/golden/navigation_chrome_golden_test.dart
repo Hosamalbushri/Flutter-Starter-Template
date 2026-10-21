@@ -20,11 +20,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() async {
-    setUpTolerantGoldenComparator(
-      Uri.parse(
-        'packages/app_ui/test/widgets/golden/navigation_chrome_golden_test.dart',
-      ),
-    );
+    setUpTolerantGoldenComparator();
     final bytes = await loadGoldenFontBytes();
     await (FontLoader(
       'GoldenText',
