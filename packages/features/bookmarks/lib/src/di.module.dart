@@ -24,10 +24,8 @@ import 'package:feature_bookmarks/src/domain/services/bookmark_stats_service.dar
     as _i808;
 import 'package:feature_bookmarks/src/domain/services/bookmark_summaries_service.dart'
     as _i976;
-// fst:document:engine:start
 import 'package:feature_bookmarks/src/domain/services/bookmarks_import_delegate.dart'
     as _i1031;
-// fst:document:engine:end
 import 'package:feature_bookmarks/src/domain/services/bookmarks_sync_controller.dart'
     as _i699;
 import 'package:feature_bookmarks/src/domain/usecases/create_bookmark.dart'
@@ -36,10 +34,8 @@ import 'package:feature_bookmarks/src/domain/usecases/delete_bookmark.dart'
     as _i135;
 import 'package:feature_bookmarks/src/domain/usecases/get_bookmark.dart'
     as _i118;
-// fst:document:engine:start
 import 'package:feature_bookmarks/src/domain/usecases/import_bookmarks.dart'
     as _i0;
-// fst:document:engine:end
 import 'package:feature_bookmarks/src/domain/usecases/list_bookmarks.dart'
     as _i416;
 import 'package:feature_bookmarks/src/domain/usecases/list_local_bookmarks.dart'
@@ -135,7 +131,6 @@ class FeatureBookmarksPackageModule extends _i526.MicroPackageModule {
     gh.lazySingleton<_i856.BookmarkSummariesReader>(
       () => _i976.BookmarkSummariesService(gh<_i416.ListBookmarksUseCase>()),
     );
-    // fst:document:engine:start
     gh.lazySingleton<_i1031.BookmarksImportDelegate>(
       () => _i1031.BookmarksImportDelegate(
         gh<_i263.BookmarksRepository>(),
@@ -146,7 +141,6 @@ class FeatureBookmarksPackageModule extends _i526.MicroPackageModule {
     gh.factory<_i0.ImportBookmarksUseCase>(
       () => _i0.ImportBookmarksUseCase(gh<_i1031.BookmarksImportDelegate>()),
     );
-    // fst:document:engine:end
     gh.factory<_i278.BookmarkFormBloc>(
       () => _i278.BookmarkFormBloc(
         gh<_i118.GetBookmarkUseCase>(),
