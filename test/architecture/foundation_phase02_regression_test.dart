@@ -164,9 +164,9 @@ void main() {
         var goRouterInsideAuth = false;
 
         for (final line in lines) {
-          if (line.contains('fst:auth:start')) {
+          if (line.contains(['fst', 'auth', 'start'].join(':'))) {
             insideAuth = true;
-          } else if (line.contains('fst:auth:end')) {
+          } else if (line.contains(['fst', 'auth', 'end'].join(':'))) {
             insideAuth = false;
           } else if (line.trim().startsWith('go_router:') && insideAuth) {
             goRouterInsideAuth = true;

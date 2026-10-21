@@ -65,9 +65,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() async {
-    final bytes = await File(
-      '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-    ).readAsBytes();
+    final bytes = await _loadGoldenFontBytes();
     await (FontLoader(
       'GoldenText',
     )..addFont(Future.value(bytes.buffer.asByteData()))).load();
@@ -172,6 +170,21 @@ void main() {
       await _expectGolden(tester, 'app_loading_dark');
     });
   });
+}
+
+Future<Uint8List> _loadGoldenFontBytes() async {
+  const candidates = [
+    'test/widgets/golden/fonts/DejaVuSans.ttf',
+    'packages/app_ui/test/widgets/golden/fonts/DejaVuSans.ttf',
+    '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+  ];
+  for (final path in candidates) {
+    final file = File(path);
+    if (file.existsSync()) {
+      return file.readAsBytes();
+    }
+  }
+  throw StateError('Could not find DejaVuSans.ttf in candidates: $candidates');
 }
 
 Future<void> _loadBundledFont(String family, String asset) async {
