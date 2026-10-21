@@ -12,6 +12,7 @@ void main() {
     ];
     final violations = <String>[];
     for (final root in roots) {
+      if (!root.existsSync()) continue;
       for (final file
           in root
               .listSync(recursive: true)
@@ -35,6 +36,7 @@ void main() {
     final root = Directory(
       'packages/features/document_center/lib/src/presentation',
     );
+    if (!root.existsSync()) return;
     final literal = RegExp(r'''Text\(\s*(?:const\s+)?['\"]''');
     final violations = <String>[];
     for (final file

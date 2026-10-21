@@ -16,30 +16,36 @@ import 'package:network/src/token_refresher.dart' as _i277;
 import 'package:storage/storage.dart' as _i431;
 
 class NetworkPackageModule extends _i526.MicroPackageModule {
-// initializes the registration of main-scope dependencies inside of GetIt
+  // initializes the registration of main-scope dependencies inside of GetIt
   @override
   _i687.FutureOr<void> init(_i526.GetItHelper gh) {
     final performanceModule = _$PerformanceModule();
     final networkModule = _$NetworkModule();
     gh.lazySingleton<_i420.PerformanceTracker>(
-        () => performanceModule.providePerformance());
+      () => performanceModule.providePerformance(),
+    );
     gh.lazySingleton<_i129.SessionTerminationNotifier>(
-        () => _i129.SessionTerminationNotifier());
+      () => _i129.SessionTerminationNotifier(),
+    );
     gh.lazySingleton<_i361.Dio>(
       () => networkModule.providePlainDio(gh<_i259.EnvConfig>()),
       instanceName: 'plain',
     );
-    gh.lazySingleton<_i277.TokenRefresher>(() => _i277.TokenRefresher(
-          gh<_i431.AuthTokenStore>(),
-          gh<_i361.Dio>(instanceName: 'plain'),
-          gh<_i129.SessionTerminationNotifier>(),
-        ));
-    gh.lazySingleton<_i361.Dio>(() => networkModule.provideDio(
-          gh<_i431.AuthTokenStore>(),
-          gh<_i277.TokenRefresher>(),
-          gh<_i259.EnvConfig>(),
-          gh<_i420.PerformanceTracker>(),
-        ));
+    gh.lazySingleton<_i277.TokenRefresher>(
+      () => _i277.TokenRefresher(
+        gh<_i431.AuthTokenStore>(),
+        gh<_i361.Dio>(instanceName: 'plain'),
+        gh<_i129.SessionTerminationNotifier>(),
+      ),
+    );
+    gh.lazySingleton<_i361.Dio>(
+      () => networkModule.provideDio(
+        gh<_i431.AuthTokenStore>(),
+        gh<_i277.TokenRefresher>(),
+        gh<_i259.EnvConfig>(),
+        gh<_i420.PerformanceTracker>(),
+      ),
+    );
   }
 }
 

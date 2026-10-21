@@ -264,14 +264,13 @@ jobs:
       - name: Analyze
         run: flutter analyze
 
-      # Golden tests are excluded: Flutter goldens are not guaranteed to match
-      # across operating systems, and baselines are generated on macOS while
-      # this runner is Ubuntu. They run locally as a regression check (see
-      # dart_test.yaml). Integration tests under integration_test/ also do not
-      # run here — they boot the real assembled App against an actual platform
-      # target (no headless flutter_tester support), which this runner doesn't
-      # have set up. Run them locally before release: see
-      # integration_test/README.md.
+      # General coverage excludes goldens because package suites are collected
+      # separately below. app_ui goldens have deterministic DejaVu/FontAwesome
+      # font loading and Linux baselines, and are run explicitly after coverage.
+      # Integration tests under integration_test/ do not run here — they boot
+      # the real assembled App against an actual platform target (no headless
+      # flutter_tester support), which this runner doesn't have set up. Run them
+      # locally before release: see integration_test/README.md.
       - name: Run tests
         run: |
           flutter test --coverage --exclude-tags golden
@@ -292,16 +291,26 @@ jobs:
               continue
             fi
 
-            (
-              cd "$package"
-              flutter test --coverage --exclude-tags golden
-            )
+            if [ "$package" = "packages/database" ]; then
+              # flutter_test does not build the Linux desktop plugin, so run
+              # ObjectBox tests with the checksummed, version-matched C runtime.
+              ./tool/test_objectbox.sh --coverage --exclude-tags golden
+            else
+              (
+                cd "$package"
+                flutter test --coverage --exclude-tags golden
+              )
+            fi
 
             if [ -f "$package/coverage/lcov.info" ]; then
               sed "s|^SF:|SF:$package/|" \
                 "$package/coverage/lcov.info" >> coverage/lcov.info
             fi
           done
+
+      - name: Run deterministic Linux golden tests
+        working-directory: packages/app_ui
+        run: flutter test test/widgets/golden
 
       - name: Upload coverage artifact
         if: always()
@@ -347,8 +356,9 @@ jobs:
   # pillar combination and asserts the generated project is coherent. Catches
   # the failure mode flutter analyze can't — the CLI and the template drifting
   # apart (renamed/removed `fst:` markers, mis-scoped strips, changed wiring) —
-  # independently per config. Pure Dart: no Flutter, no codegen, so it's fast and
-  # the configs run in parallel. Gated on the `cli` filter. Compile-level
+  # independently per config. No codegen is needed, so the configs run in
+  # parallel. Flutter is present because create refreshes and enforces the
+  # generated application lockfile. Gated on the `cli` filter. Compile-level
   # verification of each strip is done locally / at release (the default template
   # is compiled by analyze-and-test + the build jobs).
   cli-smoke:
@@ -376,6 +386,8 @@ jobs:
           - { name: exclude-bookmarks-drift, flags: '--exclude-feature bookmarks --database drift' }
           - { name: drift-no-setup-exclusions, flags: '--no-firebase --backend --no-auth --database drift --exclude-feature notifications' }
           - { name: minimal-drift, flags: '--minimal --database drift' }
+          - { name: document-engine-only, flags: '--no-document-center' }
+          - { name: no-documents, flags: '--no-document-engine' }
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -387,8 +399,12 @@ jobs:
       - name: Check out CLI + rev_sync submodules
         run: git submodule update --init published/cli published/rev_sync
 
-      - name: Set up Dart
-        uses: dart-lang/setup-dart@v1
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.0
+          channel: stable
+          cache: true
 
       - name: Resolve CLI dependencies
         working-directory: published/cli
@@ -396,7 +412,7 @@ jobs:
 
       # Scaffold into a temp dir OUTSIDE the workspace. --template-path makes the
       # run exercise the current template (not the published remote); --no-setup
-      # keeps it to pure-Dart scaffolding.
+      # skips code generation while create still refreshes the app lockfile.
       - name: Scaffold a project from this checkout
         working-directory: published/cli
         run: |
@@ -437,6 +453,8 @@ jobs:
           syncconn="$out/packages/sync_connectivity_plus"
           bookmarks="$out/packages/features/bookmarks"
           notifications="$out/packages/features/notifications"
+          document_engine="$out/packages/document_engine"
+          document_center="$out/packages/features/document_center"
           profile_header="$out/packages/features/profile/lib/src/presentation/widgets/profile_header.dart"
           infoplist="$out/ios/Runner/Info.plist"
           manifest="$out/android/app/src/main/AndroidManifest.xml"
@@ -525,6 +543,8 @@ jobs:
             default|default-drift)
               [ -d "$auth" ] || { echo "::error::auth removed in default"; fail=1; }
               [ -d "$bookmarks" ] || { echo "::error::bookmarks missing in default"; fail=1; }
+              [ -d "$document_engine" ] || { echo "::error::Document Engine missing in default"; fail=1; }
+              [ -d "$document_center" ] || { echo "::error::Document Center missing in default"; fail=1; }
               assert_media_perms_present
               assert_rev_sync_present
               ;;
@@ -616,9 +636,37 @@ jobs:
               else
                 assert_rev_sync_present
               fi
+              if [[ "$CONFIG" == minimal* ]]; then
+                [ ! -d "$document_engine" ] || { echo "::error::Document Engine survived $CONFIG"; fail=1; }
+                [ ! -d "$document_center" ] || { echo "::error::Document Center survived $CONFIG"; fail=1; }
+              fi
+              ;;
+            document-engine-only)
+              [ -d "$document_engine" ] || { echo "::error::Document Engine missing"; fail=1; }
+              [ ! -d "$document_center" ] || { echo "::error::Document Center not removed"; fail=1; }
+              if grep -R "feature_document_center\|FeatureDocumentCenterPackageModule" \
+                  "$out/pubspec.yaml" "$out/lib/app" "$out/test/architecture/package_layering_test.dart"; then
+                echo "::error::Document Center wiring survived engine-only scaffold"; fail=1
+              fi
+              ;;
+            no-documents)
+              [ ! -d "$document_engine" ] || { echo "::error::Document Engine not removed"; fail=1; }
+              [ ! -d "$document_center" ] || { echo "::error::Document Center not removed"; fail=1; }
+              [ -d "$bookmarks" ] || { echo "::error::bookmarks missing in document-free scaffold"; fail=1; }
+              [ -d "$out/packages/features/collections" ] || { echo "::error::collections missing in document-free scaffold"; fail=1; }
+              [ ! -f "$bookmarks/lib/src/domain/services/bookmarks_import_delegate.dart" ] || { echo "::error::Bookmarks import delegate survived"; fail=1; }
+              [ ! -f "$out/packages/features/collections/lib/src/domain/services/collections_import_delegate.dart" ] || { echo "::error::Collections import delegate survived"; fail=1; }
+              if grep -R "document_engine\|feature_document_center\|FeatureDocumentCenterPackageModule" \
+                  "$out/pubspec.yaml" "$out/lib/app" "$out/test/architecture/package_layering_test.dart"; then
+                echo "::error::document package wiring survived document-free scaffold"; fail=1
+              fi
               ;;
           esac
           exit $fail
+
+      - name: Enforce generated lockfile
+        working-directory: ${{ runner.temp }}/smoke
+        run: flutter pub get --enforce-lockfile
 
   # The assertions above prove the right files are gone; only the analyzer
   # proves what's left still compiles. That gap is exactly how a --minimal
@@ -647,6 +695,8 @@ jobs:
           - { name: feature-registration, flags: '--no-firebase --backend --no-auth --database objectbox --exclude-feature bookmarks,collections,notifications' }
           - { name: minimal, flags: '--minimal' }
           - { name: minimal-drift, flags: '--minimal --database drift' }
+          - { name: document-engine-only, flags: '--no-document-center' }
+          - { name: no-documents, flags: '--no-document-engine' }
     steps:
       - name: Checkout
         uses: actions/checkout@v7

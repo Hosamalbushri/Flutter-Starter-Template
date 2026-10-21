@@ -26,7 +26,9 @@ dependencies:
   shared_contracts: ^0.1.0
   shared_ui: ^0.1.0
   localization: ^0.1.0
+  # fst:document:engine:start
   document_engine: ^0.1.0
+  # fst:document:engine:end
   # Bookmarks embeds two collections capabilities (the collections list view in
   # its Collections tab, and the "add to collection" sheet on a bookmark).
   feature_collections: ^0.1.0
@@ -46,7 +48,9 @@ dependencies:
   freezed_annotation: ^3.1.0
   json_annotation: ^4.12.0
   clock: ^1.1.2
+  # fst:document:engine:start
   file_picker: ^13.1.0
+  # fst:document:engine:end
 
 dev_dependencies:
   flutter_test:

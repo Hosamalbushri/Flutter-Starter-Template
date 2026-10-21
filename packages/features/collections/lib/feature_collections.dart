@@ -12,7 +12,9 @@ library;
 
 export 'src/di.module.dart' show FeatureCollectionsPackageModule;
 export 'src/domain/entities/collection.dart';
+// fst:document:engine:start
 export 'src/domain/services/collections_import_delegate.dart';
+// fst:document:engine:end
 export 'src/domain/services/collections_membership_service.dart';
 export 'src/domain/services/collections_sync_controller.dart';
 export 'src/presentation/bloc/collections_list/collections_list_bloc.dart';
@@ -22,5 +24,7 @@ export 'src/presentation/screens/collection_detail_screen.dart';
 export 'src/presentation/screens/collection_form_screen.dart';
 export 'src/presentation/screens/collections_list_screen.dart';
 export 'src/presentation/widgets/add_to_collection_sheet.dart';
+// fst:document:engine:start
 export 'src/presentation/widgets/collections_import_sheet.dart';
+// fst:document:engine:end
 export 'src/presentation/widgets/collections_list_view.dart';

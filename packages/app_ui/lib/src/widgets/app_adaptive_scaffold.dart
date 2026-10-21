@@ -656,7 +656,12 @@ class _CenterActionButtonState extends State<_CenterActionButton>
                     borderRadius: BorderRadius.circular(13),
                   ),
                   clipBehavior: Clip.antiAlias,
-                  color: context.colorScheme.surface.withValues(alpha: 0),
+                  color: context.colorScheme.surface.withValues(
+                    alpha: 0,
+                    red: 0,
+                    green: 0,
+                    blue: 0,
+                  ),
                   child: InkWell(
                     onHighlightChanged: _setPressed,
                     onTap: () {

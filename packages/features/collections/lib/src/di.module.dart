@@ -18,8 +18,10 @@ import 'package:feature_collections/src/data/sync/collections_sync_service.dart'
     as _i342;
 import 'package:feature_collections/src/domain/repositories/collections_repository.dart'
     as _i709;
+// fst:document:engine:start
 import 'package:feature_collections/src/domain/services/collections_import_delegate.dart'
     as _i373;
+// fst:document:engine:end
 import 'package:feature_collections/src/domain/services/collections_membership_service.dart'
     as _i318;
 import 'package:feature_collections/src/domain/services/collections_summary_service.dart'
@@ -32,8 +34,10 @@ import 'package:feature_collections/src/domain/usecases/delete_collection.dart'
     as _i67;
 import 'package:feature_collections/src/domain/usecases/get_collection.dart'
     as _i562;
+// fst:document:engine:start
 import 'package:feature_collections/src/domain/usecases/import_collections.dart'
     as _i891;
+// fst:document:engine:end
 import 'package:feature_collections/src/domain/usecases/list_collections.dart'
     as _i300;
 import 'package:feature_collections/src/domain/usecases/list_local_collections.dart'
@@ -55,77 +59,107 @@ import 'package:shared_contracts/shared_contracts.dart' as _i856;
 import 'package:uuid/uuid.dart' as _i706;
 
 class FeatureCollectionsPackageModule extends _i526.MicroPackageModule {
-// initializes the registration of main-scope dependencies inside of GetIt
+  // initializes the registration of main-scope dependencies inside of GetIt
   @override
   _i687.FutureOr<void> init(_i526.GetItHelper gh) {
     final collectionsRemoteModule = _$CollectionsRemoteModule();
-    gh.lazySingleton<_i596.CollectionsRemoteDataSource>(() =>
-        collectionsRemoteModule
-            .provideCollectionsRemoteDataSource(gh<_i372.Dio>()));
+    gh.lazySingleton<_i596.CollectionsRemoteDataSource>(
+      () => collectionsRemoteModule.provideCollectionsRemoteDataSource(
+        gh<_i372.Dio>(),
+      ),
+    );
     gh.lazySingleton<_i214.CollectionsLocalDataSource>(
-        () => _i214.ObjectBoxCollectionsDataSource(
-              gh<_i252.Store>(),
-              gh<_i252.AtomicWriteCoordinator>(),
-            ));
+      () => _i214.ObjectBoxCollectionsDataSource(
+        gh<_i252.Store>(),
+        gh<_i252.AtomicWriteCoordinator>(),
+      ),
+    );
     gh.lazySingleton<_i321.CollectionsSyncController>(
-        () => _i342.CollectionsSyncService(
-              gh<_i214.CollectionsLocalDataSource>(),
-              gh<_i596.CollectionsRemoteDataSource>(),
-              gh<_i520.ConnectivitySource>(),
-              gh<_i520.SyncCursorStore>(),
-            ));
+      () => _i342.CollectionsSyncService(
+        gh<_i214.CollectionsLocalDataSource>(),
+        gh<_i596.CollectionsRemoteDataSource>(),
+        gh<_i520.ConnectivitySource>(),
+        gh<_i520.SyncCursorStore>(),
+      ),
+    );
     gh.lazySingleton<_i709.CollectionsRepository>(
-        () => _i614.CollectionsRepositoryImpl(
-              gh<_i214.CollectionsLocalDataSource>(),
-              gh<_i321.CollectionsSyncController>(),
-              gh<_i706.Uuid>(),
-              gh<_i252.AtomicWriteCoordinator>(),
-            ));
+      () => _i614.CollectionsRepositoryImpl(
+        gh<_i214.CollectionsLocalDataSource>(),
+        gh<_i321.CollectionsSyncController>(),
+        gh<_i706.Uuid>(),
+        gh<_i252.AtomicWriteCoordinator>(),
+      ),
+    );
     gh.factory<_i227.CreateCollectionUseCase>(
-        () => _i227.CreateCollectionUseCase(gh<_i709.CollectionsRepository>()));
+      () => _i227.CreateCollectionUseCase(gh<_i709.CollectionsRepository>()),
+    );
     gh.factory<_i67.DeleteCollectionUseCase>(
-        () => _i67.DeleteCollectionUseCase(gh<_i709.CollectionsRepository>()));
+      () => _i67.DeleteCollectionUseCase(gh<_i709.CollectionsRepository>()),
+    );
     gh.factory<_i562.GetCollectionUseCase>(
-        () => _i562.GetCollectionUseCase(gh<_i709.CollectionsRepository>()));
+      () => _i562.GetCollectionUseCase(gh<_i709.CollectionsRepository>()),
+    );
     gh.factory<_i300.ListCollectionsUseCase>(
-        () => _i300.ListCollectionsUseCase(gh<_i709.CollectionsRepository>()));
-    gh.factory<_i878.ListLocalCollectionsUseCase>(() =>
-        _i878.ListLocalCollectionsUseCase(gh<_i709.CollectionsRepository>()));
+      () => _i300.ListCollectionsUseCase(gh<_i709.CollectionsRepository>()),
+    );
+    gh.factory<_i878.ListLocalCollectionsUseCase>(
+      () =>
+          _i878.ListLocalCollectionsUseCase(gh<_i709.CollectionsRepository>()),
+    );
     gh.factory<_i200.UpdateCollectionUseCase>(
-        () => _i200.UpdateCollectionUseCase(gh<_i709.CollectionsRepository>()));
-    gh.lazySingleton<_i318.CollectionsMembershipService>(() =>
-        _i318.CollectionsMembershipService(gh<_i709.CollectionsRepository>()));
-    gh.factory<_i511.CollectionFormCubit>(() => _i511.CollectionFormCubit(
-          gh<_i227.CreateCollectionUseCase>(),
-          gh<_i200.UpdateCollectionUseCase>(),
-          gh<_i562.GetCollectionUseCase>(),
-        ));
-    gh.factory<_i846.AddToCollectionCubit>(() => _i846.AddToCollectionCubit(
-          gh<_i300.ListCollectionsUseCase>(),
-          gh<_i200.UpdateCollectionUseCase>(),
-        ));
-    gh.lazySingleton<_i856.CollectionsReader>(() =>
-        _i228.CollectionsSummaryService(gh<_i300.ListCollectionsUseCase>()));
+      () => _i200.UpdateCollectionUseCase(gh<_i709.CollectionsRepository>()),
+    );
+    gh.lazySingleton<_i318.CollectionsMembershipService>(
+      () =>
+          _i318.CollectionsMembershipService(gh<_i709.CollectionsRepository>()),
+    );
+    gh.factory<_i511.CollectionFormCubit>(
+      () => _i511.CollectionFormCubit(
+        gh<_i227.CreateCollectionUseCase>(),
+        gh<_i200.UpdateCollectionUseCase>(),
+        gh<_i562.GetCollectionUseCase>(),
+      ),
+    );
+    gh.factory<_i846.AddToCollectionCubit>(
+      () => _i846.AddToCollectionCubit(
+        gh<_i300.ListCollectionsUseCase>(),
+        gh<_i200.UpdateCollectionUseCase>(),
+      ),
+    );
+    gh.lazySingleton<_i856.CollectionsReader>(
+      () => _i228.CollectionsSummaryService(gh<_i300.ListCollectionsUseCase>()),
+    );
+    // fst:document:engine:start
     gh.lazySingleton<_i373.CollectionsImportDelegate>(
-        () => _i373.CollectionsImportDelegate(
-              gh<_i709.CollectionsRepository>(),
-              gh<_i856.BookmarkSummariesReader>(),
-              gh<_i252.AtomicWriteCoordinator>(),
-            ));
-    gh.factory<_i352.CollectionsListBloc>(() => _i352.CollectionsListBloc(
-          gh<_i300.ListCollectionsUseCase>(),
-          gh<_i878.ListLocalCollectionsUseCase>(),
-          gh<_i67.DeleteCollectionUseCase>(),
-          gh<_i321.CollectionsSyncController>(),
-        ));
-    gh.factory<_i916.CollectionDetailCubit>(() => _i916.CollectionDetailCubit(
-          gh<_i562.GetCollectionUseCase>(),
-          gh<_i200.UpdateCollectionUseCase>(),
-          gh<_i67.DeleteCollectionUseCase>(),
-          gh<_i856.BookmarkSummariesReader>(),
-        ));
-    gh.factory<_i891.ImportCollectionsUseCase>(() =>
-        _i891.ImportCollectionsUseCase(gh<_i373.CollectionsImportDelegate>()));
+      () => _i373.CollectionsImportDelegate(
+        gh<_i709.CollectionsRepository>(),
+        gh<_i856.BookmarkSummariesReader>(),
+        gh<_i252.AtomicWriteCoordinator>(),
+      ),
+    );
+    // fst:document:engine:end
+    gh.factory<_i352.CollectionsListBloc>(
+      () => _i352.CollectionsListBloc(
+        gh<_i300.ListCollectionsUseCase>(),
+        gh<_i878.ListLocalCollectionsUseCase>(),
+        gh<_i67.DeleteCollectionUseCase>(),
+        gh<_i321.CollectionsSyncController>(),
+      ),
+    );
+    gh.factory<_i916.CollectionDetailCubit>(
+      () => _i916.CollectionDetailCubit(
+        gh<_i562.GetCollectionUseCase>(),
+        gh<_i200.UpdateCollectionUseCase>(),
+        gh<_i67.DeleteCollectionUseCase>(),
+        gh<_i856.BookmarkSummariesReader>(),
+      ),
+    );
+    // fst:document:engine:start
+    gh.factory<_i891.ImportCollectionsUseCase>(
+      () =>
+          _i891.ImportCollectionsUseCase(gh<_i373.CollectionsImportDelegate>()),
+    );
+    // fst:document:engine:end
   }
 }
 

@@ -4,7 +4,9 @@ import 'package:feature_bookmarks/feature_bookmarks.dart';
 // fst:feature:collections:start
 import 'package:feature_collections/feature_collections.dart';
 // fst:feature:collections:end
+// fst:document:center:start
 import 'package:feature_document_center/feature_document_center.dart';
+// fst:document:center:end
 // fst:feature:notifications:start
 import 'package:feature_notifications/feature_notifications.dart';
 // fst:feature:notifications:end
@@ -28,7 +30,9 @@ const List<FeatureModule> enabledFeatures = [
   // fst:feature:notifications:start
   _NotificationsModule(),
   // fst:feature:notifications:end
+  // fst:document:center:start
   _DocumentCenterModule(),
+  // fst:document:center:end
   // fst:enabled-features — `fst add-feature` inserts new modules above this line
 ];
 
@@ -111,6 +115,7 @@ final class _NotificationsModule extends FeatureModule {
 }
 // fst:feature:notifications:end
 
+// fst:document:center:start
 final class _DocumentCenterModule extends FeatureModule {
   const _DocumentCenterModule();
 
@@ -120,6 +125,7 @@ final class _DocumentCenterModule extends FeatureModule {
   @override
   Iterable<RouteBase> get routes => documentCenterRoutes;
 }
+// fst:document:center:end
 
 // fst:feature-module-classes — `fst add-feature` inserts new module classes above
 

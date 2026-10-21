@@ -51,9 +51,7 @@ void main() {
           return;
         }
 
-        final isTemplate = File(
-          'pubspec.yaml',
-        ).readAsStringSync().contains('name: flutter_starter_template');
+        final isTemplate = File('.gitmodules').existsSync();
         if (isTemplate) {
           var insideCollections = false;
           var collectionsImportGuarded = false;
@@ -86,9 +84,7 @@ void main() {
         final file = File('lib/app/di/injection.dart');
         expect(file.existsSync(), isTrue);
         final content = file.readAsStringSync();
-        final isTemplate = File(
-          'pubspec.yaml',
-        ).readAsStringSync().contains('name: flutter_starter_template');
+        final isTemplate = File('.gitmodules').existsSync();
 
         if (isTemplate) {
           expect(
@@ -135,9 +131,7 @@ void main() {
         final file = File('lib/app/di/injection.dart');
         expect(file.existsSync(), isTrue);
         final content = file.readAsStringSync();
-        final isTemplate = File(
-          'pubspec.yaml',
-        ).readAsStringSync().contains('name: flutter_starter_template');
+        final isTemplate = File('.gitmodules').existsSync();
 
         if (isTemplate) {
           expect(

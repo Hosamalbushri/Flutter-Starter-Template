@@ -1,7 +1,9 @@
 import 'package:analytics/analytics.dart';
 import 'package:app_platform/app_platform.dart';
 import 'package:config/config.dart';
+// fst:document:engine:start
 import 'package:document_engine/document_engine.dart';
+// fst:document:engine:end
 // fst:auth:start
 import 'package:feature_auth/feature_auth.dart';
 // fst:auth:end
@@ -11,7 +13,9 @@ import 'package:feature_bookmarks/feature_bookmarks.dart';
 // fst:feature:collections:start
 import 'package:feature_collections/feature_collections.dart';
 // fst:feature:collections:end
+// fst:document:center:start
 import 'package:feature_document_center/feature_document_center.dart';
+// fst:document:center:end
 import 'package:feature_home/feature_home.dart';
 // fst:feature:notifications:start
 import 'package:feature_notifications/feature_notifications.dart';
@@ -72,7 +76,9 @@ final GetIt getIt = GetIt.instance;
     // fst:feature:bookmarks:end
     ExternalModule(FeatureHomePackageModule),
     ExternalModule(FeatureProfilePackageModule),
+    // fst:document:center:start
     ExternalModule(FeatureDocumentCenterPackageModule),
+    // fst:document:center:end
     // fst:feature-modules — `fst add-feature` inserts new feature modules above
   ],
 )
@@ -82,7 +88,9 @@ Future<void> configureDependencies() async {
   // Fill in Null-Object readers for any feature dropped at scaffold time, so
   // `home` keeps working when bookmarks/collections were excluded.
   registerReaderFallbacks(getIt);
+  // fst:document:engine:start
   _configureDocumentEngine(getIt);
+  // fst:document:engine:end
 }
 
 /// Replaces Firebase-backed tracking adapters with inert implementations when
@@ -110,6 +118,7 @@ void configureFirebaseRuntimeBindings(GetIt sl) {
   // fst:network:end
 }
 
+// fst:document:engine:start
 void _configureDocumentEngine(GetIt sl) {
   final registry = DocumentFormatRegistry.standard();
   // fst:feature:collections:start
@@ -126,3 +135,5 @@ void _configureDocumentEngine(GetIt sl) {
     sl.registerSingleton<DocumentFormatRegistry>(registry);
   }
 }
+
+// fst:document:engine:end
