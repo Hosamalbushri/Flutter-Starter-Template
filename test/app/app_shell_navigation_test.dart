@@ -150,6 +150,7 @@ void main() {
 
       tester.view.physicalSize = const Size(390, 844);
       await tester.pumpAndSettle();
+      // fst:feature:bookmarks:start
       await tester.tap(
         find.byKey(const ValueKey('bottomNavigationDestination-1')),
       );
@@ -159,6 +160,7 @@ void main() {
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
       expect(find.text('home-root'), findsOneWidget);
+      // fst:feature:bookmarks:end
 
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
