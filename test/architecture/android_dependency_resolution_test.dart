@@ -25,11 +25,11 @@ void main() {
     ).readAsStringSync();
     final firebaseSource = File('lib/app/firebase.dart').readAsStringSync();
 
-    if (source.contains('val googleServicesFile')) {
+    const conditionalPlugin =
+        'apply(plugin = "com.google.gms.google-services")';
+    if (source.contains(conditionalPlugin)) {
+      expect(source, contains('val googleServicesFile'));
       expect(source, contains('if (googleServicesFile.exists())'));
-      const conditionalPlugin =
-          'apply(plugin = "com.google.gms.google-services")';
-      expect(source, contains(conditionalPlugin));
       expect(firebaseSource, contains('bool.fromEnvironment('));
       expect(firebaseSource, contains("'FIREBASE_ENABLED'"));
       expect(firebaseSource, contains('defaultValue: false'));
