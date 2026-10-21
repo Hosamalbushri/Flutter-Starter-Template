@@ -12,6 +12,8 @@ import 'package:feature_notifications/feature_notifications.dart';
 // fst:feature:notifications:end
 
 // fst:feature:_infra:start
+import 'package:go_router/go_router.dart';
+
 import 'di/injection.dart';
 // fst:feature:_infra:end
 import 'feature_module.dart';

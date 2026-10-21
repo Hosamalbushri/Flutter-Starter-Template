@@ -1,7 +1,5 @@
 import 'package:go_router/go_router.dart';
 
-export 'package:go_router/go_router.dart' show RouteBase;
-
 /// Lifecycle interface for an optional feature's background sync.
 abstract interface class FeatureSyncController {
   Future<void> start();

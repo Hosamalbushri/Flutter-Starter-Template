@@ -27,6 +27,7 @@ void main() {
     expect(result.data.values.first, 1);
   });
 
+  // fst:feature:bookmarks:start
   test(
     'atomic coordinator rolls back earlier writes when commit fails',
     () async {
@@ -167,6 +168,7 @@ void main() {
 
     expect(await db.select(db.bookmarks).get(), hasLength(1));
   });
+  // fst:feature:bookmarks:end
 
   test('completion failure cannot hide the original write error', () async {
     final atomic = DriftAtomicWriteCoordinator(db);
