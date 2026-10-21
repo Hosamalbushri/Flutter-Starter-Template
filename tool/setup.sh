@@ -32,7 +32,7 @@ force_full=0
 dry_run=0
 verify_mode=0
 fast_mode=0
-run_format=0
+run_format=1
 run_fix=0
 
 usage() {
@@ -44,6 +44,7 @@ while [[ $# -gt 0 ]]; do
     --no-hooks) enable_hooks=0 ;;
     --no-codegen) run_codegen=0 ;;
     --no-backend) setup_backend=0 ;;
+    --no-format) run_format=0 ;;
     --full) force_full=1 ;;
     --fast) fast_mode=1 ;;
     --dry-run) dry_run=1 ;;

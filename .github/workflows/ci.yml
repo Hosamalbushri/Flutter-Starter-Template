@@ -740,7 +740,7 @@ jobs:
       # none and cannot be analyzed until this has run.
       - name: Bootstrap the scaffold
         working-directory: ${{ runner.temp }}/analyze-smoke
-        run: ./tool/setup.sh --no-hooks --no-backend
+        run: ./tool/setup.sh --no-hooks --no-backend --format
 
       - name: Verify repeatable Drift code generation
         if: matrix.name == 'drift-excluded-regression'

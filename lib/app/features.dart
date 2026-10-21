@@ -11,9 +11,11 @@ import 'package:feature_document_center/feature_document_center.dart';
 import 'package:feature_notifications/feature_notifications.dart';
 // fst:feature:notifications:end
 
-// fst:feature:_infra:start
+// fst:feature:_router:start
 import 'package:go_router/go_router.dart';
+// fst:feature:_router:end
 
+// fst:feature:_infra:start
 import 'di/injection.dart';
 // fst:feature:_infra:end
 import 'feature_module.dart';
