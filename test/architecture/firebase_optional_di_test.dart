@@ -7,10 +7,10 @@ import 'package:app_platform/app_platform.dart';
 import 'package:config/config.dart';
 // fst:auth:start
 import 'package:feature_auth/feature_auth.dart';
-// fst:auth:end
 import 'package:flutter_starter_template/app/di/injection.dart'
     show configureFirebaseRuntimeBindings;
 import 'package:flutter_starter_template/app/firebase.dart';
+// fst:auth:end
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart' show GetItHelper;

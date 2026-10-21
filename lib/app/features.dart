@@ -10,7 +10,6 @@ import 'package:feature_document_center/feature_document_center.dart';
 // fst:feature:notifications:start
 import 'package:feature_notifications/feature_notifications.dart';
 // fst:feature:notifications:end
-import 'package:go_router/go_router.dart';
 
 // fst:feature:_infra:start
 import 'di/injection.dart';

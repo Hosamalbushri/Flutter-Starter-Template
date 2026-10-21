@@ -13,9 +13,9 @@ import 'package:feature_notifications/feature_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-// fst:network:start
+// fst:auth:start
 import 'package:network/network.dart';
-// fst:network:end
+// fst:auth:end
 import 'package:shared_contracts/shared_contracts.dart';
 // fst:auth:start
 import 'package:shared_ui/shared_ui.dart';

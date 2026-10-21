@@ -1,5 +1,6 @@
 // fst:auth:start
 import 'dart:async';
+
 // fst:auth:end
 
 import 'package:architecture/architecture.dart';
@@ -24,7 +25,9 @@ import 'package:flutter_starter_template/app/di/injection.dart';
 import 'package:flutter_starter_template/app/feature_module.dart';
 // fst:auth:end
 import 'package:flutter_test/flutter_test.dart';
+// fst:auth:start
 import 'package:network/network.dart';
+// fst:auth:end
 import 'package:shared_contracts/shared_contracts.dart';
 import 'package:storage/storage.dart';
 import 'package:theme/theme.dart';
