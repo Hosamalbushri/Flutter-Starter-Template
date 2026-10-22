@@ -408,7 +408,7 @@ jobs:
 
       - name: Resolve CLI dependencies
         working-directory: published/cli
-        run: dart pub get
+        run: dart pub get --enforce-lockfile
 
       # Scaffold into a temp dir OUTSIDE the workspace. --template-path makes the
       # run exercise the current template (not the published remote); --no-setup
@@ -717,7 +717,7 @@ jobs:
 
       - name: Resolve CLI dependencies
         working-directory: published/cli
-        run: dart pub get
+        run: dart pub get --enforce-lockfile
 
       - name: Scaffold a project from this checkout
         working-directory: published/cli
