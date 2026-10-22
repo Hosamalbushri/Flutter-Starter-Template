@@ -11,6 +11,7 @@ export 'dart:convert' show jsonDecode, jsonEncode;
 export 'package:drift/drift.dart' show OrderingTerm, Value;
 
 export 'src/app_database.dart';
+export 'src/atomic_write_coordinator.dart';
 // fst:feature:notifications:start
 export 'src/entities/activity_entity.dart';
 // fst:feature:notifications:end

@@ -14,3 +14,10 @@ abstract interface class BookmarksRepository {
   Future<Result<Bookmark>> update(String id, BookmarkInput input);
   Future<Result<void>> delete(String id);
 }
+
+/// Optional repository capability used by imports to defer synchronization
+/// until every local mutation and relationship update succeeds.
+abstract interface class BookmarksImportBatchRepository {
+  void beginImportBatch();
+  void endImportBatch({required bool successful});
+}

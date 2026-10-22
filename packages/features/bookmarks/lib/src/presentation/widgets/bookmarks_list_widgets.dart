@@ -12,6 +12,9 @@ import '../../domain/services/bookmarks_sync_controller.dart';
 import '../bloc/bookmarks_list/bookmarks_list_bloc.dart';
 import '../bloc/bookmarks_list/bookmarks_list_state.dart';
 import '../bookmarks_routes.dart';
+// fst:document:engine:start
+import 'bookmarks_import_sheet.dart';
+// fst:document:engine:end
 import 'bookmarks_list_master.dart';
 
 class BookmarksListView extends StatefulWidget {
@@ -80,6 +83,16 @@ class _BookmarksListViewState extends State<BookmarksListView> {
       title: context.l10n.bookmarksAppBarTitle,
       padding: EdgeInsets.zero,
       actions: [
+        // fst:document:engine:start
+        IconButton(
+          icon: const Icon(Icons.file_upload_outlined),
+          tooltip: context.l10n.bookmarksImportAction,
+          onPressed: () => BookmarksImportSheet.show(
+            context,
+            onImportCompleted: _reload,
+          ),
+        ),
+        // fst:document:engine:end
         BlocBuilder<BookmarksListBloc, BookmarksListState>(
           buildWhen: (a, b) => a.syncStatus != b.syncStatus,
           builder: (context, state) =>
@@ -97,7 +110,10 @@ class _BookmarksListViewState extends State<BookmarksListView> {
               : 0,
         ),
         child: FloatingActionButton(
-          heroTag: 'bookmarks-add-bookmark-fab',
+          // This action has no shared-element counterpart on the form route.
+          // Keeping a fixed Hero tag makes retained shell subtrees collide
+          // when more than one bookmarks branch is briefly mounted.
+          heroTag: null,
           onPressed: _openNew,
           tooltip: context.l10n.bookmarksAddTooltip,
           child: const FaIcon(FontAwesomeIcons.plus),
@@ -136,7 +152,6 @@ class _SortMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final showLabel = MediaQuery.sizeOf(context).width >= AppBreakpoints.medium;
 
     return PopupMenuButton<BookmarkSort>(
       padding: EdgeInsets.zero,
@@ -159,43 +174,21 @@ class _SortMenuButton extends StatelessWidget {
         button: true,
         label: context.l10n.bookmarksSortTooltip,
         child: Container(
-          constraints: BoxConstraints(
-            minHeight: 56,
-            minWidth: showLabel ? 116 : 56,
-          ),
-          margin: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.sm,
-            vertical: AppSpacing.xs,
-          ),
+          width: 40,
+          height: 40,
           decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-            border: Border.all(color: colorScheme.outlineVariant),
+            color: colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.65),
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FaIcon(
-                FontAwesomeIcons.filter,
-                size: AppIconSize.md,
-                color: colorScheme.primary,
-              ),
-              if (showLabel) ...[
-                const SizedBox(height: AppSpacing.xxs),
-                Text(
-                  context.l10n.bookmarksSortMenuLabel,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.labelLarge?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0,
-                  ),
-                ),
-              ],
-            ],
+          child: Center(
+            child: FaIcon(
+              FontAwesomeIcons.filter,
+              size: AppIconSize.sm,
+              color: colorScheme.primary,
+            ),
           ),
         ),
       ),

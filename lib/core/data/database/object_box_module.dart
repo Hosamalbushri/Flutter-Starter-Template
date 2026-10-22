@@ -16,4 +16,8 @@ abstract class ObjectBoxModule {
 
   @singleton
   Store provideStore(ObjectBox objectBox) => objectBox.store;
+
+  @singleton
+  AtomicWriteCoordinator provideAtomicWriteCoordinator(Store store) =>
+      ObjectBoxAtomicWriteCoordinator(store);
 }

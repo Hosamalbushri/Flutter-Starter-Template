@@ -27,15 +27,21 @@ void main() {
     test('initial state has default scheme and system mode when no prefs', () {
       expect(bloc.state.mode, ThemeMode.system);
       expect(bloc.state.scheme, ThemeState.defaultScheme);
+      expect(bloc.state.fontFamily, 'system');
+      expect(bloc.state.textScale, AppTextScale.system);
     });
 
     test('reads initial state from SharedPreferences', () {
       when(() => mockPrefs.getString('app.theme_mode')).thenReturn('dark');
       when(() => mockPrefs.getString('app.theme_scheme')).thenReturn('indigo');
+      when(() => mockPrefs.getString('app.font_family')).thenReturn('cairo');
+      when(() => mockPrefs.getString('app.text_scale')).thenReturn('large');
 
       final c = ThemeBloc(mockPrefs, mockAnalytics);
       expect(c.state.mode, ThemeMode.dark);
       expect(c.state.scheme, FlexScheme.indigo);
+      expect(c.state.fontFamily, 'Cairo');
+      expect(c.state.textScale, AppTextScale.large);
       c.close();
     });
 
@@ -133,6 +139,79 @@ void main() {
         ],
         verify: (_) {
           verify(() => mockPrefs.setString('app.locale', '')).called(1);
+        },
+      );
+    });
+
+    group('system settings', () {
+      blocTest<ThemeBloc, ThemeState>(
+        'persists the selected font family',
+        build: () => bloc,
+        act: (bloc) => bloc.add(
+          const ThemeFontFamilyChanged('Noto Kufi Arabic'),
+        ),
+        expect: () => [
+          predicate<ThemeState>(
+            (state) => state.fontFamily == 'Noto Kufi Arabic',
+          ),
+        ],
+        verify: (_) {
+          verify(
+            () => mockPrefs.setString('app.font_family', 'Noto Kufi Arabic'),
+          ).called(1);
+        },
+      );
+
+      blocTest<ThemeBloc, ThemeState>(
+        'persists the selected text scale',
+        build: () => bloc,
+        act: (bloc) =>
+            bloc.add(const ThemeTextScaleChanged(AppTextScale.large)),
+        expect: () => [
+          predicate<ThemeState>(
+            (state) => state.textScale == AppTextScale.large,
+          ),
+        ],
+        verify: (_) {
+          verify(
+            () => mockPrefs.setString('app.text_scale', 'large'),
+          ).called(1);
+        },
+      );
+
+      blocTest<ThemeBloc, ThemeState>(
+        'reset restores all system defaults',
+        build: () {
+          when(() => mockPrefs.getString('app.theme_mode')).thenReturn('dark');
+          when(
+            () => mockPrefs.getString('app.theme_scheme'),
+          ).thenReturn('mango');
+          when(() => mockPrefs.getString('app.locale')).thenReturn('ar');
+          when(
+            () => mockPrefs.getString('app.font_family'),
+          ).thenReturn('cairo');
+          when(() => mockPrefs.getString('app.text_scale')).thenReturn('large');
+          return ThemeBloc(mockPrefs, mockAnalytics);
+        },
+        act: (bloc) => bloc.add(const ThemeSettingsReset()),
+        expect: () => [
+          predicate<ThemeState>(
+            (state) =>
+                state.mode == ThemeMode.system &&
+                state.scheme == ThemeState.defaultScheme &&
+                state.locale == null &&
+                state.fontFamily == 'system' &&
+                state.textScale == AppTextScale.system,
+          ),
+        ],
+        verify: (_) {
+          verify(() => mockPrefs.setString('app.locale', '')).called(1);
+          verify(
+            () => mockPrefs.setString('app.font_family', 'system'),
+          ).called(1);
+          verify(
+            () => mockPrefs.setString('app.text_scale', 'system'),
+          ).called(1);
         },
       );
     });

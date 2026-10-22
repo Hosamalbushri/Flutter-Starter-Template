@@ -13,11 +13,17 @@ import '../models/sign_in_request.dart';
 
 @LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
-  AuthRepositoryImpl(this._remote, this._local, this._refresher);
+  AuthRepositoryImpl(
+    this._remote,
+    this._local,
+    this._refresher,
+    this._sessionTermination,
+  );
 
   final AuthRemoteDataSource _remote;
   final AuthLocalDataSource _local;
   final TokenRefresher _refresher;
+  final SessionTerminationNotifier _sessionTermination;
 
   @override
   AuthUser? get currentUser => _local.currentUser;
@@ -37,6 +43,7 @@ class AuthRepositoryImpl implements AuthRepository {
         accessToken: response.accessToken,
         refreshToken: response.refreshToken,
       );
+      _sessionTermination.reset();
       return Ok(user);
     } on DioException catch (e) {
       return Err(_mapDioError(e));
@@ -62,6 +69,7 @@ class AuthRepositoryImpl implements AuthRepository {
         accessToken: response.accessToken,
         refreshToken: response.refreshToken,
       );
+      _sessionTermination.reset();
       return Ok(user);
     } on DioException catch (e) {
       return Err(_mapDioError(e));
@@ -101,6 +109,12 @@ class AuthRepositoryImpl implements AuthRepository {
         // the user isn't stuck signed in after a network blip.
       }
     }
+    await _local.clearSession();
+    return const Ok(null);
+  }
+
+  @override
+  Future<Result<void>> expireSession() async {
     await _local.clearSession();
     return const Ok(null);
   }

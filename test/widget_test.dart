@@ -1,10 +1,13 @@
 // fst:auth:start
 import 'dart:async';
+
 // fst:auth:end
 
 import 'package:architecture/architecture.dart';
 // fst:auth:start
 import 'package:checks/checks.dart';
+// fst:auth:end
+// fst:auth:start
 import 'package:feature_auth/feature_auth.dart';
 // fst:auth:end
 import 'package:feature_home/feature_home.dart';
@@ -22,6 +25,9 @@ import 'package:flutter_starter_template/app/di/injection.dart';
 import 'package:flutter_starter_template/app/feature_module.dart';
 // fst:auth:end
 import 'package:flutter_test/flutter_test.dart';
+// fst:auth:start
+import 'package:network/network.dart';
+// fst:auth:end
 import 'package:shared_contracts/shared_contracts.dart';
 import 'package:storage/storage.dart';
 import 'package:theme/theme.dart';
@@ -72,6 +78,8 @@ void main() {
 
     // fst:auth:start
     authStateController = StreamController<AuthState>.broadcast();
+    final sessionTermination = SessionTerminationNotifier();
+    getIt.registerSingleton<SessionTerminationNotifier>(sessionTermination);
     var currentAuthState = const AuthState.initial();
     authBloc = MockAuthBloc();
     when(() => authBloc.state).thenAnswer((_) => currentAuthState);
@@ -92,6 +100,11 @@ void main() {
       ),
     ).thenAnswer((_) {
       currentAuthState = const AuthState.authenticated(testUser);
+      sessionTermination.reset();
+      authStateController.add(currentAuthState);
+    });
+    when(() => authBloc.add(const AuthSessionCleared())).thenAnswer((_) {
+      currentAuthState = const AuthState.initial();
       authStateController.add(currentAuthState);
     });
     // fst:auth:end
@@ -179,14 +192,28 @@ void main() {
     }
 
     expect(
-      find.descendant(of: find.byType(AppBar), matching: find.text('Home')),
+      find.byKey(const ValueKey('home-dashboard-identity')),
       findsOneWidget,
     );
+    expect(find.byKey(const ValueKey('home-search-field')), findsOneWidget);
     expect(homeBloc, isNotNull);
     expect(authBloc.state, isA<AuthAuthenticated>());
     expect(
       (authBloc.state as AuthAuthenticated).user.username,
       'alice',
+    );
+
+    getIt<SessionTerminationNotifier>().notifyTerminated();
+    await tester.pumpAndSettle();
+    expect(find.text('Log In'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextFormField).at(0), 'alice');
+    await tester.enterText(find.byType(TextFormField).at(1), 'hunter2');
+    await tester.tap(find.widgetWithText(FilledButton, 'Log In'));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('home-dashboard-identity')),
+      findsOneWidget,
     );
   });
   // fst:auth:end

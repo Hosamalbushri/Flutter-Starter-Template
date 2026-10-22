@@ -12,9 +12,11 @@
 // fst:auth:start
 import 'package:feature_auth/feature_auth.dart';
 // fst:auth:end
+import 'package:flutter/material.dart';
 import 'package:flutter_starter_template/app/router.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localization/localization.dart';
 
 // fst:auth:start
 import '../test_utils.dart';
@@ -57,6 +59,35 @@ String? resolve({
 // fst:auth:end
 
 void main() {
+  testWidgets('unknown locations render the localized recovery screen', (
+    tester,
+  ) async {
+    final result = buildRouterWithDeepLink(
+      null,
+      featureRoutes: const [],
+      includeDebugRoutes: false,
+    );
+    addTearDown(result.router.dispose);
+    result.deepLink.splashCompleted = true;
+    result.router.go('/does-not-exist');
+
+    await tester.pumpWidget(
+      MaterialApp.router(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        routerConfig: result.router,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('unknown-route-screen')),
+      findsOneWidget,
+    );
+    expect(find.text('Page Not Found'), findsOneWidget);
+    expect(find.textContaining('/does-not-exist'), findsOneWidget);
+  });
+
   // fst:auth:start
   group('Phase 1 — before splash completes', () {
     test('stays on splash when already there, capturing nothing', () {

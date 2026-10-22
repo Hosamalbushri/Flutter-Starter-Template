@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rev_sync/rev_sync.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../atomic.dart';
 import '../../support.dart';
 
 class MockCollectionsLocalDataSource extends Mock
@@ -58,7 +59,12 @@ void main() {
     mockSync = MockCollectionsSyncController();
     mockUuid = MockUuid();
     when(() => mockSync.sync()).thenAnswer((_) async {});
-    repository = CollectionsRepositoryImpl(mockLocal, mockSync, mockUuid);
+    repository = CollectionsRepositoryImpl(
+      mockLocal,
+      mockSync,
+      mockUuid,
+      TestAtomicWriteCoordinator(),
+    );
   });
 
   group('list', () {
@@ -203,6 +209,44 @@ void main() {
       expect(result, isA<Ok<void>>());
       expect(entity.syncState, SyncState.pendingDelete);
       verify(() => mockSync.sync()).called(1);
+    });
+  });
+
+  group('import batch synchronization', () {
+    const input = CollectionInput(
+      name: 'Imported',
+      icon: 'folder',
+      color: 0xFF0EA5E9,
+    );
+
+    test('triggers one sync after a successful batch', () async {
+      when(() => mockUuid.v4()).thenReturn('new-uuid');
+      when(() => mockLocal.putNew(any())).thenAnswer(
+        (invocation) async =>
+            invocation.positionalArguments[0] as CollectionEntity,
+      );
+
+      repository.beginImportBatch();
+      await repository.create(input);
+      await repository.create(input);
+
+      verifyNever(() => mockSync.sync());
+      repository.endImportBatch(successful: true);
+      verify(() => mockSync.sync()).called(1);
+    });
+
+    test('does not sync a compensated failed batch', () async {
+      when(() => mockUuid.v4()).thenReturn('new-uuid');
+      when(() => mockLocal.putNew(any())).thenAnswer(
+        (invocation) async =>
+            invocation.positionalArguments[0] as CollectionEntity,
+      );
+
+      repository.beginImportBatch();
+      await repository.create(input);
+      repository.endImportBatch(successful: false);
+
+      verifyNever(() => mockSync.sync());
     });
   });
 }

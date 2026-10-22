@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:network/network.dart';
 
 import 'package:shared_contracts/shared_contracts.dart';
 import 'bloc/auth_bloc.dart';
@@ -24,12 +25,17 @@ SessionStatus sessionStatusFor(AuthState state) => switch (state) {
 /// session surface other features need, so they don't depend on auth's
 /// presentation layer.
 class AuthSession extends ChangeNotifier implements Session {
-  AuthSession(this._bloc) {
+  AuthSession(this._bloc, this._sessionTermination) {
     _subscription = _bloc.stream.listen((_) => notifyListeners());
+    _terminationSubscription = _sessionTermination.terminations.listen((_) {
+      _bloc.add(const AuthSessionCleared());
+    });
   }
 
   final AuthBloc _bloc;
+  final SessionTerminationNotifier _sessionTermination;
   late final StreamSubscription<AuthState> _subscription;
+  late final StreamSubscription<void> _terminationSubscription;
 
   @override
   AuthUser? get currentUser => switch (_bloc.state) {
@@ -65,6 +71,7 @@ class AuthSession extends ChangeNotifier implements Session {
   @override
   void dispose() {
     _subscription.cancel();
+    _terminationSubscription.cancel();
     super.dispose();
   }
 }

@@ -14,6 +14,8 @@ part 'theme_event.dart';
 const _kThemeModeKey = 'app.theme_mode';
 const _kThemeSchemeKey = 'app.theme_scheme';
 const _kLocaleKey = 'app.locale';
+const _kFontFamilyKey = 'app.font_family';
+const _kTextScaleKey = 'app.text_scale';
 
 @lazySingleton
 class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
@@ -21,6 +23,9 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
     on<ThemeModeChanged>(_onModeChanged, transformer: sequential());
     on<ThemeSchemeChanged>(_onSchemeChanged, transformer: sequential());
     on<ThemeLocaleChanged>(_onLocaleChanged, transformer: sequential());
+    on<ThemeFontFamilyChanged>(_onFontFamilyChanged, transformer: sequential());
+    on<ThemeTextScaleChanged>(_onTextScaleChanged, transformer: sequential());
+    on<ThemeSettingsReset>(_onSettingsReset, transformer: sequential());
   }
 
   final SharedPreferences _prefs;
@@ -44,8 +49,30 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
         ? Locale(localeRaw)
         : null;
 
-    return ThemeState(mode: mode, scheme: scheme, locale: locale);
+    final fontFamily = _migrateFontFamily(prefs.getString(_kFontFamilyKey));
+
+    final scaleRaw = prefs.getString(_kTextScaleKey);
+    final textScale = AppTextScale.values.firstWhere(
+      (scale) => scale.name == scaleRaw,
+      orElse: () => AppTextScale.system,
+    );
+
+    return ThemeState(
+      mode: mode,
+      scheme: scheme,
+      locale: locale,
+      fontFamily: fontFamily,
+      textScale: textScale,
+    );
   }
+
+  static String _migrateFontFamily(String? stored) => switch (stored) {
+    null || '' || 'system' => 'system',
+    'inter' => 'Inter',
+    'cairo' => 'Cairo',
+    'notoKufiArabic' => 'Noto Kufi Arabic',
+    _ => stored,
+  };
 
   Future<void> _onModeChanged(
     ThemeModeChanged event,
@@ -79,5 +106,48 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
       ),
     );
     await _prefs.setString(_kLocaleKey, event.locale?.languageCode ?? '');
+  }
+
+  Future<void> _onFontFamilyChanged(
+    ThemeFontFamilyChanged event,
+    Emitter<ThemeState> emit,
+  ) async {
+    if (event.fontFamily == state.fontFamily) return;
+    emit(state.copyWith(fontFamily: event.fontFamily));
+    await _prefs.setString(_kFontFamilyKey, event.fontFamily);
+  }
+
+  Future<void> _onTextScaleChanged(
+    ThemeTextScaleChanged event,
+    Emitter<ThemeState> emit,
+  ) async {
+    if (event.textScale == state.textScale) return;
+    emit(state.copyWith(textScale: event.textScale));
+    await _prefs.setString(_kTextScaleKey, event.textScale.name);
+  }
+
+  Future<void> _onSettingsReset(
+    ThemeSettingsReset event,
+    Emitter<ThemeState> emit,
+  ) async {
+    const defaults = ThemeState(
+      mode: ThemeMode.system,
+      scheme: ThemeState.defaultScheme,
+    );
+    if (state.mode == defaults.mode &&
+        state.scheme == defaults.scheme &&
+        state.locale == defaults.locale &&
+        state.fontFamily == defaults.fontFamily &&
+        state.textScale == defaults.textScale) {
+      return;
+    }
+    emit(defaults);
+    await Future.wait([
+      _prefs.setString(_kThemeModeKey, defaults.mode.name),
+      _prefs.setString(_kThemeSchemeKey, defaults.scheme.name),
+      _prefs.setString(_kLocaleKey, ''),
+      _prefs.setString(_kFontFamilyKey, defaults.fontFamily),
+      _prefs.setString(_kTextScaleKey, defaults.textScale.name),
+    ]);
   }
 }

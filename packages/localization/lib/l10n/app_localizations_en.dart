@@ -165,6 +165,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonSignOut => 'Sign out';
 
   @override
+  String get quickActionsTitle => 'Quick actions';
+
+  @override
   String get homeAppBarTitle => 'Home';
 
   @override
@@ -267,16 +270,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSettingsSubtitle => 'Account and application settings';
 
   @override
+  String get profileAccountBadge => 'Personal workspace';
+
+  @override
+  String get profileCopyIdTooltip => 'Copy account ID';
+
+  @override
   String get profileSectionAppearance => 'Appearance';
+
+  @override
+  String get profileAppearanceSectionSubtitle => 'Theme, color and language';
 
   @override
   String get profileSectionAccount => 'Account';
 
   @override
+  String get profileAccountSectionSubtitle => 'Security and privacy controls';
+
+  @override
   String get profileChangePassword => 'Change Password';
 
   @override
+  String get profileChangePasswordSubtitle =>
+      'Update your account security credentials';
+
+  @override
   String get profileDeleteAccount => 'Delete Account';
+
+  @override
+  String get profileDeleteAccountSubtitle =>
+      'Permanently remove your account and data';
 
   @override
   String get profileDeleteAccountDialogTitle => 'Delete account?';
@@ -322,6 +345,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSectionAbout => 'About';
 
   @override
+  String get profileAboutSectionSubtitle => 'Version and application details';
+
+  @override
   String get profileUserIdCopied => 'User ID copied';
 
   @override
@@ -343,6 +369,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String profileAppVersionBuild(String version, String buildNumber) {
     return 'Version $version (build $buildNumber)';
   }
+
+  @override
+  String get profileAppStatus => 'Up to date';
 
   @override
   String get profileSignOutConfirmMessage =>
@@ -521,10 +550,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navHome => 'Home';
 
   @override
-  String get navBookmarks => 'Bookmarks';
+  String get navBookmarks => 'Saved';
 
   @override
-  String get navProfile => 'Profile';
+  String get navProfile => 'Account';
 
   @override
   String get navSettings => 'Settings';
@@ -548,7 +577,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookmarkRemoveImageLabel => 'Remove image';
 
   @override
-  String get navNotifications => 'Notifications';
+  String get navNotifications => 'Alerts';
 
   @override
   String get notificationsAppBarTitle => 'Notifications';
@@ -735,4 +764,373 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileAppearanceLanguageLabel => 'Language';
+
+  @override
+  String get systemSettingsTitle => 'System settings';
+
+  @override
+  String get systemSettingsSubtitle => 'Personalize your app experience';
+
+  @override
+  String get systemSettingsOpen => 'Open system settings';
+
+  @override
+  String get systemSettingsAppearance => 'Appearance and color';
+
+  @override
+  String get systemSettingsAppearanceHint =>
+      'Choose the appearance and accent that suit you';
+
+  @override
+  String get systemSettingsTypography => 'Type and reading';
+
+  @override
+  String get systemSettingsTypographyHint =>
+      'Change the font and text size across the app';
+
+  @override
+  String get systemSettingsFont => 'Font family';
+
+  @override
+  String get systemSettingsFontSystem => 'System font';
+
+  @override
+  String get systemSettingsFontSystemHint => 'Use the device\'s default font';
+
+  @override
+  String get systemSettingsFontPreview => 'English and نص عربي 123';
+
+  @override
+  String get systemSettingsBrowseFonts => 'Tap to choose a font family';
+
+  @override
+  String get systemSettingsSuggestedFonts => 'Suggested';
+
+  @override
+  String get systemSettingsFontLibrary => 'Choose a font family';
+
+  @override
+  String get systemSettingsFontLibraryHint =>
+      'Names load gradually; the font is loaded only after selection';
+
+  @override
+  String get systemSettingsFontSearchHint => 'Search by font name';
+
+  @override
+  String get systemSettingsFontNoResults => 'No matching font found';
+
+  @override
+  String get systemSettingsFontLoadError => 'The font list could not be loaded';
+
+  @override
+  String get systemSettingsRetry => 'Try again';
+
+  @override
+  String get systemSettingsTextSize => 'Text size';
+
+  @override
+  String get systemSettingsTextCompact => 'Small';
+
+  @override
+  String get systemSettingsTextStandard => 'Standard';
+
+  @override
+  String get systemSettingsTextLarge => 'Large';
+
+  @override
+  String get systemSettingsLanguageHint =>
+      'The interface language and direction update immediately';
+
+  @override
+  String get systemSettingsLanguageSystemHint =>
+      'Automatically follow the device language';
+
+  @override
+  String get systemSettingsPreviewTitle => 'Live preview';
+
+  @override
+  String get systemSettingsReset => 'Restore default settings';
+
+  @override
+  String get documentCenterTitle => 'Document Center';
+
+  @override
+  String get documentCenterSubtitle =>
+      'Import, export, report composition and printing';
+
+  @override
+  String get documentCenterTabImport => 'Import Data';
+
+  @override
+  String get documentCenterTabExport => 'Export Data';
+
+  @override
+  String get documentCenterTabReports => 'Reports & Printing';
+
+  @override
+  String get documentImportSelectFile => 'Select File';
+
+  @override
+  String get documentImportSelectFileHint =>
+      'Select a CSV, XLSX, or JSON file to import';
+
+  @override
+  String documentImportFileSelected(String fileName) {
+    return 'Selected file: $fileName';
+  }
+
+  @override
+  String documentImportDetectedFormat(String format) {
+    return 'Detected format: $format';
+  }
+
+  @override
+  String get documentImportSourceColumns => 'Source columns';
+
+  @override
+  String get documentImportTargetSchema => 'Target schema';
+
+  @override
+  String get documentImportValidateButton => 'Validate Dataset';
+
+  @override
+  String get documentImportCommitButton => 'Commit Import';
+
+  @override
+  String get documentImportPreviewTitle => 'Validation Preview';
+
+  @override
+  String documentImportValidRows(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Valid rows: $countString';
+  }
+
+  @override
+  String documentImportInvalidRows(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Invalid rows: $countString';
+  }
+
+  @override
+  String documentImportSuccessMessage(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Successfully imported $countString records';
+  }
+
+  @override
+  String documentImportErrorMessage(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Import validation failed with $countString errors';
+  }
+
+  @override
+  String get documentExportDatasetLabel => 'Select Dataset';
+
+  @override
+  String get documentExportFormatLabel => 'Export Format';
+
+  @override
+  String get documentExportColumnsLabel => 'Select Columns';
+
+  @override
+  String get documentExportNeutralizeFormulas =>
+      'Protect against spreadsheet formula injection';
+
+  @override
+  String get documentExportButton => 'Export Document';
+
+  @override
+  String documentExportSuccess(int bytes) {
+    final intl.NumberFormat bytesNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String bytesString = bytesNumberFormat.format(bytes);
+
+    return 'Export completed ($bytesString bytes)';
+  }
+
+  @override
+  String get documentReportsSelectTemplate => 'Report Template';
+
+  @override
+  String get documentReportsSales => 'Sales Summary Report';
+
+  @override
+  String get documentReportsInventory => 'Inventory Movement Report';
+
+  @override
+  String get documentReportsStatement => 'Supplier Account Statement';
+
+  @override
+  String get documentReportsInvoice => 'Commercial Tax Invoice';
+
+  @override
+  String get documentReportsGeneral => 'General Activity Log';
+
+  @override
+  String get documentReportsGeneratePdf => 'Generate PDF';
+
+  @override
+  String get documentReportsPrintSystem => 'System Print';
+
+  @override
+  String get documentReportsPrintThermal => 'Thermal Print (ESC/POS)';
+
+  @override
+  String get documentReportsThermalSuccess =>
+      'Document sent to thermal printer';
+
+  @override
+  String get documentReportsPreviewTitle => 'Report Preview';
+
+  @override
+  String get collectionsImportAction => 'Import Collections';
+
+  @override
+  String get bookmarksImportAction => 'Import Bookmarks';
+
+  @override
+  String get documentImportDatasetLabel => 'Target Dataset';
+
+  @override
+  String get documentImportDuplicatePolicyLabel => 'Duplicate Handling Policy';
+
+  @override
+  String get documentImportPolicySkip => 'Skip Duplicates';
+
+  @override
+  String get documentImportPolicyUpdate => 'Update Existing';
+
+  @override
+  String get documentImportPolicyCreate => 'Create New Copies';
+
+  @override
+  String documentImportCreatedCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Created: $countString';
+  }
+
+  @override
+  String documentImportUpdatedCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Updated: $countString';
+  }
+
+  @override
+  String documentImportSkippedCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Skipped: $countString';
+  }
+
+  @override
+  String documentImportFailedCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Failed: $countString';
+  }
+
+  @override
+  String get documentImportSummaryTitle => 'Import Result Summary';
+
+  @override
+  String get documentImportCloseButton => 'Close';
+
+  @override
+  String get routeNotFoundTitle => 'Page Not Found';
+
+  @override
+  String routeNotFoundMessage(String location) {
+    return 'No page matches $location.';
+  }
+
+  @override
+  String get routeNotFoundHomeAction => 'Go to Home';
+
+  @override
+  String get exitAppTitle => 'Exit app?';
+
+  @override
+  String get exitAppMessage => 'Press Exit to close the app.';
+
+  @override
+  String get exitAppConfirm => 'Exit';
+
+  @override
+  String get documentImportDemoSales => 'Sales (Demo)';
+
+  @override
+  String get documentProgressReading => 'Reading document…';
+
+  @override
+  String get documentProgressParsing => 'Parsing document…';
+
+  @override
+  String documentProgressValidating(int current, int total) {
+    final intl.NumberFormat currentNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String currentString = currentNumberFormat.format(current);
+    final intl.NumberFormat totalNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String totalString = totalNumberFormat.format(total);
+
+    return 'Validating $currentString of $totalString…';
+  }
+
+  @override
+  String get documentProgressCommitting => 'Saving imported records…';
+
+  @override
+  String get documentReportPdfFailure => 'The PDF could not be generated.';
+
+  @override
+  String documentThermalSuccessBytes(int bytes) {
+    final intl.NumberFormat bytesNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String bytesString = bytesNumberFormat.format(bytes);
+
+    return 'Document sent to the thermal printer ($bytesString bytes)';
+  }
+
+  @override
+  String get documentThermalFailure =>
+      'The document could not be sent to the thermal printer.';
+
+  @override
+  String get documentFileReadFailure => 'The selected file could not be read.';
+
+  @override
+  String get documentImportValidationFailure =>
+      'The document is damaged, unsupported, or does not match the selected dataset.';
+
+  @override
+  String get documentImportCommitFailure =>
+      'The validated rows could not be saved. No partial import was kept.';
+
+  @override
+  String get documentExportFailure => 'The document could not be exported.';
+
+  @override
+  String get documentSaveFailure => 'The exported file could not be saved.';
 }

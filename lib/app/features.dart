@@ -4,12 +4,16 @@ import 'package:feature_bookmarks/feature_bookmarks.dart';
 // fst:feature:collections:start
 import 'package:feature_collections/feature_collections.dart';
 // fst:feature:collections:end
+// fst:document:center:start
+import 'package:feature_document_center/feature_document_center.dart';
+// fst:document:center:end
 // fst:feature:notifications:start
 import 'package:feature_notifications/feature_notifications.dart';
 // fst:feature:notifications:end
-// fst:feature:_infra:start
+
+// fst:feature:_router:start
 import 'package:go_router/go_router.dart';
-// fst:feature:_infra:end
+// fst:feature:_router:end
 
 // fst:feature:_infra:start
 import 'di/injection.dart';
@@ -29,6 +33,9 @@ const List<FeatureModule> enabledFeatures = [
   // fst:feature:notifications:start
   _NotificationsModule(),
   // fst:feature:notifications:end
+  // fst:document:center:start
+  _DocumentCenterModule(),
+  // fst:document:center:end
   // fst:enabled-features — `fst add-feature` inserts new modules above this line
 ];
 
@@ -110,6 +117,18 @@ final class _NotificationsModule extends FeatureModule {
   Iterable<RouteBase> get routes => const <RouteBase>[];
 }
 // fst:feature:notifications:end
+
+// fst:document:center:start
+final class _DocumentCenterModule extends FeatureModule {
+  const _DocumentCenterModule();
+
+  @override
+  String get id => 'document_center';
+
+  @override
+  Iterable<RouteBase> get routes => documentCenterRoutes;
+}
+// fst:document:center:end
 
 // fst:feature-module-classes — `fst add-feature` inserts new module classes above
 

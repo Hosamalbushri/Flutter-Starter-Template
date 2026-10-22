@@ -23,14 +23,22 @@ if (googleServicesFile.exists()) {
 
 // Release signing is configured via android/key.properties (git-ignored).
 // Copy key.properties.example to key.properties and point it at your upload
-// keystore to ship Play-ready builds (see android/fastlane/README.md). When
-// the file is absent — the default template state — release falls back to the
-// debug keystore so the app still builds without any setup.
+// keystore to ship Play-ready builds (see android/fastlane/README.md).
 val keystorePropertiesFile = rootProject.file("key.properties")
 val keystoreProperties = Properties().apply {
     if (keystorePropertiesFile.exists()) {
         load(FileInputStream(keystorePropertiesFile))
     }
+}
+val requestedProdRelease = gradle.startParameter.taskNames.any { taskName ->
+    taskName.substringAfterLast(':').contains("ProdRelease", ignoreCase = true)
+}
+if (requestedProdRelease && !keystorePropertiesFile.exists()) {
+    throw GradleException(
+        "Production release signing is not configured. " +
+            "Copy android/key.properties.example to android/key.properties " +
+            "and configure the upload keystore.",
+    )
 }
 
 android {
@@ -89,10 +97,8 @@ android {
 
     buildTypes {
         release {
-            signingConfig = if (keystorePropertiesFile.exists()) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
             }
         }
     }

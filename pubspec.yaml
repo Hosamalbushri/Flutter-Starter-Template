@@ -60,7 +60,13 @@ workspace:
   - packages/features/splash
   - packages/features/home
   - packages/features/profile
+  # fst:document:engine:start
+  - packages/document_engine
+  # fst:document:engine:end
   # fst:packages — `fst create-package` inserts reusable packages above this line
+  # fst:document:center:start
+  - packages/features/document_center
+  # fst:document:center:end
   # fst:features — `fst add-feature` inserts new feature packages above this line
 
 # Dependencies specify other packages that your package needs in order to work.
@@ -93,6 +99,9 @@ dependencies:
   shared_ui: ^0.1.0
   database: ^0.1.0
   localization: ^0.1.0
+  # fst:document:engine:start
+  document_engine: ^0.1.0
+  # fst:document:engine:end
   # fst:auth:start
   feature_auth: ^0.1.0
   # fst:auth:end
@@ -108,6 +117,9 @@ dependencies:
   feature_splash: ^0.1.0
   feature_home: ^0.1.0
   feature_profile: ^0.1.0
+  # fst:document:center:start
+  feature_document_center: ^0.1.0
+  # fst:document:center:end
   # fst:feature-deps — `fst add-feature` inserts new feature deps above this line
 
   flutter:

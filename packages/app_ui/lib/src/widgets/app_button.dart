@@ -61,12 +61,12 @@ class AppButton extends StatelessWidget {
         icon == null || isLoading
             ? FilledButton(
                 onPressed: effectiveOnPressed,
-                style: _style(),
+                style: _style(context),
                 child: child,
               )
             : FilledButton.icon(
                 onPressed: effectiveOnPressed,
-                style: _style(),
+                style: _style(context),
                 icon: FaIcon(icon),
                 label: Text(label),
               ),
@@ -74,12 +74,12 @@ class AppButton extends StatelessWidget {
         icon == null || isLoading
             ? FilledButton.tonal(
                 onPressed: effectiveOnPressed,
-                style: _style(),
+                style: _style(context),
                 child: child,
               )
             : FilledButton.tonalIcon(
                 onPressed: effectiveOnPressed,
-                style: _style(),
+                style: _style(context),
                 icon: FaIcon(icon),
                 label: Text(label),
               ),
@@ -87,12 +87,12 @@ class AppButton extends StatelessWidget {
         icon == null || isLoading
             ? OutlinedButton(
                 onPressed: effectiveOnPressed,
-                style: _style(),
+                style: _style(context),
                 child: child,
               )
             : OutlinedButton.icon(
                 onPressed: effectiveOnPressed,
-                style: _style(),
+                style: _style(context),
                 icon: FaIcon(icon),
                 label: Text(label),
               ),
@@ -100,12 +100,12 @@ class AppButton extends StatelessWidget {
         icon == null || isLoading
             ? TextButton(
                 onPressed: effectiveOnPressed,
-                style: _style(),
+                style: _style(context),
                 child: child,
               )
             : TextButton.icon(
                 onPressed: effectiveOnPressed,
-                style: _style(),
+                style: _style(context),
                 icon: FaIcon(icon),
                 label: Text(label),
               ),
@@ -127,7 +127,7 @@ class AppButton extends StatelessWidget {
     AppButtonSize.large => 20,
   };
 
-  ButtonStyle _style() {
+  ButtonStyle _style(BuildContext context) {
     final padding = switch (size) {
       AppButtonSize.small => const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
@@ -168,12 +168,7 @@ class AppButton extends StatelessWidget {
             ? AppElevation.md - 1
             : AppElevation.none,
       ),
-      textStyle: const WidgetStatePropertyAll(
-        TextStyle(
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.3,
-        ),
-      ),
+      textStyle: WidgetStatePropertyAll(context.textTheme.labelLarge),
     );
   }
 

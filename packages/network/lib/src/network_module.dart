@@ -21,15 +21,38 @@ BaseOptions apiBaseOptions(
   contentType: 'application/json',
 );
 
-/// Verbose request/response logging for development builds only. Routes Dio's
-/// output through `dart:developer` (not `print`) so it integrates with
-/// DevTools and stays off the release console. Gate the call site on
-/// [EnvConfig.isDev].
-Interceptor devLogInterceptor() => LogInterceptor(
-  requestBody: true,
-  responseBody: true,
-  logPrint: (object) => developer.log(object.toString(), name: 'dio'),
-);
+/// Metadata-only request logging for development builds.
+///
+/// Headers, query strings, request/response bodies, and exception messages are
+/// deliberately excluded because they frequently contain credentials or user
+/// data. Gate the call site on [EnvConfig.isDev].
+Interceptor devLogInterceptor({void Function(String message)? logPrint}) {
+  final write =
+      logPrint ?? (String message) => developer.log(message, name: 'dio');
+
+  return InterceptorsWrapper(
+    onRequest: (options, handler) {
+      write('HTTP ${options.method} ${options.uri.path}');
+      handler.next(options);
+    },
+    onResponse: (response, handler) {
+      final request = response.requestOptions;
+      write(
+        'HTTP ${request.method} ${request.uri.path} '
+        '-> ${response.statusCode ?? 'unknown'}',
+      );
+      handler.next(response);
+    },
+    onError: (error, handler) {
+      final request = error.requestOptions;
+      write(
+        'HTTP ${request.method} ${request.uri.path} failed '
+        '(${error.type.name}, status ${error.response?.statusCode ?? 'none'})',
+      );
+      handler.next(error);
+    },
+  );
+}
 
 @module
 abstract class NetworkModule {

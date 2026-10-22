@@ -404,6 +404,12 @@ abstract class AppLocalizations {
   /// **'Sign out'**
   String get commonSignOut;
 
+  /// No description provided for @quickActionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick actions'**
+  String get quickActionsTitle;
+
   /// No description provided for @homeAppBarTitle.
   ///
   /// In en, this message translates to:
@@ -578,11 +584,29 @@ abstract class AppLocalizations {
   /// **'Account and application settings'**
   String get profileSettingsSubtitle;
 
+  /// No description provided for @profileAccountBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal workspace'**
+  String get profileAccountBadge;
+
+  /// No description provided for @profileCopyIdTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy account ID'**
+  String get profileCopyIdTooltip;
+
   /// No description provided for @profileSectionAppearance.
   ///
   /// In en, this message translates to:
   /// **'Appearance'**
   String get profileSectionAppearance;
+
+  /// No description provided for @profileAppearanceSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme, color and language'**
+  String get profileAppearanceSectionSubtitle;
 
   /// No description provided for @profileSectionAccount.
   ///
@@ -590,17 +614,35 @@ abstract class AppLocalizations {
   /// **'Account'**
   String get profileSectionAccount;
 
+  /// No description provided for @profileAccountSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Security and privacy controls'**
+  String get profileAccountSectionSubtitle;
+
   /// No description provided for @profileChangePassword.
   ///
   /// In en, this message translates to:
   /// **'Change Password'**
   String get profileChangePassword;
 
+  /// No description provided for @profileChangePasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update your account security credentials'**
+  String get profileChangePasswordSubtitle;
+
   /// No description provided for @profileDeleteAccount.
   ///
   /// In en, this message translates to:
   /// **'Delete Account'**
   String get profileDeleteAccount;
+
+  /// No description provided for @profileDeleteAccountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently remove your account and data'**
+  String get profileDeleteAccountSubtitle;
 
   /// No description provided for @profileDeleteAccountDialogTitle.
   ///
@@ -680,6 +722,12 @@ abstract class AppLocalizations {
   /// **'About'**
   String get profileSectionAbout;
 
+  /// No description provided for @profileAboutSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Version and application details'**
+  String get profileAboutSectionSubtitle;
+
   /// No description provided for @profileUserIdCopied.
   ///
   /// In en, this message translates to:
@@ -721,6 +769,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Version {version} (build {buildNumber})'**
   String profileAppVersionBuild(String version, String buildNumber);
+
+  /// No description provided for @profileAppStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to date'**
+  String get profileAppStatus;
 
   /// No description provided for @profileSignOutConfirmMessage.
   ///
@@ -1061,13 +1115,13 @@ abstract class AppLocalizations {
   /// No description provided for @navBookmarks.
   ///
   /// In en, this message translates to:
-  /// **'Bookmarks'**
+  /// **'Saved'**
   String get navBookmarks;
 
   /// No description provided for @navProfile.
   ///
   /// In en, this message translates to:
-  /// **'Profile'**
+  /// **'Account'**
   String get navProfile;
 
   /// No description provided for @navSettings.
@@ -1109,7 +1163,7 @@ abstract class AppLocalizations {
   /// No description provided for @navNotifications.
   ///
   /// In en, this message translates to:
-  /// **'Notifications'**
+  /// **'Alerts'**
   String get navNotifications;
 
   /// No description provided for @notificationsAppBarTitle.
@@ -1429,6 +1483,570 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language'**
   String get profileAppearanceLanguageLabel;
+
+  /// No description provided for @systemSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'System settings'**
+  String get systemSettingsTitle;
+
+  /// No description provided for @systemSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Personalize your app experience'**
+  String get systemSettingsSubtitle;
+
+  /// No description provided for @systemSettingsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open system settings'**
+  String get systemSettingsOpen;
+
+  /// No description provided for @systemSettingsAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance and color'**
+  String get systemSettingsAppearance;
+
+  /// No description provided for @systemSettingsAppearanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the appearance and accent that suit you'**
+  String get systemSettingsAppearanceHint;
+
+  /// No description provided for @systemSettingsTypography.
+  ///
+  /// In en, this message translates to:
+  /// **'Type and reading'**
+  String get systemSettingsTypography;
+
+  /// No description provided for @systemSettingsTypographyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the font and text size across the app'**
+  String get systemSettingsTypographyHint;
+
+  /// No description provided for @systemSettingsFont.
+  ///
+  /// In en, this message translates to:
+  /// **'Font family'**
+  String get systemSettingsFont;
+
+  /// No description provided for @systemSettingsFontSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System font'**
+  String get systemSettingsFontSystem;
+
+  /// No description provided for @systemSettingsFontSystemHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the device\'s default font'**
+  String get systemSettingsFontSystemHint;
+
+  /// No description provided for @systemSettingsFontPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'English and نص عربي 123'**
+  String get systemSettingsFontPreview;
+
+  /// No description provided for @systemSettingsBrowseFonts.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to choose a font family'**
+  String get systemSettingsBrowseFonts;
+
+  /// No description provided for @systemSettingsSuggestedFonts.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested'**
+  String get systemSettingsSuggestedFonts;
+
+  /// No description provided for @systemSettingsFontLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a font family'**
+  String get systemSettingsFontLibrary;
+
+  /// No description provided for @systemSettingsFontLibraryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Names load gradually; the font is loaded only after selection'**
+  String get systemSettingsFontLibraryHint;
+
+  /// No description provided for @systemSettingsFontSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by font name'**
+  String get systemSettingsFontSearchHint;
+
+  /// No description provided for @systemSettingsFontNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching font found'**
+  String get systemSettingsFontNoResults;
+
+  /// No description provided for @systemSettingsFontLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'The font list could not be loaded'**
+  String get systemSettingsFontLoadError;
+
+  /// No description provided for @systemSettingsRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get systemSettingsRetry;
+
+  /// No description provided for @systemSettingsTextSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Text size'**
+  String get systemSettingsTextSize;
+
+  /// No description provided for @systemSettingsTextCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get systemSettingsTextCompact;
+
+  /// No description provided for @systemSettingsTextStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get systemSettingsTextStandard;
+
+  /// No description provided for @systemSettingsTextLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get systemSettingsTextLarge;
+
+  /// No description provided for @systemSettingsLanguageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The interface language and direction update immediately'**
+  String get systemSettingsLanguageHint;
+
+  /// No description provided for @systemSettingsLanguageSystemHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically follow the device language'**
+  String get systemSettingsLanguageSystemHint;
+
+  /// No description provided for @systemSettingsPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Live preview'**
+  String get systemSettingsPreviewTitle;
+
+  /// No description provided for @systemSettingsReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore default settings'**
+  String get systemSettingsReset;
+
+  /// No description provided for @documentCenterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Document Center'**
+  String get documentCenterTitle;
+
+  /// No description provided for @documentCenterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import, export, report composition and printing'**
+  String get documentCenterSubtitle;
+
+  /// No description provided for @documentCenterTabImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Data'**
+  String get documentCenterTabImport;
+
+  /// No description provided for @documentCenterTabExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Data'**
+  String get documentCenterTabExport;
+
+  /// No description provided for @documentCenterTabReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports & Printing'**
+  String get documentCenterTabReports;
+
+  /// No description provided for @documentImportSelectFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Select File'**
+  String get documentImportSelectFile;
+
+  /// No description provided for @documentImportSelectFileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a CSV, XLSX, or JSON file to import'**
+  String get documentImportSelectFileHint;
+
+  /// No description provided for @documentImportFileSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected file: {fileName}'**
+  String documentImportFileSelected(String fileName);
+
+  /// No description provided for @documentImportDetectedFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected format: {format}'**
+  String documentImportDetectedFormat(String format);
+
+  /// No description provided for @documentImportSourceColumns.
+  ///
+  /// In en, this message translates to:
+  /// **'Source columns'**
+  String get documentImportSourceColumns;
+
+  /// No description provided for @documentImportTargetSchema.
+  ///
+  /// In en, this message translates to:
+  /// **'Target schema'**
+  String get documentImportTargetSchema;
+
+  /// No description provided for @documentImportValidateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate Dataset'**
+  String get documentImportValidateButton;
+
+  /// No description provided for @documentImportCommitButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Commit Import'**
+  String get documentImportCommitButton;
+
+  /// No description provided for @documentImportPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Validation Preview'**
+  String get documentImportPreviewTitle;
+
+  /// No description provided for @documentImportValidRows.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid rows: {count}'**
+  String documentImportValidRows(int count);
+
+  /// No description provided for @documentImportInvalidRows.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid rows: {count}'**
+  String documentImportInvalidRows(int count);
+
+  /// No description provided for @documentImportSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully imported {count} records'**
+  String documentImportSuccessMessage(int count);
+
+  /// No description provided for @documentImportErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Import validation failed with {count} errors'**
+  String documentImportErrorMessage(int count);
+
+  /// No description provided for @documentExportDatasetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Dataset'**
+  String get documentExportDatasetLabel;
+
+  /// No description provided for @documentExportFormatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Format'**
+  String get documentExportFormatLabel;
+
+  /// No description provided for @documentExportColumnsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Columns'**
+  String get documentExportColumnsLabel;
+
+  /// No description provided for @documentExportNeutralizeFormulas.
+  ///
+  /// In en, this message translates to:
+  /// **'Protect against spreadsheet formula injection'**
+  String get documentExportNeutralizeFormulas;
+
+  /// No description provided for @documentExportButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Document'**
+  String get documentExportButton;
+
+  /// No description provided for @documentExportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Export completed ({bytes} bytes)'**
+  String documentExportSuccess(int bytes);
+
+  /// No description provided for @documentReportsSelectTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Template'**
+  String get documentReportsSelectTemplate;
+
+  /// No description provided for @documentReportsSales.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales Summary Report'**
+  String get documentReportsSales;
+
+  /// No description provided for @documentReportsInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory Movement Report'**
+  String get documentReportsInventory;
+
+  /// No description provided for @documentReportsStatement.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplier Account Statement'**
+  String get documentReportsStatement;
+
+  /// No description provided for @documentReportsInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Commercial Tax Invoice'**
+  String get documentReportsInvoice;
+
+  /// No description provided for @documentReportsGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General Activity Log'**
+  String get documentReportsGeneral;
+
+  /// No description provided for @documentReportsGeneratePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate PDF'**
+  String get documentReportsGeneratePdf;
+
+  /// No description provided for @documentReportsPrintSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System Print'**
+  String get documentReportsPrintSystem;
+
+  /// No description provided for @documentReportsPrintThermal.
+  ///
+  /// In en, this message translates to:
+  /// **'Thermal Print (ESC/POS)'**
+  String get documentReportsPrintThermal;
+
+  /// No description provided for @documentReportsThermalSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Document sent to thermal printer'**
+  String get documentReportsThermalSuccess;
+
+  /// No description provided for @documentReportsPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Preview'**
+  String get documentReportsPreviewTitle;
+
+  /// No description provided for @collectionsImportAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Collections'**
+  String get collectionsImportAction;
+
+  /// No description provided for @bookmarksImportAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Bookmarks'**
+  String get bookmarksImportAction;
+
+  /// No description provided for @documentImportDatasetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Dataset'**
+  String get documentImportDatasetLabel;
+
+  /// No description provided for @documentImportDuplicatePolicyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate Handling Policy'**
+  String get documentImportDuplicatePolicyLabel;
+
+  /// No description provided for @documentImportPolicySkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip Duplicates'**
+  String get documentImportPolicySkip;
+
+  /// No description provided for @documentImportPolicyUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Existing'**
+  String get documentImportPolicyUpdate;
+
+  /// No description provided for @documentImportPolicyCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Copies'**
+  String get documentImportPolicyCreate;
+
+  /// No description provided for @documentImportCreatedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Created: {count}'**
+  String documentImportCreatedCount(int count);
+
+  /// No description provided for @documentImportUpdatedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated: {count}'**
+  String documentImportUpdatedCount(int count);
+
+  /// No description provided for @documentImportSkippedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped: {count}'**
+  String documentImportSkippedCount(int count);
+
+  /// No description provided for @documentImportFailedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed: {count}'**
+  String documentImportFailedCount(int count);
+
+  /// No description provided for @documentImportSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Result Summary'**
+  String get documentImportSummaryTitle;
+
+  /// No description provided for @documentImportCloseButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get documentImportCloseButton;
+
+  /// No description provided for @routeNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Page Not Found'**
+  String get routeNotFoundTitle;
+
+  /// No description provided for @routeNotFoundMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No page matches {location}.'**
+  String routeNotFoundMessage(String location);
+
+  /// No description provided for @routeNotFoundHomeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Home'**
+  String get routeNotFoundHomeAction;
+
+  /// No description provided for @exitAppTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit app?'**
+  String get exitAppTitle;
+
+  /// No description provided for @exitAppMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Press Exit to close the app.'**
+  String get exitAppMessage;
+
+  /// No description provided for @exitAppConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get exitAppConfirm;
+
+  /// No description provided for @documentImportDemoSales.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales (Demo)'**
+  String get documentImportDemoSales;
+
+  /// No description provided for @documentProgressReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading document…'**
+  String get documentProgressReading;
+
+  /// No description provided for @documentProgressParsing.
+  ///
+  /// In en, this message translates to:
+  /// **'Parsing document…'**
+  String get documentProgressParsing;
+
+  /// No description provided for @documentProgressValidating.
+  ///
+  /// In en, this message translates to:
+  /// **'Validating {current} of {total}…'**
+  String documentProgressValidating(int current, int total);
+
+  /// No description provided for @documentProgressCommitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving imported records…'**
+  String get documentProgressCommitting;
+
+  /// No description provided for @documentReportPdfFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'The PDF could not be generated.'**
+  String get documentReportPdfFailure;
+
+  /// No description provided for @documentThermalSuccessBytes.
+  ///
+  /// In en, this message translates to:
+  /// **'Document sent to the thermal printer ({bytes} bytes)'**
+  String documentThermalSuccessBytes(int bytes);
+
+  /// No description provided for @documentThermalFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'The document could not be sent to the thermal printer.'**
+  String get documentThermalFailure;
+
+  /// No description provided for @documentFileReadFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected file could not be read.'**
+  String get documentFileReadFailure;
+
+  /// No description provided for @documentImportValidationFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'The document is damaged, unsupported, or does not match the selected dataset.'**
+  String get documentImportValidationFailure;
+
+  /// No description provided for @documentImportCommitFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'The validated rows could not be saved. No partial import was kept.'**
+  String get documentImportCommitFailure;
+
+  /// No description provided for @documentExportFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'The document could not be exported.'**
+  String get documentExportFailure;
+
+  /// No description provided for @documentSaveFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'The exported file could not be saved.'**
+  String get documentSaveFailure;
 }
 
 class _AppLocalizationsDelegate

@@ -15,18 +15,22 @@ import '../local/collections_local_data_source.dart';
 /// commit locally first (and mark sync state), then kick a fire-and-forget
 /// sync. The UI gets immediate confirmation regardless of network state.
 @LazySingleton(as: CollectionsRepository)
-class CollectionsRepositoryImpl implements CollectionsRepository {
-  CollectionsRepositoryImpl(this._local, this._sync, this._uuid);
+class CollectionsRepositoryImpl
+    implements CollectionsRepository, CollectionsImportBatchRepository {
+  CollectionsRepositoryImpl(this._local, this._sync, this._uuid, this._atomic);
 
   final CollectionsLocalDataSource _local;
   final CollectionsSyncController _sync;
   final Uuid _uuid;
+  final AtomicWriteCoordinator _atomic;
+  var _importBatchDepth = 0;
+  var _importBatchDirty = false;
 
   @override
   Future<Result<List<Collection>>> list() async {
     final result = await listLocal();
     // Trigger a refresh in the background; reads return immediately.
-    _sync.sync().fire();
+    _requestSync();
     return result;
   }
 
@@ -47,59 +51,95 @@ class CollectionsRepositoryImpl implements CollectionsRepository {
 
   @override
   Future<Result<Collection>> create(CollectionInput input) async {
-    final normalized = _normalize(input);
-    final now = clock.now().toUtc();
-    final entity = CollectionEntity(
-      uuid: _uuid.v4(),
-      name: normalized.name,
-      icon: normalized.icon,
-      color: normalized.color,
-      bookmarkIds: List.of(normalized.bookmarkIds),
-      createdAt: now,
-      updatedAt: now,
-      syncStateCode: SyncState.pendingCreate.code,
-    );
-    await _local.putNew(entity);
-    _sync.sync().fire();
-    return Ok(entity.toDomain());
+    return _atomic.run(() async {
+      final normalized = _normalize(input);
+      final now = clock.now().toUtc();
+      final entity = CollectionEntity(
+        uuid: _uuid.v4(),
+        name: normalized.name,
+        icon: normalized.icon,
+        color: normalized.color,
+        bookmarkIds: List.of(normalized.bookmarkIds),
+        createdAt: now,
+        updatedAt: now,
+        syncStateCode: SyncState.pendingCreate.code,
+      );
+      await _local.putNew(entity);
+      _requestSync();
+      return Ok(entity.toDomain());
+    });
   }
 
   @override
   Future<Result<Collection>> update(String id, CollectionInput input) async {
-    final existing = await _local.getByUuid(id);
-    if (existing == null || existing.syncState == SyncState.pendingDelete) {
-      return const Err(NotFoundFailure('Collection not found.'));
-    }
-    final normalized = _normalize(input);
-    existing.applyInput(normalized, now: clock.now().toUtc());
-    // pendingCreate stays pendingCreate (still needs the initial POST). Every
-    // other state — synced, an existing pendingUpdate, or a conflicted/failed
-    // row the user is re-editing — becomes a pendingUpdate to (re)push.
-    if (existing.syncState != SyncState.pendingCreate) {
-      existing.syncState = SyncState.pendingUpdate;
-    }
-    await _local.put(existing);
-    _sync.sync().fire();
-    return Ok(existing.toDomain());
+    return _atomic.run(() async {
+      final existing = await _local.getByUuid(id);
+      if (existing == null || existing.syncState == SyncState.pendingDelete) {
+        return const Err(NotFoundFailure('Collection not found.'));
+      }
+      final normalized = _normalize(input);
+      existing.applyInput(normalized, now: clock.now().toUtc());
+      // pendingCreate stays pendingCreate (still needs the initial POST). Every
+      // other state — synced, an existing pendingUpdate, or a conflicted/failed
+      // row the user is re-editing — becomes a pendingUpdate to (re)push.
+      if (existing.syncState != SyncState.pendingCreate) {
+        existing.syncState = SyncState.pendingUpdate;
+      }
+      await _local.put(existing);
+      _requestSync();
+      return Ok(existing.toDomain());
+    });
   }
 
   @override
   Future<Result<void>> delete(String id) async {
-    final existing = await _local.getByUuid(id);
-    if (existing == null || existing.syncState == SyncState.pendingDelete) {
-      return const Err(NotFoundFailure('Collection not found.'));
-    }
-    // A pendingCreate that's never been synced can be dropped outright —
-    // the server has never seen it, so there's nothing to tell it.
-    if (existing.syncState == SyncState.pendingCreate) {
-      await _local.hardDelete(existing);
+    return _atomic.run(() async {
+      final existing = await _local.getByUuid(id);
+      if (existing == null || existing.syncState == SyncState.pendingDelete) {
+        return const Err(NotFoundFailure('Collection not found.'));
+      }
+      // A pendingCreate that's never been synced can be dropped outright —
+      // the server has never seen it, so there's nothing to tell it.
+      if (existing.syncState == SyncState.pendingCreate) {
+        await _local.hardDelete(existing);
+        return const Ok(null);
+      }
+      existing.syncState = SyncState.pendingDelete;
+      existing.updatedAt = clock.now().toUtc();
+      await _local.put(existing);
+      _requestSync();
       return const Ok(null);
+    });
+  }
+
+  @override
+  void beginImportBatch() {
+    _importBatchDepth++;
+  }
+
+  @override
+  void endImportBatch({required bool successful}) {
+    if (_importBatchDepth == 0) {
+      throw StateError('No collections import batch is active.');
     }
-    existing.syncState = SyncState.pendingDelete;
-    existing.updatedAt = clock.now().toUtc();
-    await _local.put(existing);
+    _importBatchDepth--;
+    if (_importBatchDepth != 0) return;
+
+    final shouldSync = successful && _importBatchDirty;
+    _importBatchDirty = false;
+    if (shouldSync) _sync.sync().fire();
+  }
+
+  void _requestSync() {
+    if (_atomic.isActive) {
+      _atomic.afterCommit(_requestSync);
+      return;
+    }
+    if (_importBatchDepth > 0) {
+      _importBatchDirty = true;
+      return;
+    }
     _sync.sync().fire();
-    return const Ok(null);
   }
 
   /// Trim the name + dedupe bookmark ids so storage matches what the server

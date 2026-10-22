@@ -18,6 +18,10 @@ import 'package:feature_collections/src/data/sync/collections_sync_service.dart'
     as _i342;
 import 'package:feature_collections/src/domain/repositories/collections_repository.dart'
     as _i709;
+import 'package:feature_collections/src/domain/services/collections_import_delegate.dart'
+    as _i373;
+import 'package:feature_collections/src/domain/services/collections_membership_service.dart'
+    as _i318;
 import 'package:feature_collections/src/domain/services/collections_summary_service.dart'
     as _i228;
 import 'package:feature_collections/src/domain/services/collections_sync_controller.dart'
@@ -28,6 +32,8 @@ import 'package:feature_collections/src/domain/usecases/delete_collection.dart'
     as _i67;
 import 'package:feature_collections/src/domain/usecases/get_collection.dart'
     as _i562;
+import 'package:feature_collections/src/domain/usecases/import_collections.dart'
+    as _i891;
 import 'package:feature_collections/src/domain/usecases/list_collections.dart'
     as _i300;
 import 'package:feature_collections/src/domain/usecases/list_local_collections.dart'
@@ -53,12 +59,15 @@ class FeatureCollectionsPackageModule extends _i526.MicroPackageModule {
   @override
   _i687.FutureOr<void> init(_i526.GetItHelper gh) {
     final collectionsRemoteModule = _$CollectionsRemoteModule();
-    gh.lazySingleton<_i214.CollectionsLocalDataSource>(
-      () => _i214.ObjectBoxCollectionsDataSource(gh<_i252.Store>()),
-    );
     gh.lazySingleton<_i596.CollectionsRemoteDataSource>(
       () => collectionsRemoteModule.provideCollectionsRemoteDataSource(
         gh<_i372.Dio>(),
+      ),
+    );
+    gh.lazySingleton<_i214.CollectionsLocalDataSource>(
+      () => _i214.ObjectBoxCollectionsDataSource(
+        gh<_i252.Store>(),
+        gh<_i252.AtomicWriteCoordinator>(),
       ),
     );
     gh.lazySingleton<_i321.CollectionsSyncController>(
@@ -74,6 +83,7 @@ class FeatureCollectionsPackageModule extends _i526.MicroPackageModule {
         gh<_i214.CollectionsLocalDataSource>(),
         gh<_i321.CollectionsSyncController>(),
         gh<_i706.Uuid>(),
+        gh<_i252.AtomicWriteCoordinator>(),
       ),
     );
     gh.factory<_i227.CreateCollectionUseCase>(
@@ -95,6 +105,10 @@ class FeatureCollectionsPackageModule extends _i526.MicroPackageModule {
     gh.factory<_i200.UpdateCollectionUseCase>(
       () => _i200.UpdateCollectionUseCase(gh<_i709.CollectionsRepository>()),
     );
+    gh.lazySingleton<_i318.CollectionsMembershipService>(
+      () =>
+          _i318.CollectionsMembershipService(gh<_i709.CollectionsRepository>()),
+    );
     gh.factory<_i511.CollectionFormCubit>(
       () => _i511.CollectionFormCubit(
         gh<_i227.CreateCollectionUseCase>(),
@@ -111,6 +125,13 @@ class FeatureCollectionsPackageModule extends _i526.MicroPackageModule {
     gh.lazySingleton<_i856.CollectionsReader>(
       () => _i228.CollectionsSummaryService(gh<_i300.ListCollectionsUseCase>()),
     );
+    gh.lazySingleton<_i373.CollectionsImportDelegate>(
+      () => _i373.CollectionsImportDelegate(
+        gh<_i709.CollectionsRepository>(),
+        gh<_i856.BookmarkSummariesReader>(),
+        gh<_i252.AtomicWriteCoordinator>(),
+      ),
+    );
     gh.factory<_i352.CollectionsListBloc>(
       () => _i352.CollectionsListBloc(
         gh<_i300.ListCollectionsUseCase>(),
@@ -126,6 +147,10 @@ class FeatureCollectionsPackageModule extends _i526.MicroPackageModule {
         gh<_i67.DeleteCollectionUseCase>(),
         gh<_i856.BookmarkSummariesReader>(),
       ),
+    );
+    gh.factory<_i891.ImportCollectionsUseCase>(
+      () =>
+          _i891.ImportCollectionsUseCase(gh<_i373.CollectionsImportDelegate>()),
     );
   }
 }

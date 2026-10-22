@@ -3,8 +3,11 @@ library;
 
 import 'package:app_ui/app_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+import 'golden_test_helper.dart';
 
 /// Pumps [child] inside a deterministic MaterialApp (a plain
 /// `ColorScheme.fromSeed` theme, independent of the app theme) and captures
@@ -19,6 +22,7 @@ Future<void> _pumpGolden(
     MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        fontFamily: 'GoldenText',
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF095D9E),
           brightness: brightness,
@@ -58,6 +62,26 @@ Future<void> _expectGolden(WidgetTester tester, String name) {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() async {
+    setUpTolerantGoldenComparator();
+    final bytes = await loadGoldenFontBytes();
+    await (FontLoader(
+      'GoldenText',
+    )..addFont(Future.value(bytes.buffer.asByteData()))).load();
+    await loadBundledFont(
+      'packages/font_awesome_flutter/FontAwesomeSolid',
+      'packages/font_awesome_flutter/lib/fonts/'
+          'Font-Awesome-7-Free-Solid-900.otf',
+    );
+    await loadBundledFont(
+      'packages/font_awesome_flutter/FontAwesomeRegular',
+      'packages/font_awesome_flutter/lib/fonts/'
+          'Font-Awesome-7-Free-Regular-400.otf',
+    );
+  });
+
   group('AppButton', () {
     const buttons = Column(
       mainAxisSize: MainAxisSize.min,

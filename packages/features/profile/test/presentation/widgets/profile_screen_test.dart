@@ -1,6 +1,6 @@
 // Widget tests for the profile screen body. delete_account_flow_test covers the
 // destructive delete flow; these cover the rest of the screen: the session
-// identity header, the appearance theme-mode control wiring, and the sign-out
+// identity header, the system-settings entry point, and the sign-out
 // confirmation. The harness mirrors delete_account_flow_test (mocked blocs +
 // FakeSession) with a tall surface so every settings card is hit-testable.
 
@@ -118,30 +118,35 @@ void main() {
   });
   // fst:auth:end
 
-  testWidgets('selecting a theme mode dispatches ThemeModeChanged', (
+  testWidgets('appearance section links to system settings', (tester) async {
+    await pumpProfile(tester);
+
+    await tester.tap(find.text('Appearance'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('openSystemSettings')), findsOneWidget);
+    expect(find.text('Open system settings'), findsOneWidget);
+  });
+
+  testWidgets('accordion keeps only one profile section expanded', (
     tester,
   ) async {
     await pumpProfile(tester);
 
-    final darkTile = find.byWidgetPredicate(
-      (w) => w is RadioListTile<ThemeMode> && w.value == ThemeMode.dark,
+    expect(find.text('Change Password'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('openSystemSettings')),
+      findsNothing,
     );
-    expect(darkTile, findsOneWidget);
-    await tester.ensureVisible(darkTile);
-    await tester.tap(darkTile);
+
+    await tester.tap(find.text('Appearance'));
     await tester.pumpAndSettle();
 
-    verify(
-      () => themeBloc.add(
-        any(
-          that: isA<ThemeModeChanged>().having(
-            (e) => e.mode,
-            'mode',
-            ThemeMode.dark,
-          ),
-        ),
-      ),
-    ).called(1);
+    expect(find.text('Change Password'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('openSystemSettings')),
+      findsOneWidget,
+    );
   });
 
   // fst:auth:start

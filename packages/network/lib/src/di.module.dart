@@ -11,6 +11,7 @@ import 'package:injectable/injectable.dart' as _i526;
 import 'package:network/src/network_module.dart' as _i794;
 import 'package:network/src/performance_module.dart' as _i87;
 import 'package:network/src/performance_tracker.dart' as _i420;
+import 'package:network/src/session_termination_notifier.dart' as _i129;
 import 'package:network/src/token_refresher.dart' as _i277;
 import 'package:storage/storage.dart' as _i431;
 
@@ -23,6 +24,9 @@ class NetworkPackageModule extends _i526.MicroPackageModule {
     gh.lazySingleton<_i420.PerformanceTracker>(
       () => performanceModule.providePerformance(),
     );
+    gh.lazySingleton<_i129.SessionTerminationNotifier>(
+      () => _i129.SessionTerminationNotifier(),
+    );
     gh.lazySingleton<_i361.Dio>(
       () => networkModule.providePlainDio(gh<_i259.EnvConfig>()),
       instanceName: 'plain',
@@ -31,6 +35,7 @@ class NetworkPackageModule extends _i526.MicroPackageModule {
       () => _i277.TokenRefresher(
         gh<_i431.AuthTokenStore>(),
         gh<_i361.Dio>(instanceName: 'plain'),
+        gh<_i129.SessionTerminationNotifier>(),
       ),
     );
     gh.lazySingleton<_i361.Dio>(

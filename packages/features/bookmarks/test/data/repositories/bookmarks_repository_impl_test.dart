@@ -5,10 +5,13 @@ import 'package:feature_bookmarks/src/data/local/bookmarks_local_data_source.dar
 import 'package:feature_bookmarks/src/data/repositories/bookmarks_repository_impl.dart';
 import 'package:feature_bookmarks/src/domain/entities/bookmark.dart';
 import 'package:feature_bookmarks/src/domain/services/bookmarks_sync_controller.dart';
+import 'package:feature_collections/feature_collections.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rev_sync/rev_sync.dart';
 import 'package:test_utils/test_utils.dart';
 import 'package:uuid/uuid.dart';
+
+import '../../atomic.dart';
 
 class MockBookmarksLocalDataSource extends Mock
     implements BookmarksLocalDataSource {}
@@ -18,12 +21,16 @@ class MockBookmarksSyncController extends Mock
 
 class MockUuid extends Mock implements Uuid {}
 
+class MockCollectionsMembershipService extends Mock
+    implements CollectionsMembershipService {}
+
 class FakeBookmarkEntity extends Fake implements BookmarkEntity {}
 
 void main() {
   late MockBookmarksLocalDataSource mockLocal;
   late MockBookmarksSyncController mockSync;
   late MockUuid mockUuid;
+  late MockCollectionsMembershipService mockCollections;
   late BookmarksRepositoryImpl repository;
 
   setUpAll(() {
@@ -62,8 +69,21 @@ void main() {
     mockLocal = MockBookmarksLocalDataSource();
     mockSync = MockBookmarksSyncController();
     mockUuid = MockUuid();
+    mockCollections = MockCollectionsMembershipService();
     when(() => mockSync.sync()).thenAnswer((_) async {});
-    repository = BookmarksRepositoryImpl(mockLocal, mockSync, mockUuid);
+    when(
+      () => mockCollections.removeBookmarkEverywhere(any()),
+    ).thenAnswer((_) async => const Ok(null));
+    when(
+      () => mockCollections.repairDanglingBookmarks(any()),
+    ).thenAnswer((_) async => const Ok(null));
+    repository = BookmarksRepositoryImpl(
+      mockLocal,
+      mockSync,
+      mockUuid,
+      TestAtomicWriteCoordinator(),
+      mockCollections,
+    );
   });
 
   group('list', () {
@@ -295,6 +315,45 @@ void main() {
       expect(entity.syncState, SyncState.pendingDelete);
       verify(() => mockLocal.put(entity)).called(1);
       verify(() => mockSync.sync()).called(1);
+    });
+  });
+
+  group('import batch synchronization', () {
+    const input = BookmarkInput(
+      title: 'Imported',
+      url: 'https://example.com',
+      description: '',
+      tags: [],
+    );
+
+    test('triggers one sync after a successful batch', () async {
+      when(() => mockUuid.v4()).thenReturn('new-uuid');
+      when(() => mockLocal.putNew(any())).thenAnswer(
+        (invocation) async =>
+            invocation.positionalArguments[0] as BookmarkEntity,
+      );
+
+      repository.beginImportBatch();
+      await repository.create(input);
+      await repository.create(input);
+
+      verifyNever(() => mockSync.sync());
+      repository.endImportBatch(successful: true);
+      verify(() => mockSync.sync()).called(1);
+    });
+
+    test('does not sync a compensated failed batch', () async {
+      when(() => mockUuid.v4()).thenReturn('new-uuid');
+      when(() => mockLocal.putNew(any())).thenAnswer(
+        (invocation) async =>
+            invocation.positionalArguments[0] as BookmarkEntity,
+      );
+
+      repository.beginImportBatch();
+      await repository.create(input);
+      repository.endImportBatch(successful: false);
+
+      verifyNever(() => mockSync.sync());
     });
   });
 }

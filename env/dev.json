@@ -1,5 +1,6 @@
 {
   "FLAVOR": "dev",
+  "FIREBASE_ENABLED": false,
   "API_BASE_URL": "https://comp.rawnaqq.com/",
   "API_TIMEOUT_SECONDS": 10
 }

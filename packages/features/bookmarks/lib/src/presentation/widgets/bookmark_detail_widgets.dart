@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:app_platform/app_platform.dart';
 import 'package:app_ui/app_ui.dart';
 // capability: collections widgets surfaced inside bookmarks (single consumer).
 // If a second feature needs these, promote to shared_ui per CLAUDE.md.
@@ -9,17 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:localization/localization.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../domain/entities/bookmark.dart';
 import '../../locator.dart';
 import '../bloc/bookmark_detail/bookmark_detail_bloc.dart';
 import '../bloc/bookmark_detail/bookmark_detail_state.dart';
 import '../bookmarks_routes.dart';
-import 'app_video_player.dart';
 import 'bookmark_failure_messages.dart';
+import 'detail/bookmark_detail_sections.dart';
 
 /// Provides a [BookmarkDetailBloc] for [id] and renders the detail embedded in
 /// a side pane (no back button; delete/edit report back via callbacks instead
@@ -89,7 +84,7 @@ class BookmarkDetailView extends StatelessWidget {
       child: AppScaffold(
         title: context.l10n.bookmarkAppBarTitle,
         padding: EdgeInsets.zero,
-        backgroundColor: _BookmarkDetailColors.background(context),
+        backgroundColor: context.colorScheme.surface,
         actions: [
           BlocBuilder<BookmarkDetailBloc, BookmarkDetailState>(
             builder: (context, state) {
@@ -227,7 +222,7 @@ class _DetailBody extends StatelessWidget {
               Text(
                 bookmark.title,
                 style: context.textTheme.headlineSmall?.copyWith(
-                  color: _BookmarkDetailColors.text(context),
+                  color: context.colorScheme.onSurface,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0,
                 ),
@@ -237,34 +232,34 @@ class _DetailBody extends StatelessWidget {
                 Text(
                   bookmark.description,
                   style: context.textTheme.bodyLarge?.copyWith(
-                    color: _BookmarkDetailColors.mutedText(context),
+                    color: context.semanticColors.mutedForeground,
                     letterSpacing: 0,
                   ),
                 ).animateFadeIn(delay: 100.ms),
               ],
               const SizedBox(height: AppSpacing.xxl),
-              _SourceSection(
+              SourceSection(
                 bookmark: bookmark,
               ).animateSlideLeft(delay: 150.ms),
               if (bookmark.tags.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.xxl),
-                _TagsSection(
+                TagsSection(
                   tags: bookmark.tags,
                 ).animateSlideLeft(delay: 200.ms),
               ],
               const SizedBox(height: AppSpacing.xxl),
-              _DetailsSection(
+              DetailsSection(
                 bookmark: bookmark,
               ).animateSlideLeft(delay: 250.ms),
               if (_hasMedia) ...[
                 const SizedBox(height: AppSpacing.xxl),
-                _MediaSection(
+                MediaSection(
                   bookmark: bookmark,
                 ).animateSlideLeft(delay: 300.ms),
               ],
               if (_hasVideo) ...[
                 const SizedBox(height: AppSpacing.xxl),
-                _VideoSection(
+                VideoSection(
                   videoUrl: bookmark.videoUrl!,
                 ).animateFadeIn(delay: 350.ms),
               ],
@@ -273,318 +268,9 @@ class _DetailBody extends StatelessWidget {
         ),
         Align(
           alignment: Alignment.bottomCenter,
-          child: _OpenInBrowserBar(bookmark: bookmark),
+          child: OpenInBrowserBar(bookmark: bookmark),
         ),
       ],
-    );
-  }
-}
-
-/// "Source" card: shows the bookmark URL and a button to open it.
-class _SourceSection extends StatelessWidget {
-  const _SourceSection({required this.bookmark});
-
-  final Bookmark bookmark;
-
-  @override
-  Widget build(BuildContext context) {
-    return _DetailCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _SectionHeader(
-            icon: FontAwesomeIcons.link,
-            label: context.l10n.bookmarkSourceLabel,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            bookmark.url,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textTheme.bodySmall?.copyWith(
-              color: _BookmarkDetailColors.mutedText(context),
-              letterSpacing: 0,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          _SubtleButton(
-            label: context.l10n.bookmarkVisitWebsite,
-            icon: FontAwesomeIcons.arrowUpRightFromSquare,
-            onPressed: () => _openBookmarkUrl(context, bookmark),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// "Tags" card: pill chips for each tag.
-class _TagsSection extends StatelessWidget {
-  const _TagsSection({required this.tags});
-
-  final List<String> tags;
-
-  @override
-  Widget build(BuildContext context) {
-    return _DetailCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _SectionHeader(
-            icon: FontAwesomeIcons.tag,
-            label: context.l10n.bookmarkTagsLabel,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            children: [
-              for (final tag in tags)
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: _BookmarkDetailColors.surfaceLow(context),
-                    borderRadius: BorderRadius.circular(AppRadius.xl),
-                    border: Border.all(
-                      color: _BookmarkDetailColors.surfaceHigh(context),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.xs + 2,
-                    ),
-                    child: Text(
-                      tag,
-                      style: context.textTheme.labelMedium?.copyWith(
-                        color: _BookmarkDetailColors.secondary(context),
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// "Details" card: created / last-modified dates and sync status.
-class _DetailsSection extends StatelessWidget {
-  const _DetailsSection({required this.bookmark});
-
-  final Bookmark bookmark;
-
-  @override
-  Widget build(BuildContext context) {
-    final dateFormat = DateFormat.yMMMd();
-    final rows = <_DetailRow>[
-      _DetailRow(
-        label: context.l10n.bookmarkDateCreatedLabel,
-        value: dateFormat.format(bookmark.createdAt),
-      ),
-      _DetailRow(
-        label: context.l10n.bookmarkLastModifiedLabel,
-        value: dateFormat.format(bookmark.updatedAt),
-      ),
-      if (bookmark.isPendingSync)
-        _DetailRow(
-          label: context.l10n.bookmarksNotYetSynced,
-          value: '',
-          valueIcon: FontAwesomeIcons.solidClock,
-        ),
-    ];
-
-    return _DetailCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _SectionHeader(
-            icon: FontAwesomeIcons.circleInfo,
-            label: context.l10n.bookmarkDetailsLabel,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          for (var i = 0; i < rows.length; i++)
-            Container(
-              decoration: BoxDecoration(
-                border: i == rows.length - 1
-                    ? null
-                    : Border(
-                        bottom: BorderSide(
-                          color: _BookmarkDetailColors.surfaceHigh(context),
-                        ),
-                      ),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      rows[i].label,
-                      style: context.textTheme.bodySmall?.copyWith(
-                        color: _BookmarkDetailColors.mutedText(context),
-                        letterSpacing: 0,
-                      ),
-                    ),
-                  ),
-                  if (rows[i].valueIcon != null)
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(
-                        end: AppSpacing.xs,
-                      ),
-                      child: FaIcon(
-                        rows[i].valueIcon,
-                        size: AppIconSize.xs,
-                        color: _BookmarkDetailColors.mutedText(context),
-                      ),
-                    ),
-                  if (rows[i].value.isNotEmpty)
-                    Flexible(
-                      child: Text(
-                        rows[i].value,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.textTheme.labelMedium?.copyWith(
-                          color: _BookmarkDetailColors.text(context),
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailRow {
-  const _DetailRow({required this.label, required this.value, this.valueIcon});
-
-  final String label;
-  final String value;
-  final FaIconData? valueIcon;
-}
-
-/// "Media" card: a grid of attached image thumbnails.
-class _MediaSection extends StatelessWidget {
-  const _MediaSection({required this.bookmark});
-
-  final Bookmark bookmark;
-
-  @override
-  Widget build(BuildContext context) {
-    return _DetailCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _SectionHeader(
-            icon: FontAwesomeIcons.images,
-            label: context.l10n.bookmarkMediaLabel,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: bookmark.imageUrls.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              mainAxisSpacing: AppSpacing.sm,
-              crossAxisSpacing: AppSpacing.sm,
-            ),
-            itemBuilder: (context, index) {
-              final path = bookmark.imageUrls[index];
-              return ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadius.sm),
-                child: path.startsWith('http')
-                    ? AppNetworkImage(
-                        imageUrl: path,
-                        fit: BoxFit.cover,
-                        semanticLabel: context.l10n.bookmarkImageLabel(
-                          bookmark.title,
-                        ),
-                      )
-                    : Image.file(File(path), fit: BoxFit.cover),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Sticky bottom action bar with the primary "Open in Browser" button.
-class _OpenInBrowserBar extends StatelessWidget {
-  const _OpenInBrowserBar({required this.bookmark});
-
-  final Bookmark bookmark;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: _BookmarkDetailColors.background(
-          context,
-        ).withValues(alpha: 0.94),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x080A192F),
-            blurRadius: 30,
-            offset: Offset(0, -10),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.xl,
-            AppSpacing.lg,
-            AppSpacing.xl,
-            AppSpacing.xl,
-          ),
-          child: AppButton(
-            label: context.l10n.bookmarkOpenInBrowser,
-            icon: FontAwesomeIcons.arrowUpRightFromSquare,
-            size: AppButtonSize.large,
-            expand: true,
-            onPressed: () => _openBookmarkUrl(context, bookmark),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Surface card with the soft ambient shadow used across the detail view.
-class _DetailCard extends StatelessWidget {
-  const _DetailCard({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: _BookmarkDetailColors.surface(context),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D0A192F),
-            blurRadius: 20,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: child,
-      ),
     );
   }
 }
@@ -616,190 +302,4 @@ class _MenuItem extends StatelessWidget {
       ],
     );
   }
-}
-
-/// Icon + title header shared by the detail cards.
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.icon, required this.label});
-
-  final FaIconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        FaIcon(
-          icon,
-          size: AppIconSize.sm,
-          color: _BookmarkDetailColors.primary(context),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textTheme.labelLarge?.copyWith(
-              color: _BookmarkDetailColors.text(context),
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Ghost-style button used inside cards (subtle fill, primary text).
-class _SubtleButton extends StatelessWidget {
-  const _SubtleButton({
-    required this.label,
-    required this.icon,
-    required this.onPressed,
-  });
-
-  final String label;
-  final FaIconData icon;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = _BookmarkDetailColors.primary(context);
-    return Material(
-      color: _BookmarkDetailColors.surfaceLow(context),
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        onTap: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.md,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.labelLarge?.copyWith(
-                    color: primary,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0,
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              FaIcon(icon, size: 14, color: primary),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-Future<void> _openBookmarkUrl(BuildContext context, Bookmark bookmark) async {
-  final uri = Uri.tryParse(bookmark.url);
-  if (uri == null || !uri.hasScheme) {
-    _toast(context, context.l10n.bookmarkInvalidUrl);
-    return;
-  }
-  final bloc = context.read<BookmarkDetailBloc>();
-  bool launched;
-  try {
-    launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-  } on Object catch (_) {
-    launched = false;
-  }
-  if (launched) {
-    bloc.add(BookmarkDetailUrlOpened(bookmark));
-  } else if (context.mounted) {
-    _toast(context, context.l10n.bookmarkCouldNotOpenUrl);
-  }
-}
-
-void _toast(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-}
-
-class _VideoSection extends StatefulWidget {
-  const _VideoSection({required this.videoUrl});
-
-  final String videoUrl;
-
-  @override
-  State<_VideoSection> createState() => _VideoSectionState();
-}
-
-class _VideoSectionState extends State<_VideoSection> {
-  AppVideoPlayerController? _videoPlayerController;
-
-  @override
-  void initState() {
-    super.initState();
-    final service = context.read<VideoPlayerService>();
-    final uri = Uri.tryParse(widget.videoUrl);
-    if (uri != null && (uri.scheme == 'http' || uri.scheme == 'https')) {
-      _videoPlayerController = service.network(uri);
-    } else {
-      _videoPlayerController = service.file(File(widget.videoUrl));
-    }
-    _videoPlayerController?.initialize().then((_) {
-      if (mounted) setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    _videoPlayerController?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = _videoPlayerController;
-    if (controller == null) return const SizedBox.shrink();
-
-    return _DetailCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _SectionHeader(
-            icon: FontAwesomeIcons.film,
-            label: context.l10n.bookmarkAttachedVideo,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-            child: AppVideoPlayer(controller: controller),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-abstract final class _BookmarkDetailColors {
-  static Color background(BuildContext context) =>
-      context.isDark ? context.colorScheme.surface : const Color(0xFFF7F9FB);
-  static Color surface(BuildContext context) => context.isDark
-      ? context.colorScheme.surfaceContainerLow
-      : const Color(0xFFFFFFFF);
-  static Color surfaceLow(BuildContext context) => context.isDark
-      ? context.colorScheme.surfaceContainerHigh
-      : const Color(0xFFF2F4F6);
-  static Color surfaceHigh(BuildContext context) => context.isDark
-      ? context.colorScheme.outlineVariant
-      : const Color(0xFFE0E3E5);
-  static Color primary(BuildContext context) => context.colorScheme.primary;
-  static Color secondary(BuildContext context) =>
-      context.colorScheme.onSurfaceVariant;
-  static Color text(BuildContext context) => context.colorScheme.onSurface;
-  static Color mutedText(BuildContext context) =>
-      context.colorScheme.onSurfaceVariant;
 }

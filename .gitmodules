@@ -3,7 +3,7 @@
 	url = https://github.com/kido-luci/flutter-starter-template-simple-backend
 [submodule "tool/cli"]
 	path = published/cli
-	url = https://github.com/kido-luci/flutter-starter-template-cli.git
+	url = https://github.com/Hosamalbushri/flutter-starter-template-cli.git
 [submodule "packages/rev_sync"]
 	path = published/rev_sync
 	url = https://github.com/kido-luci/rev_sync.git

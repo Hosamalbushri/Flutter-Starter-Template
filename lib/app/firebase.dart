@@ -1,10 +1,11 @@
 /// Whether the app wires the Firebase *platform* (core, remote config,
 /// messaging, performance) at startup.
 ///
-/// `true` by default. `fst create --no-firebase` flips this to `false` and
-/// strips the native Firebase config, so the app builds and runs without a
-/// Firebase project. Tracking (analytics, crash reporting, and performance) is
-/// selected independently via the `// fst:analytics-impl`, `// fst:crash-impl`,
-/// and `// fst:performance-impl` bindings in the `analytics`, `app_platform`,
-/// and `network` packages.
-const bool kFirebaseEnabled = true;
+/// Disabled by default so a checkout containing placeholder Firebase options
+/// cannot send telemetry to an unintended project. Enable only after supplying
+/// real native configuration with `--dart-define=FIREBASE_ENABLED=true` (or the
+/// equivalent value in a `--dart-define-from-file` environment file).
+const bool kFirebaseEnabled = bool.fromEnvironment(
+  'FIREBASE_ENABLED',
+  defaultValue: false,
+);

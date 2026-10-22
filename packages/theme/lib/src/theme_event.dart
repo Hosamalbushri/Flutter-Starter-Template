@@ -21,3 +21,19 @@ final class ThemeLocaleChanged extends ThemeEvent {
 
   final Locale? locale;
 }
+
+final class ThemeFontFamilyChanged extends ThemeEvent {
+  const ThemeFontFamilyChanged(this.fontFamily);
+
+  final String fontFamily;
+}
+
+final class ThemeTextScaleChanged extends ThemeEvent {
+  const ThemeTextScaleChanged(this.textScale);
+
+  final AppTextScale textScale;
+}
+
+final class ThemeSettingsReset extends ThemeEvent {
+  const ThemeSettingsReset();
+}

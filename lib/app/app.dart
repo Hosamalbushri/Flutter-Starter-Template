@@ -13,6 +13,9 @@ import 'package:feature_notifications/feature_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+// fst:auth:start
+import 'package:network/network.dart';
+// fst:auth:end
 import 'package:shared_contracts/shared_contracts.dart';
 // fst:auth:start
 import 'package:shared_ui/shared_ui.dart';
@@ -78,7 +81,9 @@ class _AppState extends State<App> {
     // fst:auth:end
     _themeBloc = widget.themeBloc ?? getIt<ThemeBloc>();
     // fst:auth:start
-    _session = widget.session ?? AuthSession(_authBloc);
+    _session =
+        widget.session ??
+        AuthSession(_authBloc, getIt<SessionTerminationNotifier>());
     _ownsSession = widget.session == null;
     // fst:auth:end
     final features = widget.features ?? enabledFeatures;
@@ -185,13 +190,28 @@ class _AppState extends State<App> {
           builder: (context, themeState) => MaterialApp.router(
             debugShowCheckedModeBanner: false,
             onGenerateTitle: (context) => context.l10n.appTitle,
-            theme: AppTheme.light(scheme: themeState.scheme),
-            darkTheme: AppTheme.dark(scheme: themeState.scheme),
+            theme: AppTheme.light(
+              scheme: themeState.scheme,
+              fontFamily: themeState.fontFamily,
+            ),
+            darkTheme: AppTheme.dark(
+              scheme: themeState.scheme,
+              fontFamily: themeState.fontFamily,
+            ),
             themeMode: themeState.mode,
             locale: themeState.locale,
             localeListResolutionCallback: resolveSupportedLocale,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
+            builder: (context, child) {
+              final scale = themeState.textScale.scale;
+              if (scale == null) return child ?? const SizedBox.shrink();
+              final mediaQuery = MediaQuery.of(context);
+              return MediaQuery(
+                data: mediaQuery.copyWith(textScaler: TextScaler.linear(scale)),
+                child: child ?? const SizedBox.shrink(),
+              );
+            },
             routerConfig: _router,
           ),
         ),

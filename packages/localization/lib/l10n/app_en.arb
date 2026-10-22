@@ -51,6 +51,7 @@
   "commonSave": "Save",
   "commonShare": "Share",
   "commonSignOut": "Sign out",
+  "quickActionsTitle": "Quick actions",
   "homeAppBarTitle": "Home",
   "homeWelcomeSubtitle": "Your saved knowledge, organized in one place",
   "@homeWelcomeSubtitle": {
@@ -153,13 +154,19 @@
   },
   "profileAppBarTitle": "Profile",
   "profileSettingsSubtitle": "Account and application settings",
+  "profileAccountBadge": "Personal workspace",
+  "profileCopyIdTooltip": "Copy account ID",
   "@profileSettingsSubtitle": {
     "description": "Supporting text below the profile screen title."
   },
   "profileSectionAppearance": "Appearance",
+  "profileAppearanceSectionSubtitle": "Theme, color and language",
   "profileSectionAccount": "Account",
+  "profileAccountSectionSubtitle": "Security and privacy controls",
   "profileChangePassword": "Change Password",
+  "profileChangePasswordSubtitle": "Update your account security credentials",
   "profileDeleteAccount": "Delete Account",
+  "profileDeleteAccountSubtitle": "Permanently remove your account and data",
   "profileDeleteAccountDialogTitle": "Delete account?",
   "profileDeleteAccountDialogMessage": "This permanently removes your account and all of its data. This action cannot be undone.",
   "profileDeleteAccountConfirmLabel": "Type \"{username}\" to confirm",
@@ -181,6 +188,7 @@
   "changePasswordSuccessMessage": "Password updated successfully.",
   "changePasswordMismatchError": "New passwords do not match.",
   "profileSectionAbout": "About",
+  "profileAboutSectionSubtitle": "Version and application details",
   "profileUserIdCopied": "User ID copied",
   "profileAppearanceThemeLabel": "Theme",
   "profileAppearanceColorLabel": "Accent color",
@@ -188,6 +196,7 @@
   "profileThemeLight": "Light",
   "profileThemeDark": "Dark",
   "profileAppVersionBuild": "Version {version} (build {buildNumber})",
+  "profileAppStatus": "Up to date",
   "@profileAppVersionBuild": {
     "placeholders": {
       "version": {
@@ -267,8 +276,8 @@
   "errorGalleryPermissionRequired": "Photo gallery access is required to attach images.",
   "errorCameraPermissionRequired": "Camera access is required to take photos.",
   "navHome": "Home",
-  "navBookmarks": "Bookmarks",
-  "navProfile": "Profile",
+  "navBookmarks": "Saved",
+  "navProfile": "Account",
   "navSettings": "Settings",
   "settingsAppBarTitle": "Settings",
   "bookmarksDetailPlaceholder": "Select a bookmark to view its details",
@@ -283,7 +292,7 @@
   },
   "bookmarkAttachedImageLabel": "Attached image",
   "bookmarkRemoveImageLabel": "Remove image",
-  "navNotifications": "Notifications",
+  "navNotifications": "Alerts",
   "notificationsAppBarTitle": "Notifications",
   "notificationsActivitySection": "Your activity",
   "notificationsSection": "Notifications",
@@ -392,5 +401,203 @@
   "videoPlayerExitFullScreen": "Exit full screen",
   "videoPlayerPlaybackSpeed": "Playback speed",
   "videoPlayerLoadFailed": "Failed to load video",
-  "profileAppearanceLanguageLabel": "Language"
+  "profileAppearanceLanguageLabel": "Language",
+  "systemSettingsTitle": "System settings",
+  "systemSettingsSubtitle": "Personalize your app experience",
+  "systemSettingsOpen": "Open system settings",
+  "systemSettingsAppearance": "Appearance and color",
+  "systemSettingsAppearanceHint": "Choose the appearance and accent that suit you",
+  "systemSettingsTypography": "Type and reading",
+  "systemSettingsTypographyHint": "Change the font and text size across the app",
+  "systemSettingsFont": "Font family",
+  "systemSettingsFontSystem": "System font",
+  "systemSettingsFontSystemHint": "Use the device's default font",
+  "systemSettingsFontPreview": "English and نص عربي 123",
+  "systemSettingsBrowseFonts": "Tap to choose a font family",
+  "systemSettingsSuggestedFonts": "Suggested",
+  "systemSettingsFontLibrary": "Choose a font family",
+  "systemSettingsFontLibraryHint": "Names load gradually; the font is loaded only after selection",
+  "systemSettingsFontSearchHint": "Search by font name",
+  "systemSettingsFontNoResults": "No matching font found",
+  "systemSettingsFontLoadError": "The font list could not be loaded",
+  "systemSettingsRetry": "Try again",
+  "systemSettingsTextSize": "Text size",
+  "systemSettingsTextCompact": "Small",
+  "systemSettingsTextStandard": "Standard",
+  "systemSettingsTextLarge": "Large",
+  "systemSettingsLanguageHint": "The interface language and direction update immediately",
+  "systemSettingsLanguageSystemHint": "Automatically follow the device language",
+  "systemSettingsPreviewTitle": "Live preview",
+  "systemSettingsReset": "Restore default settings",
+  "documentCenterTitle": "Document Center",
+  "documentCenterSubtitle": "Import, export, report composition and printing",
+  "documentCenterTabImport": "Import Data",
+  "documentCenterTabExport": "Export Data",
+  "documentCenterTabReports": "Reports & Printing",
+  "documentImportSelectFile": "Select File",
+  "documentImportSelectFileHint": "Select a CSV, XLSX, or JSON file to import",
+  "documentImportFileSelected": "Selected file: {fileName}",
+  "@documentImportFileSelected": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "documentImportDetectedFormat": "Detected format: {format}",
+  "@documentImportDetectedFormat": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "documentImportSourceColumns": "Source columns",
+  "documentImportTargetSchema": "Target schema",
+  "documentImportValidateButton": "Validate Dataset",
+  "documentImportCommitButton": "Commit Import",
+  "documentImportPreviewTitle": "Validation Preview",
+  "documentImportValidRows": "Valid rows: {count}",
+  "@documentImportValidRows": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "documentImportInvalidRows": "Invalid rows: {count}",
+  "@documentImportInvalidRows": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "documentImportSuccessMessage": "Successfully imported {count} records",
+  "@documentImportSuccessMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "documentImportErrorMessage": "Import validation failed with {count} errors",
+  "@documentImportErrorMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "documentExportDatasetLabel": "Select Dataset",
+  "documentExportFormatLabel": "Export Format",
+  "documentExportColumnsLabel": "Select Columns",
+  "documentExportNeutralizeFormulas": "Protect against spreadsheet formula injection",
+  "documentExportButton": "Export Document",
+  "documentExportSuccess": "Export completed ({bytes} bytes)",
+  "@documentExportSuccess": {
+    "placeholders": {
+      "bytes": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "documentReportsSelectTemplate": "Report Template",
+  "documentReportsSales": "Sales Summary Report",
+  "documentReportsInventory": "Inventory Movement Report",
+  "documentReportsStatement": "Supplier Account Statement",
+  "documentReportsInvoice": "Commercial Tax Invoice",
+  "documentReportsGeneral": "General Activity Log",
+  "documentReportsGeneratePdf": "Generate PDF",
+  "documentReportsPrintSystem": "System Print",
+  "documentReportsPrintThermal": "Thermal Print (ESC/POS)",
+  "documentReportsThermalSuccess": "Document sent to thermal printer",
+  "documentReportsPreviewTitle": "Report Preview",
+  "collectionsImportAction": "Import Collections",
+  "bookmarksImportAction": "Import Bookmarks",
+  "documentImportDatasetLabel": "Target Dataset",
+  "documentImportDuplicatePolicyLabel": "Duplicate Handling Policy",
+  "documentImportPolicySkip": "Skip Duplicates",
+  "documentImportPolicyUpdate": "Update Existing",
+  "documentImportPolicyCreate": "Create New Copies",
+  "documentImportCreatedCount": "Created: {count}",
+  "@documentImportCreatedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "documentImportUpdatedCount": "Updated: {count}",
+  "@documentImportUpdatedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "documentImportSkippedCount": "Skipped: {count}",
+  "@documentImportSkippedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "documentImportFailedCount": "Failed: {count}",
+  "@documentImportFailedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "documentImportSummaryTitle": "Import Result Summary",
+  "documentImportCloseButton": "Close",
+  "routeNotFoundTitle": "Page Not Found",
+  "routeNotFoundMessage": "No page matches {location}.",
+  "@routeNotFoundMessage": {
+    "placeholders": {
+      "location": {
+        "type": "String"
+      }
+    }
+  },
+  "routeNotFoundHomeAction": "Go to Home",
+  "exitAppTitle": "Exit app?",
+  "exitAppMessage": "Press Exit to close the app.",
+  "exitAppConfirm": "Exit",
+  "documentImportDemoSales": "Sales (Demo)",
+  "documentProgressReading": "Reading document…",
+  "documentProgressParsing": "Parsing document…",
+  "documentProgressValidating": "Validating {current} of {total}…",
+  "@documentProgressValidating": {
+    "placeholders": {
+      "current": {"type": "int", "format": "decimalPattern"},
+      "total": {"type": "int", "format": "decimalPattern"}
+    }
+  },
+  "documentProgressCommitting": "Saving imported records…",
+  "documentReportPdfFailure": "The PDF could not be generated.",
+  "documentThermalSuccessBytes": "Document sent to the thermal printer ({bytes} bytes)",
+  "@documentThermalSuccessBytes": {
+    "placeholders": {
+      "bytes": {"type": "int", "format": "decimalPattern"}
+    }
+  },
+  "documentThermalFailure": "The document could not be sent to the thermal printer.",
+  "documentFileReadFailure": "The selected file could not be read.",
+  "documentImportValidationFailure": "The document is damaged, unsupported, or does not match the selected dataset.",
+  "documentImportCommitFailure": "The validated rows could not be saved. No partial import was kept.",
+  "documentExportFailure": "The document could not be exported.",
+  "documentSaveFailure": "The exported file could not be saved."
 }

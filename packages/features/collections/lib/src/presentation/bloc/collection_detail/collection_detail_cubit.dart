@@ -27,11 +27,13 @@ class CollectionDetailCubit extends Cubit<CollectionDetailState> {
   Future<void> load(String id) async {
     emit(state.copyWith(isLoading: true, failure: null));
     final collectionResult = await _get(id);
-    if (collectionResult case Err(:final failure)) {
-      emit(state.copyWith(isLoading: false, failure: failure));
+    if (collectionResult is! Ok<Collection>) {
+      if (collectionResult case Err(:final failure)) {
+        emit(state.copyWith(isLoading: false, failure: failure));
+      }
       return;
     }
-    final collection = (collectionResult as Ok<Collection>).value;
+    final collection = collectionResult.value;
     final summariesResult = await _bookmarkSummaries();
     final allBookmarks = switch (summariesResult) {
       Ok(value: final items) => items,

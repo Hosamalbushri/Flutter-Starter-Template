@@ -13,6 +13,12 @@ class Collection {
     this.isFailed = false,
   });
 
+  /// Default icon token when none is specified.
+  static const String defaultIcon = 'folder';
+
+  /// Default ARGB seed color (Material Blue) when none is specified.
+  static const int defaultColor = 0xFF2196F3;
+
   final String id;
   final String name;
 

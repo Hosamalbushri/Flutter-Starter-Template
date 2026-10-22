@@ -4,6 +4,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../domain/usecases/expire_session.dart';
 import '../../domain/usecases/register.dart';
 import '../../domain/usecases/restore_session.dart';
 import '../../domain/usecases/sign_in.dart';
@@ -19,13 +20,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this._register,
     required this._signOut,
     required this._restoreSession,
+    required this._expireSession,
     required this._analytics,
   }) : super(const AuthState.initial()) {
     on<AuthSessionRestoreRequested>(
       _onSessionRestoreRequested,
       transformer: droppable(),
     );
-    on<AuthSessionCleared>(_onSessionCleared);
+    on<AuthSessionCleared>(_onSessionCleared, transformer: droppable());
     on<AuthSignInRequested>(_onSignInRequested, transformer: droppable());
     on<AuthRegisterRequested>(_onRegisterRequested, transformer: droppable());
     on<AuthSignOutRequested>(_onSignOutRequested, transformer: droppable());
@@ -35,6 +37,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final RegisterUseCase _register;
   final SignOutUseCase _signOut;
   final RestoreSessionUseCase _restoreSession;
+  final ExpireSessionUseCase _expireSession;
   final AnalyticsService _analytics;
 
   Future<void> _onSessionRestoreRequested(
@@ -57,10 +60,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  void _onSessionCleared(
+  Future<void> _onSessionCleared(
     AuthSessionCleared event,
     Emitter<AuthState> emit,
-  ) {
+  ) async {
+    await _expireSession();
+    _analytics.setCurrentUser(null).fire();
     emit(const AuthState.initial());
   }
 

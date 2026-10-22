@@ -5,9 +5,9 @@ class _AboutCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _SettingsCard(
-      title: context.l10n.profileSectionAbout,
-      child: const _AppInfoTile(),
+    return const Padding(
+      padding: EdgeInsets.only(bottom: AppSpacing.sm),
+      child: _AppInfoTile(),
     );
   }
 }
@@ -20,17 +20,29 @@ class _AppInfoTile extends StatelessWidget {
     return BlocBuilder<ProfileBloc, ProfileState>(
       builder: (context, state) {
         final info = state.packageInfo;
-        return ListTile(
-          leading: const FaIcon(FontAwesomeIcons.circleInfo),
-          title: Text(info?.appName ?? '—'),
+        return ProfileSettingsTile(
+          icon: FontAwesomeIcons.mobileScreenButton,
+          title: info?.appName ?? '—',
           subtitle: info == null
-              ? Text(context.l10n.commonLoading)
-              : Text(
-                  context.l10n.profileAppVersionBuild(
-                    info.version,
-                    info.buildNumber,
-                  ),
+              ? context.l10n.commonLoading
+              : context.l10n.profileAppVersionBuild(
+                  info.version,
+                  info.buildNumber,
                 ),
+          trailing: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: context.colorScheme.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(AppRadius.full),
+            ),
+            child: Text(
+              context.l10n.profileAppStatus,
+              style: context.textTheme.labelSmall?.copyWith(
+                color: context.semanticColors.mutedForeground,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
         );
       },
     );
@@ -49,11 +61,11 @@ class _SignOutButton extends StatelessWidget {
       builder: (context, _) {
         final isLoading = session.isSigningOut;
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           child: AppButton(
             label: context.l10n.commonSignOut,
             icon: FontAwesomeIcons.arrowRightFromBracket,
-            variant: AppButtonVariant.tonal,
+            variant: AppButtonVariant.outlined,
             expand: true,
             isLoading: isLoading,
             onPressed: isLoading ? null : () => _confirmSignOut(context),

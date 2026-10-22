@@ -18,6 +18,7 @@ import 'package:feature_auth/src/domain/repositories/auth_repository.dart'
     as _i1063;
 import 'package:feature_auth/src/domain/usecases/change_password.dart' as _i359;
 import 'package:feature_auth/src/domain/usecases/delete_account.dart' as _i884;
+import 'package:feature_auth/src/domain/usecases/expire_session.dart' as _i493;
 import 'package:feature_auth/src/domain/usecases/register.dart' as _i821;
 import 'package:feature_auth/src/domain/usecases/restore_session.dart' as _i63;
 import 'package:feature_auth/src/domain/usecases/sign_in.dart' as _i147;
@@ -50,6 +51,7 @@ class FeatureAuthPackageModule extends _i526.MicroPackageModule {
         gh<_i371.AuthRemoteDataSource>(),
         gh<_i887.AuthLocalDataSource>(),
         gh<_i372.TokenRefresher>(),
+        gh<_i372.SessionTerminationNotifier>(),
       ),
     );
     gh.factory<_i359.ChangePasswordUseCase>(
@@ -57,6 +59,9 @@ class FeatureAuthPackageModule extends _i526.MicroPackageModule {
     );
     gh.factory<_i884.DeleteAccountUseCase>(
       () => _i884.DeleteAccountUseCase(gh<_i1063.AuthRepository>()),
+    );
+    gh.factory<_i493.ExpireSessionUseCase>(
+      () => _i493.ExpireSessionUseCase(gh<_i1063.AuthRepository>()),
     );
     gh.factory<_i821.RegisterUseCase>(
       () => _i821.RegisterUseCase(gh<_i1063.AuthRepository>()),
@@ -85,6 +90,7 @@ class FeatureAuthPackageModule extends _i526.MicroPackageModule {
         register: gh<_i821.RegisterUseCase>(),
         signOut: gh<_i1002.SignOutUseCase>(),
         restoreSession: gh<_i63.RestoreSessionUseCase>(),
+        expireSession: gh<_i493.ExpireSessionUseCase>(),
         analytics: gh<_i548.AnalyticsService>(),
       ),
     );

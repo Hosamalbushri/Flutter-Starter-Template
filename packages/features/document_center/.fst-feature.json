@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "document_center",
+  "package": "feature_document_center",
+  "source": "presentation",
+  "routePath": "/document-center",
+  "routeNames": [
+    "feature-document-center",
+    "feature-document-center-details"
+  ],
+  "generatedFiles": {
+    "pubspec.yaml": "-47908e30286514a5",
+    "lib/feature_document_center.dart": "5a3e8902de80e774",
+    "lib/src/di.dart": "-22fde6c5ed1537f7",
+    "lib/src/locator.dart": "-5a6202708a765514",
+    "lib/src/presentation/bloc/document_center_cubit.dart": "68f3cfcf334b47e2",
+    "lib/src/presentation/bloc/document_center_state.dart": "-3f00fdb77a8813c7",
+    "lib/src/presentation/screens/document_center_screen.dart": "7dd86a823bbf0439",
+    "lib/src/presentation/screens/document_center_details_screen.dart": "2a55a9331b750726",
+    "lib/src/presentation/document_center_routes.dart": "-4018ac248398c95e",
+    "test/presentation/document_center_routes_test.dart": "4573ca8f60463e0b"
+  }
+}

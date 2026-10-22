@@ -7,6 +7,7 @@
 library;
 
 export 'objectbox.g.dart' hide SyncState;
+export 'src/atomic_write_coordinator.dart';
 export 'src/entities/activity_entity.dart';
 export 'src/entities/bookmark_entity.dart';
 export 'src/entities/collection_entity.dart';

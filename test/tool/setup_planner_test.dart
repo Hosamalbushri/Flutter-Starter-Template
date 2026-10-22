@@ -79,23 +79,27 @@ void main() {
         final script = File('${tempDir.path}/lock_holder.dart');
         script.writeAsStringSync('''
 import 'dart:io';
-void main() {
+Future<void> main() async {
   final file = File('${tempDir.path}/.dart_tool/fst_setup_cache/setup.lock');
   file.createSync(recursive: true);
-  final raf = file.openSync(mode: FileMode.write);
-  raf.lockSync(FileLock.exclusive);
-  stdout.writeln('LOCKED');
+  File('${tempDir.path}/lock_ready').createSync();
   sleep(const Duration(milliseconds: 600));
-  raf.unlockSync();
-  raf.closeSync();
+  file.deleteSync();
 }
 ''');
 
-        final proc = await Process.start(Platform.resolvedExecutable, [
-          script.path,
-        ]);
-        // Wait until child script prints LOCKED
-        await proc.stdout.transform(const SystemEncoding().decoder).first;
+        final proc = await Process.start(
+          'dart',
+          [script.path],
+          runInShell: Platform.isWindows,
+        );
+        // Wait until the child confirms the sentinel exists. Using stdout as
+        // the readiness signal is unreliable because pipes may stay buffered.
+        final readyFile = File('${tempDir.path}/lock_ready');
+        for (var i = 0; i < 1000 && !readyFile.existsSync(); i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+        }
+        expect(readyFile.existsSync(), isTrue);
 
         // Attempting to lock while child holds it must timeout and return null
         final raf = store.acquireLock(
@@ -160,8 +164,32 @@ void main() {
   group('SetupPlanner Cache Invalidation & Planning', () {
     test('SetupPlanner detects up-to-date state correctly', () {
       final repoRoot = Directory.current.path;
-      final store = FingerprintStore(rootDir: repoRoot);
+      final tempDir = Directory.systemTemp.createTempSync(
+        'planner_cache_test_',
+      );
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+      final store = FingerprintStore(
+        rootDir: repoRoot,
+        cacheRootDir: tempDir.path,
+      );
       final planner = SetupPlanner(rootDir: repoRoot, store: store);
+
+      final initialPlan = planner.createPlan();
+      store.saveManifest({
+        'version': 1,
+        'environment_hash': initialPlan.environmentHash,
+        'dependencies_hash': initialPlan.pubGetHash,
+        'localization_hash': initialPlan.l10nHash,
+        'app_root_codegen_hash': initialPlan.appRootCodegenHash,
+        'packages': {
+          for (final entry in initialPlan.packageCodegenHashes.entries)
+            entry.key: {'hash': entry.value},
+        },
+        'drift_packages': {
+          for (final entry in initialPlan.driftHashes.entries)
+            entry.key: {'hash': entry.value},
+        },
+      });
 
       final plan = planner.createPlan();
       expect(plan.pubGetNeeded, isFalse);

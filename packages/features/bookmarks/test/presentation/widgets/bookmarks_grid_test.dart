@@ -62,6 +62,17 @@ void main() {
       expect(find.text('Dart'), findsOneWidget);
     });
 
+    testWidgets('add action does not register a fixed Hero tag', (
+      tester,
+    ) async {
+      await pumpList(tester, 500);
+
+      final button = tester.widget<FloatingActionButton>(
+        find.byType(FloatingActionButton),
+      );
+      expect(button.heroTag, isNull);
+    });
+
     testWidgets('wide layout keeps the cards visible without a detail pane', (
       tester,
     ) async {

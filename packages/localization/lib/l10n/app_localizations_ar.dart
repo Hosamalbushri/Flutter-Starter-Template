@@ -165,6 +165,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commonSignOut => 'تسجيل الخروج';
 
   @override
+  String get quickActionsTitle => 'إجراءات سريعة';
+
+  @override
   String get homeAppBarTitle => 'الرئيسية';
 
   @override
@@ -270,16 +273,35 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profileSettingsSubtitle => 'إعدادات الحساب والتطبيق';
 
   @override
+  String get profileAccountBadge => 'مساحتك الشخصية';
+
+  @override
+  String get profileCopyIdTooltip => 'نسخ معرّف الحساب';
+
+  @override
   String get profileSectionAppearance => 'المظهر';
+
+  @override
+  String get profileAppearanceSectionSubtitle => 'السمة واللون واللغة';
 
   @override
   String get profileSectionAccount => 'الحساب';
 
   @override
+  String get profileAccountSectionSubtitle => 'خيارات الأمان والخصوصية';
+
+  @override
   String get profileChangePassword => 'تغيير كلمة المرور';
 
   @override
+  String get profileChangePasswordSubtitle =>
+      'تحديث بيانات الأمان الخاصة بحسابك';
+
+  @override
   String get profileDeleteAccount => 'حذف الحساب';
+
+  @override
+  String get profileDeleteAccountSubtitle => 'إزالة حسابك وبياناتك نهائيًا';
 
   @override
   String get profileDeleteAccountDialogTitle => 'حذف الحساب؟';
@@ -326,6 +348,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profileSectionAbout => 'حول التطبيق';
 
   @override
+  String get profileAboutSectionSubtitle => 'الإصدار وتفاصيل التطبيق';
+
+  @override
   String get profileUserIdCopied => 'تم نسخ معرّف المستخدم';
 
   @override
@@ -347,6 +372,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String profileAppVersionBuild(String version, String buildNumber) {
     return 'الإصدار $version (البنية $buildNumber)';
   }
+
+  @override
+  String get profileAppStatus => 'محدّث';
 
   @override
   String get profileSignOutConfirmMessage => 'هل تريد بالتأكيد تسجيل الخروج؟';
@@ -525,10 +553,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navHome => 'الرئيسية';
 
   @override
-  String get navBookmarks => 'الإشارات المرجعية';
+  String get navBookmarks => 'المحفوظات';
 
   @override
-  String get navProfile => 'الملف الشخصي';
+  String get navProfile => 'حسابي';
 
   @override
   String get navSettings => 'الإعدادات';
@@ -551,7 +579,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bookmarkRemoveImageLabel => 'إزالة الصورة';
 
   @override
-  String get navNotifications => 'الإشعارات';
+  String get navNotifications => 'التنبيهات';
 
   @override
   String get notificationsAppBarTitle => 'الإشعارات';
@@ -778,4 +806,370 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get profileAppearanceLanguageLabel => 'اللغة';
+
+  @override
+  String get systemSettingsTitle => 'إعدادات النظام';
+
+  @override
+  String get systemSettingsSubtitle => 'خصّص تجربة التطبيق';
+
+  @override
+  String get systemSettingsOpen => 'فتح إعدادات النظام';
+
+  @override
+  String get systemSettingsAppearance => 'المظهر والألوان';
+
+  @override
+  String get systemSettingsAppearanceHint => 'اختر المظهر واللون المناسبين لك';
+
+  @override
+  String get systemSettingsTypography => 'الخط والقراءة';
+
+  @override
+  String get systemSettingsTypographyHint =>
+      'غيّر الخط وحجم النص في كامل التطبيق';
+
+  @override
+  String get systemSettingsFont => 'نوع الخط';
+
+  @override
+  String get systemSettingsFontSystem => 'خط النظام';
+
+  @override
+  String get systemSettingsFontSystemHint => 'استخدام الخط الافتراضي للجهاز';
+
+  @override
+  String get systemSettingsFontPreview => 'نص عربي و English 123';
+
+  @override
+  String get systemSettingsBrowseFonts => 'اضغط لاختيار نوع الخط';
+
+  @override
+  String get systemSettingsSuggestedFonts => 'مقترحة';
+
+  @override
+  String get systemSettingsFontLibrary => 'اختيار نوع الخط';
+
+  @override
+  String get systemSettingsFontLibraryHint =>
+      'تُحمّل الأسماء تدريجياً، ولن يُحمّل الخط إلا بعد اختياره';
+
+  @override
+  String get systemSettingsFontSearchHint => 'ابحث باسم الخط';
+
+  @override
+  String get systemSettingsFontNoResults => 'لم يتم العثور على خط مطابق';
+
+  @override
+  String get systemSettingsFontLoadError => 'تعذر تحميل قائمة الخطوط';
+
+  @override
+  String get systemSettingsRetry => 'إعادة المحاولة';
+
+  @override
+  String get systemSettingsTextSize => 'حجم النص';
+
+  @override
+  String get systemSettingsTextCompact => 'صغير';
+
+  @override
+  String get systemSettingsTextStandard => 'عادي';
+
+  @override
+  String get systemSettingsTextLarge => 'كبير';
+
+  @override
+  String get systemSettingsLanguageHint => 'تتغير لغة الواجهة واتجاهها مباشرة';
+
+  @override
+  String get systemSettingsLanguageSystemHint => 'اتباع لغة الجهاز تلقائياً';
+
+  @override
+  String get systemSettingsPreviewTitle => 'معاينة مباشرة';
+
+  @override
+  String get systemSettingsReset => 'إعادة الإعدادات الافتراضية';
+
+  @override
+  String get documentCenterTitle => 'مركز المستندات';
+
+  @override
+  String get documentCenterSubtitle =>
+      'استيراد وتصدير وإنشاء التقارير والطباعة';
+
+  @override
+  String get documentCenterTabImport => 'استيراد البيانات';
+
+  @override
+  String get documentCenterTabExport => 'تصدير البيانات';
+
+  @override
+  String get documentCenterTabReports => 'التقارير والطباعة';
+
+  @override
+  String get documentImportSelectFile => 'اختيار ملف';
+
+  @override
+  String get documentImportSelectFileHint =>
+      'اختر ملف CSV أو XLSX أو JSON للاستيراد';
+
+  @override
+  String documentImportFileSelected(String fileName) {
+    return 'الملف المختار: $fileName';
+  }
+
+  @override
+  String documentImportDetectedFormat(String format) {
+    return 'الصيغة المكتشفة: $format';
+  }
+
+  @override
+  String get documentImportSourceColumns => 'أعمدة المصدر';
+
+  @override
+  String get documentImportTargetSchema => 'المخطط المستهدف';
+
+  @override
+  String get documentImportValidateButton => 'التحقق من البيانات';
+
+  @override
+  String get documentImportCommitButton => 'تأكيد الاستيراد';
+
+  @override
+  String get documentImportPreviewTitle => 'معاينة التحقق';
+
+  @override
+  String documentImportValidRows(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'الصفوف الصالحة: $countString';
+  }
+
+  @override
+  String documentImportInvalidRows(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'الصفوف غير الصالحة: $countString';
+  }
+
+  @override
+  String documentImportSuccessMessage(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'تم استيراد $countString سجل بنجاح';
+  }
+
+  @override
+  String documentImportErrorMessage(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'فشل التحقق من الاستيراد بـ $countString أخطاء';
+  }
+
+  @override
+  String get documentExportDatasetLabel => 'اختيار مجموعة البيانات';
+
+  @override
+  String get documentExportFormatLabel => 'صيغة التصدير';
+
+  @override
+  String get documentExportColumnsLabel => 'تحديد الأعمدة';
+
+  @override
+  String get documentExportNeutralizeFormulas =>
+      'الحماية من حقن معادلات جداول البيانات';
+
+  @override
+  String get documentExportButton => 'تصدير المستند';
+
+  @override
+  String documentExportSuccess(int bytes) {
+    final intl.NumberFormat bytesNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String bytesString = bytesNumberFormat.format(bytes);
+
+    return 'اكتمل التصدير ($bytesString بايت)';
+  }
+
+  @override
+  String get documentReportsSelectTemplate => 'قالب التقرير';
+
+  @override
+  String get documentReportsSales => 'تقرير ملخص المبيعات';
+
+  @override
+  String get documentReportsInventory => 'تقرير حركة المخزون';
+
+  @override
+  String get documentReportsStatement => 'كشف حساب المورد';
+
+  @override
+  String get documentReportsInvoice => 'فاتورة ضريبية تجارية';
+
+  @override
+  String get documentReportsGeneral => 'سجل الأنشطة العام';
+
+  @override
+  String get documentReportsGeneratePdf => 'إنشاء PDF';
+
+  @override
+  String get documentReportsPrintSystem => 'طباعة النظام';
+
+  @override
+  String get documentReportsPrintThermal => 'طباعة حرارية (ESC/POS)';
+
+  @override
+  String get documentReportsThermalSuccess =>
+      'تم إرسال المستند إلى الطابعة الحرارية';
+
+  @override
+  String get documentReportsPreviewTitle => 'معاينة التقرير';
+
+  @override
+  String get collectionsImportAction => 'استيراد المجموعات';
+
+  @override
+  String get bookmarksImportAction => 'استيراد الإشارات المرجعية';
+
+  @override
+  String get documentImportDatasetLabel => 'مجموعة البيانات المستهدفة';
+
+  @override
+  String get documentImportDuplicatePolicyLabel => 'سياسة التعامل مع التكرار';
+
+  @override
+  String get documentImportPolicySkip => 'تخطي المكرر';
+
+  @override
+  String get documentImportPolicyUpdate => 'تحديث الموجود';
+
+  @override
+  String get documentImportPolicyCreate => 'إنشاء نسخ جديدة';
+
+  @override
+  String documentImportCreatedCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'تم الإنشاء: $countString';
+  }
+
+  @override
+  String documentImportUpdatedCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'تم التحديث: $countString';
+  }
+
+  @override
+  String documentImportSkippedCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'تم التخطي: $countString';
+  }
+
+  @override
+  String documentImportFailedCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'فشل: $countString';
+  }
+
+  @override
+  String get documentImportSummaryTitle => 'ملخص نتيجة الاستيراد';
+
+  @override
+  String get documentImportCloseButton => 'إغلاق';
+
+  @override
+  String get routeNotFoundTitle => 'الصفحة غير موجودة';
+
+  @override
+  String routeNotFoundMessage(String location) {
+    return 'لا توجد صفحة تطابق $location.';
+  }
+
+  @override
+  String get routeNotFoundHomeAction => 'الانتقال إلى الرئيسية';
+
+  @override
+  String get exitAppTitle => 'هل تريد الخروج؟';
+
+  @override
+  String get exitAppMessage => 'اضغط خروج لإغلاق التطبيق.';
+
+  @override
+  String get exitAppConfirm => 'خروج';
+
+  @override
+  String get documentImportDemoSales => 'المبيعات (تجريبي)';
+
+  @override
+  String get documentProgressReading => 'جارٍ قراءة المستند…';
+
+  @override
+  String get documentProgressParsing => 'جارٍ تحليل المستند…';
+
+  @override
+  String documentProgressValidating(int current, int total) {
+    final intl.NumberFormat currentNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String currentString = currentNumberFormat.format(current);
+    final intl.NumberFormat totalNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String totalString = totalNumberFormat.format(total);
+
+    return 'جارٍ التحقق من $currentString من $totalString…';
+  }
+
+  @override
+  String get documentProgressCommitting => 'جارٍ حفظ السجلات المستوردة…';
+
+  @override
+  String get documentReportPdfFailure => 'تعذر إنشاء ملف PDF.';
+
+  @override
+  String documentThermalSuccessBytes(int bytes) {
+    final intl.NumberFormat bytesNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String bytesString = bytesNumberFormat.format(bytes);
+
+    return 'أُرسل المستند إلى الطابعة الحرارية ($bytesString بايت)';
+  }
+
+  @override
+  String get documentThermalFailure =>
+      'تعذر إرسال المستند إلى الطابعة الحرارية.';
+
+  @override
+  String get documentFileReadFailure => 'تعذرت قراءة الملف المحدد.';
+
+  @override
+  String get documentImportValidationFailure =>
+      'الملف تالف أو غير مدعوم أو لا يطابق مجموعة البيانات المحددة.';
+
+  @override
+  String get documentImportCommitFailure =>
+      'تعذر حفظ الصفوف المتحقق منها، ولم يُحتفظ باستيراد جزئي.';
+
+  @override
+  String get documentExportFailure => 'تعذر تصدير المستند.';
+
+  @override
+  String get documentSaveFailure => 'تعذر حفظ الملف المُصدّر.';
 }

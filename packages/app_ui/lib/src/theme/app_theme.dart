@@ -41,15 +41,17 @@ class AppTheme {
   static ThemeData light({
     FlexScheme scheme = FlexScheme.blue,
     AppColorPalette? palette,
+    String fontFamily = 'system',
   }) {
+    final textTheme = _fontTextTheme(fontFamily, ThemeData.light().textTheme);
     final base = FlexThemeData.light(
       scheme: scheme,
       colors: palette?.lightColors,
       useMaterial3: true,
       surfaceMode: FlexSurfaceMode.highScaffoldLowSurfaces,
       blendLevel: 1,
-      textTheme: GoogleFonts.interTextTheme(),
-      primaryTextTheme: GoogleFonts.interTextTheme(),
+      textTheme: textTheme,
+      primaryTextTheme: textTheme,
       subThemesData: _componentThemes,
       appBarElevation: AppElevation.none,
       appBarStyle: FlexAppBarStyle.surface,
@@ -62,7 +64,9 @@ class AppTheme {
   static ThemeData dark({
     FlexScheme scheme = FlexScheme.blue,
     AppColorPalette? palette,
+    String fontFamily = 'system',
   }) {
+    final textTheme = _fontTextTheme(fontFamily, ThemeData.dark().textTheme);
     final base = FlexThemeData.dark(
       scheme: scheme,
       colors: palette?.darkColors,
@@ -70,8 +74,8 @@ class AppTheme {
       surfaceMode: FlexSurfaceMode.highScaffoldLowSurfaces,
       blendLevel: 4,
       darkIsTrueBlack: true,
-      textTheme: GoogleFonts.interTextTheme(),
-      primaryTextTheme: GoogleFonts.interTextTheme(),
+      textTheme: textTheme,
+      primaryTextTheme: textTheme,
       subThemesData: _componentThemes,
       appBarElevation: AppElevation.none,
       appBarStyle: FlexAppBarStyle.surface,
@@ -81,9 +85,32 @@ class AppTheme {
 
   static ThemeData _finish(ThemeData base) {
     final semantic = SemanticColors.from(base.colorScheme);
+    final textTheme = AppTypography.textTheme(base.textTheme);
+    final primaryTextTheme = AppTypography.textTheme(base.primaryTextTheme);
+    final buttonTextStyle = WidgetStatePropertyAll(textTheme.labelLarge);
     return base.copyWith(
-      textTheme: AppTypography.textTheme(base.textTheme),
-      primaryTextTheme: AppTypography.textTheme(base.primaryTextTheme),
+      textTheme: textTheme,
+      primaryTextTheme: primaryTextTheme,
+      filledButtonTheme: FilledButtonThemeData(
+        style: (base.filledButtonTheme.style ?? const ButtonStyle()).copyWith(
+          textStyle: buttonTextStyle,
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: (base.elevatedButtonTheme.style ?? const ButtonStyle()).copyWith(
+          textStyle: buttonTextStyle,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: (base.outlinedButtonTheme.style ?? const ButtonStyle()).copyWith(
+          textStyle: buttonTextStyle,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: (base.textButtonTheme.style ?? const ButtonStyle()).copyWith(
+          textStyle: buttonTextStyle,
+        ),
+      ),
       dividerColor: semantic.divider,
       disabledColor: semantic.onDisabled,
       focusColor: semantic.focus.withValues(alpha: 0.18),
@@ -98,6 +125,16 @@ class AppTheme {
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.padded,
     );
+  }
+
+  static TextTheme _fontTextTheme(String fontFamily, TextTheme base) {
+    if (fontFamily == 'system') return base;
+    try {
+      return GoogleFonts.getTextTheme(fontFamily, base);
+    } on Exception {
+      // A removed or corrupted persisted family must never prevent startup.
+      return base;
+    }
   }
 }
 
