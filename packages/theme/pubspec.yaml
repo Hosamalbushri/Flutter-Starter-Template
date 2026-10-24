@@ -15,7 +15,7 @@ dependencies:
   bloc_concurrency: ^0.3.0
   analytics: ^0.1.0
   architecture: ^0.1.0
-  flex_color_scheme: ^8.4.0
+  flex_color_scheme: ^9.0.0
   flutter_bloc: ^9.1.1
   injectable: ^3.0.0
   shared_preferences: ^2.5.5
