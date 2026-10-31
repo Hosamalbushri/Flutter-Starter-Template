@@ -11,7 +11,7 @@ dependencies:
   architecture: ^0.1.0
   meta: ^1.16.0
   csv: ^8.0.0
-  excel_plus: ^2.29.0
+  excel_plus: ^2.29.1
   pdf: ^3.13.1
 
 dev_dependencies:
