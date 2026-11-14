@@ -32,6 +32,6 @@ dependencies:
 dev_dependencies:
   build_runner: ^2.15.1
   # See the drift cap above — these two must move together.
-  drift_dev: ">=2.22.0 <2.34.1"
+  drift_dev: ^2.35.3
   flutter_test:
     sdk: flutter
